@@ -1,0 +1,359 @@
+=title Table Record Design B (tableB)
+
+The tableB record stores a multi-column table using per-column field bundles
+(analogous to the aSub record's A..U input fields). Each column has its own
+NAME, FTVL, INP, NELM, NORD, VAL, and CHGD fields. qsrv publishes this
+record as an NTTable.
+
+=recordtype tableB
+
+=cut
+
+recordtype(tableB) {
+    include "dbCommon.dbd"
+
+    %
+    %/* Device Support Entry Table */
+    %struct tableBRecord;
+    %typedef struct {
+    %    dset common;
+    %    long (*read_table)(struct tableBRecord *prec);
+    %} tableBdset;
+    %#define HAS_tableBdset
+    %
+
+    field(VAL, DBF_LONG) {
+        prompt("Status (0=ok)")
+        asl(ASL0)
+    }
+    field(NCOL, DBF_ULONG) {
+        prompt("Number of active columns")
+        interest(1)
+    }
+    field(MAXROWS, DBF_ULONG) {
+        prompt("Max number of rows per column")
+        special(SPC_NOMOD)
+        interest(1)
+        initial("16")
+    }
+
+    field(COL00NAME, DBF_STRING) {
+        prompt("Column 0 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL00FTVL, DBF_MENU) {
+        prompt("Column 0 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL00INP, DBF_INLINK) {
+        prompt("Column 0 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL00NELM, DBF_ULONG) {
+        prompt("Column 0 max elements (0=MAXROWS)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+    field(COL00NORD, DBF_ULONG) {
+        prompt("Column 0 current elements")
+        interest(1)
+    }
+    field(COL00VAL, DBF_NOACCESS) {
+        prompt("Column 0 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col00val")
+        interest(2)
+    }
+    field(COL00CHGD, DBF_UCHAR) {
+        prompt("Column 0 changed flag")
+        interest(2)
+    }
+
+    field(COL01NAME, DBF_STRING) {
+        prompt("Column 1 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL01FTVL, DBF_MENU) {
+        prompt("Column 1 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL01INP, DBF_INLINK) {
+        prompt("Column 1 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL01NELM, DBF_ULONG) {
+        prompt("Column 1 max elements (0=MAXROWS)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+    field(COL01NORD, DBF_ULONG) {
+        prompt("Column 1 current elements")
+        interest(1)
+    }
+    field(COL01VAL, DBF_NOACCESS) {
+        prompt("Column 1 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col01val")
+        interest(2)
+    }
+    field(COL01CHGD, DBF_UCHAR) {
+        prompt("Column 1 changed flag")
+        interest(2)
+    }
+
+    field(COL02NAME, DBF_STRING) {
+        prompt("Column 2 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL02FTVL, DBF_MENU) {
+        prompt("Column 2 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL02INP, DBF_INLINK) {
+        prompt("Column 2 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL02NELM, DBF_ULONG) {
+        prompt("Column 2 max elements (0=MAXROWS)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+    field(COL02NORD, DBF_ULONG) {
+        prompt("Column 2 current elements")
+        interest(1)
+    }
+    field(COL02VAL, DBF_NOACCESS) {
+        prompt("Column 2 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col02val")
+        interest(2)
+    }
+    field(COL02CHGD, DBF_UCHAR) {
+        prompt("Column 2 changed flag")
+        interest(2)
+    }
+
+    field(COL03NAME, DBF_STRING) {
+        prompt("Column 3 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL03FTVL, DBF_MENU) {
+        prompt("Column 3 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL03INP, DBF_INLINK) {
+        prompt("Column 3 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL03NELM, DBF_ULONG) {
+        prompt("Column 3 max elements (0=MAXROWS)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+    field(COL03NORD, DBF_ULONG) {
+        prompt("Column 3 current elements")
+        interest(1)
+    }
+    field(COL03VAL, DBF_NOACCESS) {
+        prompt("Column 3 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col03val")
+        interest(2)
+    }
+    field(COL03CHGD, DBF_UCHAR) {
+        prompt("Column 3 changed flag")
+        interest(2)
+    }
+
+    field(COL04NAME, DBF_STRING) {
+        prompt("Column 4 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL04FTVL, DBF_MENU) {
+        prompt("Column 4 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL04INP, DBF_INLINK) {
+        prompt("Column 4 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL04NELM, DBF_ULONG) {
+        prompt("Column 4 max elements (0=MAXROWS)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+    field(COL04NORD, DBF_ULONG) {
+        prompt("Column 4 current elements")
+        interest(1)
+    }
+    field(COL04VAL, DBF_NOACCESS) {
+        prompt("Column 4 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col04val")
+        interest(2)
+    }
+    field(COL04CHGD, DBF_UCHAR) {
+        prompt("Column 4 changed flag")
+        interest(2)
+    }
+
+    field(COL05NAME, DBF_STRING) {
+        prompt("Column 5 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL05FTVL, DBF_MENU) {
+        prompt("Column 5 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL05INP, DBF_INLINK) {
+        prompt("Column 5 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL05NELM, DBF_ULONG) {
+        prompt("Column 5 max elements (0=MAXROWS)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+    field(COL05NORD, DBF_ULONG) {
+        prompt("Column 5 current elements")
+        interest(1)
+    }
+    field(COL05VAL, DBF_NOACCESS) {
+        prompt("Column 5 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col05val")
+        interest(2)
+    }
+    field(COL05CHGD, DBF_UCHAR) {
+        prompt("Column 5 changed flag")
+        interest(2)
+    }
+
+    field(COL06NAME, DBF_STRING) {
+        prompt("Column 6 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL06FTVL, DBF_MENU) {
+        prompt("Column 6 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL06INP, DBF_INLINK) {
+        prompt("Column 6 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL06NELM, DBF_ULONG) {
+        prompt("Column 6 max elements (0=MAXROWS)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+    field(COL06NORD, DBF_ULONG) {
+        prompt("Column 6 current elements")
+        interest(1)
+    }
+    field(COL06VAL, DBF_NOACCESS) {
+        prompt("Column 6 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col06val")
+        interest(2)
+    }
+    field(COL06CHGD, DBF_UCHAR) {
+        prompt("Column 6 changed flag")
+        interest(2)
+    }
+
+    field(COL07NAME, DBF_STRING) {
+        prompt("Column 7 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL07FTVL, DBF_MENU) {
+        prompt("Column 7 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL07INP, DBF_INLINK) {
+        prompt("Column 7 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL07NELM, DBF_ULONG) {
+        prompt("Column 7 max elements (0=MAXROWS)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+    field(COL07NORD, DBF_ULONG) {
+        prompt("Column 7 current elements")
+        interest(1)
+    }
+    field(COL07VAL, DBF_NOACCESS) {
+        prompt("Column 7 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col07val")
+        interest(2)
+    }
+    field(COL07CHGD, DBF_UCHAR) {
+        prompt("Column 7 changed flag")
+        interest(2)
+    }
+}

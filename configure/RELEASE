@@ -33,6 +33,7 @@
 #SNCSEQ = $(MODULES)/seq-ver
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
+PVXS = /home/bmartins/osprey/epics/pvxs
 EPICS_BASE = /home/bmartins/osprey/epics/epics-base
 
 # Set RULES here if you want to use build rules from somewhere

@@ -1,0 +1,15 @@
+record(tableA, "TST:A:Soft") {
+    field(DTYP,    "Soft Channel")
+    field(MAXCOLS, "4")
+    field(MAXROWS, "16")
+    field(NCOL,    "4")
+    field(NROW,    "0")
+}
+
+record(tableA, "TST:A:Sim") {
+    field(DTYP,    "Random Sim")
+    field(SCAN,    "1 second")
+    field(MAXCOLS, "4")
+    field(MAXROWS, "16")
+    field(NCOL,    "4")
+}

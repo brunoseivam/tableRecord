@@ -18,6 +18,7 @@ DBD += tableRecord.dbd
 
 # tableRecord.dbd will be made up from these files:
 tableRecord_DBD += base.dbd
+tableRecord_DBD += tableRecordSup.dbd
 
 # Include dbd files from all support applications:
 #tableRecord_DBD += xxx.dbd
@@ -36,7 +37,7 @@ tableRecord_SRCS_vxWorks += -nil-
 #tableRecord_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 # Finally link to the EPICS Base libraries
-tableRecord_LIBS += $(EPICS_BASE_IOC_LIBS)
+tableRecord_LIBS += tableRecordSup pvxsIoc pvxs $(EPICS_BASE_IOC_LIBS)
 
 #===========================
 
