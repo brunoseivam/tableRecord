@@ -1,4 +1,3 @@
-#!/bin/sh
 #!../../bin/linux-x86_64/tableRecord
 
 dbLoadDatabase("../../dbd/tableRecord.dbd", 0, 0)
