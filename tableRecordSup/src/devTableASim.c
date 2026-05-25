@@ -17,7 +17,8 @@
  * according to coltypes[i].  String columns receive "row_N" values.
  */
 
-static const char *SIM_NAMES[] = {"x", "y", "label", "flag", "c4", "c5", "c6", "c7"};
+static const char *SIM_NAMES[]  = {"x", "y", "label", "flag", "c4", "c5", "c6", "c7"};
+static const char *SIM_LABELS[] = {"X axis", "Y axis", "Label", "Flag", "C4", "C5", "C6", "C7"};
 static const epicsUInt16 SIM_TYPES[] = {
     DBF_DOUBLE, DBF_DOUBLE, DBF_STRING, DBF_UCHAR,
     DBF_DOUBLE, DBF_DOUBLE, DBF_DOUBLE, DBF_DOUBLE
@@ -31,6 +32,9 @@ static long sim_init_record(struct dbCommon *pcommon)
         char *name = prec->colnames + i * MAX_STRING_SIZE;
         if (name[0] == '\0')
             strncpy(name, SIM_NAMES[i], MAX_STRING_SIZE - 1);
+        char *lbl = prec->collabels + i * MAX_STRING_SIZE;
+        if (lbl[0] == '\0')
+            strncpy(lbl, SIM_LABELS[i], MAX_STRING_SIZE - 1);
         if (prec->coltypes[i] > DBF_ENUM)
             prec->coltypes[i] = SIM_TYPES[i];
         if (prec->coltypes[i] == 0 && name[0] == SIM_NAMES[i][0])

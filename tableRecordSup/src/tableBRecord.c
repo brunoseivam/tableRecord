@@ -22,6 +22,9 @@
 #include "epicsExport.h"
 
 #define TABLB_MAX_COLS 8
+/* Derived from the generated header — equals the number of fields per column bundle.
+   Recomputed automatically if the bundle grows (e.g. adding COLxxLABEL). */
+#define TABLB_COL_STRIDE (tableBRecordCOL01VAL - tableBRecordCOL00VAL)
 
 #define report       NULL
 #define initialize   NULL
@@ -258,7 +261,7 @@ static long cvt_dbaddr(DBADDR *paddr)
     int fi = dbGetFieldIndex(paddr);
 
     if (fi >= tableBRecordCOL00VAL && fi <= tableBRecordCOL07VAL) {
-        int i = (fi - tableBRecordCOL00VAL) / 7;
+        int i = (fi - tableBRecordCOL00VAL) / TABLB_COL_STRIDE;
         epicsEnum16 ftvl = colFtvl(prec, i);
         void **vp = colValAddr(prec, i);
         paddr->pfield         = vp ? *vp : NULL;
@@ -277,7 +280,7 @@ static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
 
     *offset = 0;
     if (fi >= tableBRecordCOL00VAL && fi <= tableBRecordCOL07VAL) {
-        int i = (fi - tableBRecordCOL00VAL) / 7;
+        int i = (fi - tableBRecordCOL00VAL) / TABLB_COL_STRIDE;
         *no_elements = colNord(prec, i);
     } else {
         *no_elements = 0;
@@ -291,7 +294,7 @@ static long put_array_info(DBADDR *paddr, long nNew)
     int fi = dbGetFieldIndex(paddr);
 
     if (fi >= tableBRecordCOL00VAL && fi <= tableBRecordCOL07VAL) {
-        int i = (fi - tableBRecordCOL00VAL) / 7;
+        int i = (fi - tableBRecordCOL00VAL) / TABLB_COL_STRIDE;
         epicsUInt32 max = colNelm(prec, i);
         setColNord(prec, i, ((epicsUInt32)nNew <= max) ? (epicsUInt32)nNew : max);
     }

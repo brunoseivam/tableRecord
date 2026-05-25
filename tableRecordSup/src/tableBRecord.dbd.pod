@@ -43,6 +43,12 @@ recordtype(tableB) {
         interest(1)
         size(40)
     }
+    field(COL00LABEL, DBF_STRING) {
+        prompt("Column 0 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
     field(COL00FTVL, DBF_MENU) {
         prompt("Column 0 field type")
         promptgroup("41 - Input")
@@ -79,6 +85,12 @@ recordtype(tableB) {
 
     field(COL01NAME, DBF_STRING) {
         prompt("Column 1 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL01LABEL, DBF_STRING) {
+        prompt("Column 1 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
@@ -123,6 +135,12 @@ recordtype(tableB) {
         interest(1)
         size(40)
     }
+    field(COL02LABEL, DBF_STRING) {
+        prompt("Column 2 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
     field(COL02FTVL, DBF_MENU) {
         prompt("Column 2 field type")
         promptgroup("41 - Input")
@@ -159,6 +177,12 @@ recordtype(tableB) {
 
     field(COL03NAME, DBF_STRING) {
         prompt("Column 3 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL03LABEL, DBF_STRING) {
+        prompt("Column 3 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
@@ -203,6 +227,12 @@ recordtype(tableB) {
         interest(1)
         size(40)
     }
+    field(COL04LABEL, DBF_STRING) {
+        prompt("Column 4 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
     field(COL04FTVL, DBF_MENU) {
         prompt("Column 4 field type")
         promptgroup("41 - Input")
@@ -239,6 +269,12 @@ recordtype(tableB) {
 
     field(COL05NAME, DBF_STRING) {
         prompt("Column 5 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL05LABEL, DBF_STRING) {
+        prompt("Column 5 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
@@ -283,6 +319,12 @@ recordtype(tableB) {
         interest(1)
         size(40)
     }
+    field(COL06LABEL, DBF_STRING) {
+        prompt("Column 6 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
     field(COL06FTVL, DBF_MENU) {
         prompt("Column 6 field type")
         promptgroup("41 - Input")
@@ -319,6 +361,12 @@ recordtype(tableB) {
 
     field(COL07NAME, DBF_STRING) {
         prompt("Column 7 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL07LABEL, DBF_STRING) {
+        prompt("Column 7 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)

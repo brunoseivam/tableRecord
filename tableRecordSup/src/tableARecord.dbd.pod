@@ -59,6 +59,12 @@ recordtype(tableA) {
         extra("char *colnames")
         interest(1)
     }
+    field(COLLABELS, DBF_NOACCESS) {
+        prompt("Column labels (STRING[MAXCOLS])")
+        special(SPC_DBADDR)
+        extra("char *collabels")
+        interest(1)
+    }
     field(COLTYPES, DBF_NOACCESS) {
         prompt("Column types — menuFtype values (USHORT[MAXCOLS])")
         special(SPC_DBADDR)

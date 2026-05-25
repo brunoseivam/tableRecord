@@ -71,12 +71,14 @@ static long init_record(struct dbCommon *pcommon, int pass)
         if (prec->ncol > prec->maxcols)
             prec->ncol = prec->maxcols;
 
-        prec->colnames = callocMustSucceed(prec->maxcols, MAX_STRING_SIZE,
-                                           "tableA: colnames");
-        prec->coltypes = (epicsUInt16 *)callocMustSucceed(prec->maxcols,
-                                           sizeof(epicsUInt16), "tableA: coltypes");
-        prec->chgd = (epicsUInt8 *)callocMustSucceed(prec->maxcols,
-                                           sizeof(epicsUInt8), "tableA: chgd");
+        prec->colnames  = callocMustSucceed(prec->maxcols, MAX_STRING_SIZE,
+                                            "tableA: colnames");
+        prec->collabels = callocMustSucceed(prec->maxcols, MAX_STRING_SIZE,
+                                            "tableA: collabels");
+        prec->coltypes  = (epicsUInt16 *)callocMustSucceed(prec->maxcols,
+                                            sizeof(epicsUInt16), "tableA: coltypes");
+        prec->chgd      = (epicsUInt8 *)callocMustSucceed(prec->maxcols,
+                                            sizeof(epicsUInt8), "tableA: chgd");
         return 0;
     }
 
@@ -151,6 +153,12 @@ static long cvt_dbaddr(DBADDR *paddr)
         paddr->field_size     = MAX_STRING_SIZE;
         paddr->dbr_field_type = DBR_STRING;
         paddr->no_elements    = prec->maxcols;
+    } else if (fi == tableARecordCOLLABELS) {
+        paddr->pfield         = prec->collabels;
+        paddr->field_type     = DBF_STRING;
+        paddr->field_size     = MAX_STRING_SIZE;
+        paddr->dbr_field_type = DBR_STRING;
+        paddr->no_elements    = prec->maxcols;
     } else if (fi == tableARecordCOLTYPES) {
         paddr->pfield         = prec->coltypes;
         paddr->field_type     = DBF_USHORT;
@@ -184,6 +192,7 @@ static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
 
     *offset = 0;
     if (fi == tableARecordCOLNAMES ||
+        fi == tableARecordCOLLABELS ||
         fi == tableARecordCOLTYPES ||
         fi == tableARecordCHGD) {
         *no_elements = prec->ncol;
@@ -199,6 +208,7 @@ static long put_array_info(DBADDR *paddr, long nNew)
     int fi = dbGetFieldIndex(paddr);
 
     if (fi == tableARecordCOLNAMES ||
+        fi == tableARecordCOLLABELS ||
         fi == tableARecordCOLTYPES ||
         fi == tableARecordCHGD) {
         if ((epicsUInt32)nNew <= prec->maxcols)

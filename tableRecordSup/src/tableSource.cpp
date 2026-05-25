@@ -139,20 +139,21 @@ static void snapshotA(tableARecord *prec, pvxs::Value &v)
 
 struct ColB {
     const char  *name;
+    const char  *label;
     epicsEnum16  ftvl;
     void        *val;
     epicsUInt32  nord;
 };
 static void getColsB(tableBRecord *prec, ColB cols[8])
 {
-    cols[0] = {prec->col00name, prec->col00ftvl, prec->col00val, prec->col00nord};
-    cols[1] = {prec->col01name, prec->col01ftvl, prec->col01val, prec->col01nord};
-    cols[2] = {prec->col02name, prec->col02ftvl, prec->col02val, prec->col02nord};
-    cols[3] = {prec->col03name, prec->col03ftvl, prec->col03val, prec->col03nord};
-    cols[4] = {prec->col04name, prec->col04ftvl, prec->col04val, prec->col04nord};
-    cols[5] = {prec->col05name, prec->col05ftvl, prec->col05val, prec->col05nord};
-    cols[6] = {prec->col06name, prec->col06ftvl, prec->col06val, prec->col06nord};
-    cols[7] = {prec->col07name, prec->col07ftvl, prec->col07val, prec->col07nord};
+    cols[0] = {prec->col00name, prec->col00label, prec->col00ftvl, prec->col00val, prec->col00nord};
+    cols[1] = {prec->col01name, prec->col01label, prec->col01ftvl, prec->col01val, prec->col01nord};
+    cols[2] = {prec->col02name, prec->col02label, prec->col02ftvl, prec->col02val, prec->col02nord};
+    cols[3] = {prec->col03name, prec->col03label, prec->col03ftvl, prec->col03val, prec->col03nord};
+    cols[4] = {prec->col04name, prec->col04label, prec->col04ftvl, prec->col04val, prec->col04nord};
+    cols[5] = {prec->col05name, prec->col05label, prec->col05ftvl, prec->col05val, prec->col05nord};
+    cols[6] = {prec->col06name, prec->col06label, prec->col06ftvl, prec->col06val, prec->col06nord};
+    cols[7] = {prec->col07name, prec->col07label, prec->col07ftvl, prec->col07val, prec->col07nord};
 }
 
 /* Snapshot a tableB record into a Value clone (caller holds lock) */
@@ -262,7 +263,9 @@ pvxs::Value TableSource::makeProto(const RecInfo &ri) const
                 snprintf(fallback, sizeof(fallback), "col%u", i);
                 name = fallback;
             }
-            builder.add_column(ftypeToTC(prec->coltypes[i]), name, name);
+            const char *label = prec->collabels + i * MAX_STRING_SIZE;
+            if (!label[0]) label = name;
+            builder.add_column(ftypeToTC(prec->coltypes[i]), name, label);
         }
     } else {
         tableBRecord *prec = (tableBRecord *)ri.prec;
@@ -274,7 +277,9 @@ pvxs::Value TableSource::makeProto(const RecInfo &ri) const
                 snprintf(fallback, sizeof(fallback), "col%u", i);
                 name = fallback;
             }
-            builder.add_column(ftypeToTC(cols[i].ftvl), name, name);
+            const char *label = cols[i].label;
+            if (!label || !label[0]) label = name;
+            builder.add_column(ftypeToTC(cols[i].ftvl), name, label);
         }
     }
     return builder.create();
