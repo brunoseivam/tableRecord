@@ -37,8 +37,6 @@ static long sim_init_record(struct dbCommon *pcommon)
             strncpy(lbl, SIM_LABELS[i], MAX_STRING_SIZE - 1);
         if (prec->coltypes[i] > DBF_ENUM)
             prec->coltypes[i] = SIM_TYPES[i];
-        if (prec->coltypes[i] == 0 && name[0] == SIM_NAMES[i][0])
-            prec->coltypes[i] = SIM_TYPES[i];
     }
     return 0;
 }

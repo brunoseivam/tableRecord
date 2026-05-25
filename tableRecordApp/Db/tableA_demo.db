@@ -1,9 +1,15 @@
 record(tableA, "TST:A:Soft") {
-    field(DTYP,    "Soft Channel")
-    field(MAXCOLS, "4")
-    field(MAXROWS, "16")
-    field(NCOL,    "4")
-    field(NROW,    "0")
+    field(DTYP,         "Soft Channel")
+    field(MAXCOLS,      "4")
+    field(MAXROWS,      "16")
+    field(NCOL,         "4")
+    field(NROW,         "0")
+    # COLTYPESINP uses menuFtype numeric values:
+    #   STRING=0  CHAR=1  UCHAR=2  SHORT=3  USHORT=4
+    #   LONG=5  ULONG=6  INT64=7  UINT64=8  FLOAT=9  DOUBLE=10
+    field(COLNAMESINP,  "[\"x\", \"y\", \"label\", \"flag\"]")
+    field(COLLABELSINP, "[\"X axis\", \"Y axis\", \"Label\", \"Flag\"]")
+    field(COLTYPESINP,  "[10, 10, 0, 2]")
 }
 
 record(tableA, "TST:A:Sim") {
@@ -12,4 +18,6 @@ record(tableA, "TST:A:Sim") {
     field(MAXCOLS, "4")
     field(MAXROWS, "16")
     field(NCOL,    "4")
+    # Names, labels, and types are set by devTableASim.sim_init_record using
+    # SIM_NAMES / SIM_LABELS / SIM_TYPES defaults for any unset (0xFFFF) slots.
 }

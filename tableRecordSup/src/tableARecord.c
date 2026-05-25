@@ -7,6 +7,7 @@
 #include "dbAccess.h"
 #include "dbEvent.h"
 #include "dbFldTypes.h"
+#include "dbLink.h"
 #include "dbScan.h"
 #include "devSup.h"
 #include "errMdef.h"
@@ -77,22 +78,33 @@ static long init_record(struct dbCommon *pcommon, int pass)
                                             "tableA: collabels");
         prec->coltypes  = (epicsUInt16 *)callocMustSucceed(prec->maxcols,
                                             sizeof(epicsUInt16), "tableA: coltypes");
+        /* 0xFFFF > DBF_ENUM: sentinel meaning "not yet set" */
+        memset(prec->coltypes, 0xFF, prec->maxcols * sizeof(epicsUInt16));
         prec->chgd      = (epicsUInt8 *)callocMustSucceed(prec->maxcols,
                                             sizeof(epicsUInt8), "tableA: chgd");
         return 0;
     }
 
-    /* pass 1: allocate per-column data buffers */
+    /* pass 1: load metadata from const links (if provided), then allocate data buffers */
     {
+        long nReq;
         void **colfields[] = {
             &prec->col00, &prec->col01, &prec->col02, &prec->col03,
             &prec->col04, &prec->col05, &prec->col06, &prec->col07
         };
         epicsUInt32 i;
+
+        nReq = prec->maxcols;
+        dbLoadLinkArray(&prec->coltypesinp, DBF_USHORT, prec->coltypes, &nReq);
+        nReq = prec->maxcols;
+        dbLoadLinkArray(&prec->colnamesinp, DBF_STRING, prec->colnames, &nReq);
+        nReq = prec->maxcols;
+        dbLoadLinkArray(&prec->collabelsinp, DBF_STRING, prec->collabels, &nReq);
+
         for (i = 0; i < prec->ncol && i < prec->maxcols; i++) {
             epicsUInt16 ftvl = prec->coltypes[i];
             if (ftvl > DBF_ENUM)
-                ftvl = DBF_UCHAR;
+                ftvl = DBF_DOUBLE;
             *colfields[i] = callocMustSucceed(prec->maxrows,
                                               dbValueSize(ftvl),
                                               "tableA: column data");

@@ -53,6 +53,21 @@ recordtype(tableA) {
         prompt("Number of active rows")
         interest(1)
     }
+    field(COLNAMESINP, DBF_INLINK) {
+        prompt("Column names input (const link to STRING array)")
+        promptgroup("40 - Input")
+        interest(1)
+    }
+    field(COLLABELSINP, DBF_INLINK) {
+        prompt("Column labels input (const link to STRING array)")
+        promptgroup("40 - Input")
+        interest(1)
+    }
+    field(COLTYPESINP, DBF_INLINK) {
+        prompt("Column types input (const link, menuFtype values: STRING=0 UCHAR=2 DOUBLE=10 …)")
+        promptgroup("40 - Input")
+        interest(1)
+    }
     field(COLNAMES, DBF_NOACCESS) {
         prompt("Column names (STRING[MAXCOLS])")
         special(SPC_DBADDR)
