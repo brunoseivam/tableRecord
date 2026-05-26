@@ -176,6 +176,8 @@ static pvxs::Value snapshot(const RecInfo &ri, const pvxs::Value &proto,
                              bool withLabels = false)
 {
     pvxs::Value v = withLabels ? proto.clone() : proto.cloneEmpty();
+    v["timeStamp.secondsPastEpoch"] = (int64_t)ri.prec->time.secPastEpoch;
+    v["timeStamp.nanoseconds"]      = (int32_t)ri.prec->time.nsec;
     if (std::strcmp(ri.type, "tableA") == 0)
         snapshotA((tableARecord *)ri.prec, v);
     else
@@ -285,7 +287,9 @@ pvxs::Value TableSource::makeProto(const RecInfo &ri) const
             builder.add_column(ftypeToTC(cols[i].ftvl), name, label);
         }
     }
-    return builder.create();
+    pvxs::Value proto = builder.create();
+    proto["descriptor"] = std::string(ri.prec->desc);
+    return proto;
 }
 
 /* ------------------------------------------------------------------ */
