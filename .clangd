@@ -1,0 +1,5 @@
+CompileFlags:
+  Add:
+    - "-I/home/bmartins/osprey/epics/pvxs/include"
+    - "-I/home/bmartins/osprey/epics/epics-base/include"
+    - "-I/home/bmartins/osprey/epics/tableRecord/include"

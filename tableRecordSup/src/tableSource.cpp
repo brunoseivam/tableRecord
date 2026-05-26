@@ -166,9 +166,16 @@ static void snapshotB(tableBRecord *prec, pvxs::Value &v)
     }
 }
 
-static pvxs::Value snapshot(const RecInfo &ri, const pvxs::Value &proto)
+/* Build a snapshot Value from the current record state.
+   withLabels=true: start from proto.clone() so the marked labels field is
+   included in the transmission (needed for the first send to each client).
+   withLabels=false: start from proto.cloneEmpty() — labels are omitted and
+   the client's cache_sync mechanism re-populates them from the prototype it
+   accumulated on the first send. */
+static pvxs::Value snapshot(const RecInfo &ri, const pvxs::Value &proto,
+                             bool withLabels = false)
 {
-    pvxs::Value v = proto.cloneEmpty();
+    pvxs::Value v = withLabels ? proto.clone() : proto.cloneEmpty();
     if (std::strcmp(ri.type, "tableA") == 0)
         snapshotA((tableARecord *)ri.prec, v);
     else
@@ -356,7 +363,7 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
                 pvxs::Value v;
                 {
                     RecLock lk(ri.prec);
-                    v = snapshot(ri, proto);
+                    v = snapshot(ri, proto, true);
                 }
                 get->reply(v);
             } catch (std::exception &e) {
@@ -413,8 +420,19 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
                         eventCallback, ctx.get(),
                         DBE_VALUE);
                     db_event_enable(ctx->evtSub);
-                    /* post initial snapshot */
-                    eventCallback(ctx.get(), pChan, 0, nullptr);
+                    /* Initial snapshot includes labels so the client's
+                       cache_sync prototype is seeded; subsequent posts
+                       via eventCallback omit them (cache_sync supplies them). */
+                    try {
+                        pvxs::Value v;
+                        {
+                            RecLock lk(ctx->ri.prec);
+                            v = snapshot(ctx->ri, ctx->proto, true);
+                        }
+                        ctx->ctrl->post(v);
+                    } catch (std::exception &e) {
+                        log_exc_printf(tlog, "initial snapshot: %s\n", e.what());
+                    }
                 } else {
                     if (ctx->evtSub) {
                         db_cancel_event(ctx->evtSub);
