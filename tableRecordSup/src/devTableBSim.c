@@ -14,7 +14,29 @@
  * Random Sim device support for tableB.
  *
  * Fills every active column with MAXROWS random elements typed by COLiFTVL.
+ * sim_init_record sets default names and labels for any column left unset in
+ * the .db file.
  */
+
+static const char *SIM_NAMES[]  = {"x", "y", "label", "flag", "c4", "c5", "c6", "c7"};
+static const char *SIM_LABELS[] = {"X axis", "Y axis", "Label", "Flag", "C4", "C5", "C6", "C7"};
+
+static long sim_init_record(struct dbCommon *pcommon)
+{
+    tableBRecord *prec = (tableBRecord *)pcommon;
+    char *names[8]  = {prec->col00name,  prec->col01name,  prec->col02name,  prec->col03name,
+                       prec->col04name,  prec->col05name,  prec->col06name,  prec->col07name};
+    char *labels[8] = {prec->col00label, prec->col01label, prec->col02label, prec->col03label,
+                       prec->col04label, prec->col05label, prec->col06label, prec->col07label};
+    epicsUInt32 i;
+    for (i = 0; i < prec->ncol && i < 8; i++) {
+        if (!names[i][0])
+            strncpy(names[i],  SIM_NAMES[i],  MAX_STRING_SIZE - 1);
+        if (!labels[i][0])
+            strncpy(labels[i], SIM_LABELS[i], MAX_STRING_SIZE - 1);
+    }
+    return 0;
+}
 
 typedef struct { epicsEnum16 *ftvl; epicsUInt32 *nelm;
                  epicsUInt32 *nord; void **val; epicsUInt8 *chgd; } ColB;
@@ -78,7 +100,7 @@ static long read_table(tableBRecord *prec)
 #undef COLB
 
 tableBdset devTableBSim = {
-    {5, NULL, NULL, NULL, NULL},
+    {5, NULL, NULL, sim_init_record, NULL},
     read_table
 };
 epicsExportAddress(dset, devTableBSim);
