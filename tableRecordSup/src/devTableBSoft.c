@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "dbAccess.h"
 #include "dbFldTypes.h"
@@ -45,6 +46,9 @@ static long read_table(tableBRecord *prec)
 
     for (i = 0; i < prec->numcols && i < 8; i++) {
         long nReq = (long)prec->maxrows;
+        /* Constant links are loaded once at init time (tableBRecord.c).
+           Only re-read non-constant (CA/DB) links here, matching devWfSoft. */
+        if (dbLinkIsConstant(cols[i].inp)) continue;
         if (!*cols[i].val) continue;
         if (dbGetLink(cols[i].inp, *cols[i].ftvl, *cols[i].val, 0, &nReq) == 0) {
             *cols[i].chgd = 1;

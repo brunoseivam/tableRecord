@@ -12,4 +12,7 @@ record(tableB, "TST:B:Soft") {
     field(DTYP,        "Soft Channel")
     field(COL00NAME,   "x")  field(COL00LABEL,  "X axis")  field(COL00FTVL,  "DOUBLE")
     field(COL01NAME,   "y")  field(COL01LABEL,  "Y axis")  field(COL01FTVL,  "DOUBLE")
+    # Constant links: loaded once at iocInit — no SCAN needed.
+    field(COL00INP,    "[1.1, 2.2, 3.3, 4.4]")
+    field(COL01INP,    "[10.0, 20.0, 30.0, 40.0]")
 }

@@ -7,6 +7,7 @@
 #include "dbAccess.h"
 #include "dbEvent.h"
 #include "dbFldTypes.h"
+#include "dbLink.h"
 #include "dbScan.h"
 #include "devSup.h"
 #include "errMdef.h"
@@ -51,6 +52,21 @@ rset tableBRSET = {
     get_graphic_double, get_control_double, get_alarm_double
 };
 epicsExportAddress(rset, tableBRSET);
+
+static DBLINK *colInpAddr(tableBRecord *prec, int i)
+{
+    switch (i) {
+    case 0: return &prec->col00inp;
+    case 1: return &prec->col01inp;
+    case 2: return &prec->col02inp;
+    case 3: return &prec->col03inp;
+    case 4: return &prec->col04inp;
+    case 5: return &prec->col05inp;
+    case 6: return &prec->col06inp;
+    case 7: return &prec->col07inp;
+    default: return NULL;
+    }
+}
 
 static void **colValAddr(tableBRecord *prec, int i)
 {
@@ -120,6 +136,20 @@ static long init_record(struct dbCommon *pcommon, int pass)
         *colValAddr(prec, i) = callocMustSucceed(prec->maxrows,
                                                  dbValueSize(ftvl),
                                                  "tableB: column data");
+    }
+
+    /* Load constant COLxxINP links into column buffers at init time.
+       Mirrors devWfSoft: constant links are loaded here; dbGetLink is only
+       for non-constant (CA/DB) links at process time. */
+    for (i = 0; i < prec->numcols; i++) {
+        DBLINK *inp = colInpAddr(prec, i);
+        void *buf = *colValAddr(prec, i);
+        long nReq = prec->maxrows;
+        if (inp && buf && !dbLoadLinkArray(inp, colFtvl(prec, i), buf, &nReq)) {
+            if ((epicsUInt32)nReq > prec->numrows)
+                prec->numrows = (epicsUInt32)nReq;
+            prec->udf = FALSE;
+        }
     }
     return 0;
 }
