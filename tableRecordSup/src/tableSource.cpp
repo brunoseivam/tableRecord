@@ -142,18 +142,17 @@ struct ColB {
     const char  *label;
     epicsEnum16  ftvl;
     void        *val;
-    epicsUInt32  nord;
 };
 static void getColsB(tableBRecord *prec, ColB cols[8])
 {
-    cols[0] = {prec->col00name, prec->col00label, prec->col00ftvl, prec->col00val, prec->col00nord};
-    cols[1] = {prec->col01name, prec->col01label, prec->col01ftvl, prec->col01val, prec->col01nord};
-    cols[2] = {prec->col02name, prec->col02label, prec->col02ftvl, prec->col02val, prec->col02nord};
-    cols[3] = {prec->col03name, prec->col03label, prec->col03ftvl, prec->col03val, prec->col03nord};
-    cols[4] = {prec->col04name, prec->col04label, prec->col04ftvl, prec->col04val, prec->col04nord};
-    cols[5] = {prec->col05name, prec->col05label, prec->col05ftvl, prec->col05val, prec->col05nord};
-    cols[6] = {prec->col06name, prec->col06label, prec->col06ftvl, prec->col06val, prec->col06nord};
-    cols[7] = {prec->col07name, prec->col07label, prec->col07ftvl, prec->col07val, prec->col07nord};
+    cols[0] = {prec->col00name, prec->col00label, prec->col00ftvl, prec->col00val};
+    cols[1] = {prec->col01name, prec->col01label, prec->col01ftvl, prec->col01val};
+    cols[2] = {prec->col02name, prec->col02label, prec->col02ftvl, prec->col02val};
+    cols[3] = {prec->col03name, prec->col03label, prec->col03ftvl, prec->col03val};
+    cols[4] = {prec->col04name, prec->col04label, prec->col04ftvl, prec->col04val};
+    cols[5] = {prec->col05name, prec->col05label, prec->col05ftvl, prec->col05val};
+    cols[6] = {prec->col06name, prec->col06label, prec->col06ftvl, prec->col06val};
+    cols[7] = {prec->col07name, prec->col07label, prec->col07ftvl, prec->col07val};
 }
 
 /* Snapshot a tableB record into a Value clone (caller holds lock) */
@@ -161,9 +160,9 @@ static void snapshotB(tableBRecord *prec, pvxs::Value &v)
 {
     ColB cols[8];
     getColsB(prec, cols);
-    for (epicsUInt32 i = 0; i < prec->ncol; i++) {
+    for (epicsUInt32 i = 0; i < prec->numcols; i++) {
         auto col = v["value"][cols[i].name];
-        fillCol(col, cols[i].ftvl, cols[i].val, cols[i].nord);
+        fillCol(col, cols[i].ftvl, cols[i].val, prec->numrows);
     }
 }
 
@@ -199,20 +198,18 @@ struct ColBPut {
     const char  *name;
     epicsEnum16  ftvl;
     void       **val;
-    epicsUInt32  nelm;
-    epicsUInt32 *nord;
     epicsUInt8  *chgd;
 };
 static void getColsBPut(tableBRecord *prec, ColBPut cols[8])
 {
-    cols[0] = {prec->col00name, prec->col00ftvl, &prec->col00val, prec->col00nelm, &prec->col00nord, &prec->col00chgd};
-    cols[1] = {prec->col01name, prec->col01ftvl, &prec->col01val, prec->col01nelm, &prec->col01nord, &prec->col01chgd};
-    cols[2] = {prec->col02name, prec->col02ftvl, &prec->col02val, prec->col02nelm, &prec->col02nord, &prec->col02chgd};
-    cols[3] = {prec->col03name, prec->col03ftvl, &prec->col03val, prec->col03nelm, &prec->col03nord, &prec->col03chgd};
-    cols[4] = {prec->col04name, prec->col04ftvl, &prec->col04val, prec->col04nelm, &prec->col04nord, &prec->col04chgd};
-    cols[5] = {prec->col05name, prec->col05ftvl, &prec->col05val, prec->col05nelm, &prec->col05nord, &prec->col05chgd};
-    cols[6] = {prec->col06name, prec->col06ftvl, &prec->col06val, prec->col06nelm, &prec->col06nord, &prec->col06chgd};
-    cols[7] = {prec->col07name, prec->col07ftvl, &prec->col07val, prec->col07nelm, &prec->col07nord, &prec->col07chgd};
+    cols[0] = {prec->col00name, prec->col00ftvl, &prec->col00val, &prec->col00chgd};
+    cols[1] = {prec->col01name, prec->col01ftvl, &prec->col01val, &prec->col01chgd};
+    cols[2] = {prec->col02name, prec->col02ftvl, &prec->col02val, &prec->col02chgd};
+    cols[3] = {prec->col03name, prec->col03ftvl, &prec->col03val, &prec->col03chgd};
+    cols[4] = {prec->col04name, prec->col04ftvl, &prec->col04val, &prec->col04chgd};
+    cols[5] = {prec->col05name, prec->col05ftvl, &prec->col05val, &prec->col05chgd};
+    cols[6] = {prec->col06name, prec->col06ftvl, &prec->col06val, &prec->col06chgd};
+    cols[7] = {prec->col07name, prec->col07ftvl, &prec->col07val, &prec->col07chgd};
 }
 
 /* Write NTTable value into a tableB record (caller holds lock + calls dbProcess) */
@@ -220,13 +217,12 @@ static void putValueB(tableBRecord *prec, const pvxs::Value &val)
 {
     ColBPut cols[8];
     getColsBPut(prec, cols);
-    for (epicsUInt32 i = 0; i < prec->ncol; i++) {
+    for (epicsUInt32 i = 0; i < prec->numcols; i++) {
         auto col = val["value"][cols[i].name];
         if (!col.valid() || !col.isMarked(true, true)) continue;
-        epicsUInt32 nelm = cols[i].nelm ? cols[i].nelm : prec->maxrows;
         epicsUInt32 nout = 0;
-        drainCol(col, cols[i].ftvl, *cols[i].val, nelm, nout);
-        *cols[i].nord = nout;
+        drainCol(col, cols[i].ftvl, *cols[i].val, prec->maxrows, nout);
+        if (nout > prec->numrows) prec->numrows = nout;
         *cols[i].chgd = 1;
     }
 }
@@ -271,7 +267,7 @@ pvxs::Value TableSource::makeProto(const RecInfo &ri) const
         tableBRecord *prec = (tableBRecord *)ri.prec;
         ColB cols[8];
         getColsB(prec, cols);
-        for (epicsUInt32 i = 0; i < prec->ncol; i++) {
+        for (epicsUInt32 i = 0; i < prec->numcols; i++) {
             const char *name = cols[i].name;
             if (!name || !name[0]) {
                 snprintf(fallback, sizeof(fallback), "col%u", i);
@@ -397,9 +393,10 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
             ctx->evtCtx   = evtCtx;
             ctx->ctrl     = sub->connect(proto);
 
-            /* Open a dbChannel to subscribe for events */
+            /* Open a dbChannel to subscribe for events.
+               tableB has no VAL field; use COL00VAL as the trigger instead. */
             std::string chname = ri.prec->name;
-            chname += ".VAL";
+            chname += (std::strcmp(ri.type, "tableB") == 0) ? ".COL00VAL" : ".VAL";
             dbChannel *pChan = dbChannelCreate(chname.c_str());
             if (!pChan)
                 pChan = dbChannelCreate(ri.prec->name);

@@ -22,12 +22,9 @@ recordtype(tableB) {
     %#define HAS_tableBdset
     %
 
-    field(VAL, DBF_LONG) {
-        prompt("Status (0=ok)")
-        asl(ASL0)
-    }
-    field(NCOL, DBF_ULONG) {
-        prompt("Number of active columns")
+    field(NUMCOLS, DBF_ULONG) {
+        prompt("Number of active columns (set by device support)")
+        special(SPC_NOMOD)
         interest(1)
     }
     field(MAXROWS, DBF_ULONG) {
@@ -35,6 +32,10 @@ recordtype(tableB) {
         special(SPC_NOMOD)
         interest(1)
         initial("16")
+    }
+    field(NUMROWS, DBF_ULONG) {
+        prompt("Number of valid rows (all columns)")
+        interest(1)
     }
 
     field(COL00NAME, DBF_STRING) {
@@ -60,15 +61,6 @@ recordtype(tableB) {
     field(COL00INP, DBF_INLINK) {
         prompt("Column 0 input link")
         promptgroup("41 - Input")
-        interest(1)
-    }
-    field(COL00NELM, DBF_ULONG) {
-        prompt("Column 0 max elements (0=MAXROWS)")
-        special(SPC_NOMOD)
-        interest(1)
-    }
-    field(COL00NORD, DBF_ULONG) {
-        prompt("Column 0 current elements")
         interest(1)
     }
     field(COL00VAL, DBF_NOACCESS) {
@@ -108,15 +100,6 @@ recordtype(tableB) {
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL01NELM, DBF_ULONG) {
-        prompt("Column 1 max elements (0=MAXROWS)")
-        special(SPC_NOMOD)
-        interest(1)
-    }
-    field(COL01NORD, DBF_ULONG) {
-        prompt("Column 1 current elements")
-        interest(1)
-    }
     field(COL01VAL, DBF_NOACCESS) {
         prompt("Column 1 data")
         special(SPC_DBADDR)
@@ -152,15 +135,6 @@ recordtype(tableB) {
     field(COL02INP, DBF_INLINK) {
         prompt("Column 2 input link")
         promptgroup("41 - Input")
-        interest(1)
-    }
-    field(COL02NELM, DBF_ULONG) {
-        prompt("Column 2 max elements (0=MAXROWS)")
-        special(SPC_NOMOD)
-        interest(1)
-    }
-    field(COL02NORD, DBF_ULONG) {
-        prompt("Column 2 current elements")
         interest(1)
     }
     field(COL02VAL, DBF_NOACCESS) {
@@ -200,15 +174,6 @@ recordtype(tableB) {
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL03NELM, DBF_ULONG) {
-        prompt("Column 3 max elements (0=MAXROWS)")
-        special(SPC_NOMOD)
-        interest(1)
-    }
-    field(COL03NORD, DBF_ULONG) {
-        prompt("Column 3 current elements")
-        interest(1)
-    }
     field(COL03VAL, DBF_NOACCESS) {
         prompt("Column 3 data")
         special(SPC_DBADDR)
@@ -244,15 +209,6 @@ recordtype(tableB) {
     field(COL04INP, DBF_INLINK) {
         prompt("Column 4 input link")
         promptgroup("41 - Input")
-        interest(1)
-    }
-    field(COL04NELM, DBF_ULONG) {
-        prompt("Column 4 max elements (0=MAXROWS)")
-        special(SPC_NOMOD)
-        interest(1)
-    }
-    field(COL04NORD, DBF_ULONG) {
-        prompt("Column 4 current elements")
         interest(1)
     }
     field(COL04VAL, DBF_NOACCESS) {
@@ -292,15 +248,6 @@ recordtype(tableB) {
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL05NELM, DBF_ULONG) {
-        prompt("Column 5 max elements (0=MAXROWS)")
-        special(SPC_NOMOD)
-        interest(1)
-    }
-    field(COL05NORD, DBF_ULONG) {
-        prompt("Column 5 current elements")
-        interest(1)
-    }
     field(COL05VAL, DBF_NOACCESS) {
         prompt("Column 5 data")
         special(SPC_DBADDR)
@@ -338,15 +285,6 @@ recordtype(tableB) {
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL06NELM, DBF_ULONG) {
-        prompt("Column 6 max elements (0=MAXROWS)")
-        special(SPC_NOMOD)
-        interest(1)
-    }
-    field(COL06NORD, DBF_ULONG) {
-        prompt("Column 6 current elements")
-        interest(1)
-    }
     field(COL06VAL, DBF_NOACCESS) {
         prompt("Column 6 data")
         special(SPC_DBADDR)
@@ -382,15 +320,6 @@ recordtype(tableB) {
     field(COL07INP, DBF_INLINK) {
         prompt("Column 7 input link")
         promptgroup("41 - Input")
-        interest(1)
-    }
-    field(COL07NELM, DBF_ULONG) {
-        prompt("Column 7 max elements (0=MAXROWS)")
-        special(SPC_NOMOD)
-        interest(1)
-    }
-    field(COL07NORD, DBF_ULONG) {
-        prompt("Column 7 current elements")
         interest(1)
     }
     field(COL07VAL, DBF_NOACCESS) {
