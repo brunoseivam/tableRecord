@@ -65,12 +65,12 @@ static DBLINK *colInpAddr(tableRecord *prec, int i)
     case  7: return &prec->col07inp;
     case  8: return &prec->col08inp;
     case  9: return &prec->col09inp;
-    case 10: return &prec->col10inp;
-    case 11: return &prec->col11inp;
-    case 12: return &prec->col12inp;
-    case 13: return &prec->col13inp;
-    case 14: return &prec->col14inp;
-    case 15: return &prec->col15inp;
+    case 10: return &prec->col0Ainp;
+    case 11: return &prec->col0Binp;
+    case 12: return &prec->col0Cinp;
+    case 13: return &prec->col0Dinp;
+    case 14: return &prec->col0Einp;
+    case 15: return &prec->col0Finp;
     default: return NULL;
     }
 }
@@ -88,12 +88,12 @@ static void **colValAddr(tableRecord *prec, int i)
     case  7: return &prec->col07val;
     case  8: return &prec->col08val;
     case  9: return &prec->col09val;
-    case 10: return &prec->col10val;
-    case 11: return &prec->col11val;
-    case 12: return &prec->col12val;
-    case 13: return &prec->col13val;
-    case 14: return &prec->col14val;
-    case 15: return &prec->col15val;
+    case 10: return &prec->col0Aval;
+    case 11: return &prec->col0Bval;
+    case 12: return &prec->col0Cval;
+    case 13: return &prec->col0Dval;
+    case 14: return &prec->col0Eval;
+    case 15: return &prec->col0Fval;
     default: return NULL;
     }
 }
@@ -111,12 +111,12 @@ static epicsEnum16 colType(tableRecord *prec, int i)
     case  7: return prec->col07type;
     case  8: return prec->col08type;
     case  9: return prec->col09type;
-    case 10: return prec->col10type;
-    case 11: return prec->col11type;
-    case 12: return prec->col12type;
-    case 13: return prec->col13type;
-    case 14: return prec->col14type;
-    case 15: return prec->col15type;
+    case 10: return prec->col0Atype;
+    case 11: return prec->col0Btype;
+    case 12: return prec->col0Ctype;
+    case 13: return prec->col0Dtype;
+    case 14: return prec->col0Etype;
+    case 15: return prec->col0Ftype;
     default: return DBF_UCHAR;
     }
 }
@@ -209,7 +209,7 @@ static long cvt_dbaddr(DBADDR *paddr)
     tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
-    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL15VAL) {
+    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL) {
         int i = (fi - tableRecordCOL00VAL) / TABLE_COL_STRIDE;
         epicsEnum16 type = colType(prec, i);
         void **vp = colValAddr(prec, i);
@@ -228,7 +228,7 @@ static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
     int fi = dbGetFieldIndex(paddr);
 
     *offset = 0;
-    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL15VAL)
+    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL)
         *no_elements = prec->numrows;
     else
         *no_elements = 0;
@@ -240,7 +240,7 @@ static long put_array_info(DBADDR *paddr, long nNew)
     tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
-    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL15VAL) {
+    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL) {
         epicsUInt32 n = (epicsUInt32)nNew;
         if (n > prec->maxrows) n = prec->maxrows;
         prec->numrows = n;

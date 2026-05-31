@@ -23,8 +23,8 @@ static long soft_init_record(struct dbCommon *pcommon)
     char *names[16] = {
         prec->col00name, prec->col01name, prec->col02name, prec->col03name,
         prec->col04name, prec->col05name, prec->col06name, prec->col07name,
-        prec->col08name, prec->col09name, prec->col10name, prec->col11name,
-        prec->col12name, prec->col13name, prec->col14name, prec->col15name
+        prec->col08name, prec->col09name, prec->col0Aname, prec->col0Bname,
+        prec->col0Cname, prec->col0Dname, prec->col0Ename, prec->col0Fname
     };
     epicsUInt32 n = 0;
     while (n < 16 && names[n][0] != '\0') n++;

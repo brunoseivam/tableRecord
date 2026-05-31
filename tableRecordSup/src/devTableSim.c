@@ -39,14 +39,14 @@ static long sim_init_record(struct dbCommon *pcommon)
     char *names[16] = {
         prec->col00name, prec->col01name, prec->col02name, prec->col03name,
         prec->col04name, prec->col05name, prec->col06name, prec->col07name,
-        prec->col08name, prec->col09name, prec->col10name, prec->col11name,
-        prec->col12name, prec->col13name, prec->col14name, prec->col15name
+        prec->col08name, prec->col09name, prec->col0Aname, prec->col0Bname,
+        prec->col0Cname, prec->col0Dname, prec->col0Ename, prec->col0Fname
     };
     char *labels[16] = {
         prec->col00label, prec->col01label, prec->col02label, prec->col03label,
         prec->col04label, prec->col05label, prec->col06label, prec->col07label,
-        prec->col08label, prec->col09label, prec->col10label, prec->col11label,
-        prec->col12label, prec->col13label, prec->col14label, prec->col15label
+        prec->col08label, prec->col09label, prec->col0Alabel, prec->col0Blabel,
+        prec->col0Clabel, prec->col0Dlabel, prec->col0Elabel, prec->col0Flabel
     };
     epicsUInt32 i;
     prec->numcols = TABLE_SIM_NCOL;

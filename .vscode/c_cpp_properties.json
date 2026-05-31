@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/bmartins/osprey/epics/epics-base/include",
+                "/home/bmartins/osprey/epics/epics-base/include/compiler/gcc",
+                "/home/bmartins/osprey/epics/epics-base/include/os/Linux",
+                "/home/bmartins/osprey/epics/pvxs/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-clang-x64"
+        }
+    ],
+    "version": 4
+}
