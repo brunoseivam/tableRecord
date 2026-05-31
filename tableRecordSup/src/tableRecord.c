@@ -65,12 +65,12 @@ static DBLINK *colInpAddr(tableRecord *prec, int i)
     case  7: return &prec->col07inp;
     case  8: return &prec->col08inp;
     case  9: return &prec->col09inp;
-    case 10: return &prec->col0Ainp;
-    case 11: return &prec->col0Binp;
-    case 12: return &prec->col0Cinp;
-    case 13: return &prec->col0Dinp;
-    case 14: return &prec->col0Einp;
-    case 15: return &prec->col0Finp;
+    case 10: return &prec->col0ainp;
+    case 11: return &prec->col0binp;
+    case 12: return &prec->col0cinp;
+    case 13: return &prec->col0dinp;
+    case 14: return &prec->col0einp;
+    case 15: return &prec->col0finp;
     default: return NULL;
     }
 }
@@ -88,12 +88,12 @@ static void **colValAddr(tableRecord *prec, int i)
     case  7: return &prec->col07val;
     case  8: return &prec->col08val;
     case  9: return &prec->col09val;
-    case 10: return &prec->col0Aval;
-    case 11: return &prec->col0Bval;
-    case 12: return &prec->col0Cval;
-    case 13: return &prec->col0Dval;
-    case 14: return &prec->col0Eval;
-    case 15: return &prec->col0Fval;
+    case 10: return &prec->col0aval;
+    case 11: return &prec->col0bval;
+    case 12: return &prec->col0cval;
+    case 13: return &prec->col0dval;
+    case 14: return &prec->col0eval;
+    case 15: return &prec->col0fval;
     default: return NULL;
     }
 }
@@ -111,12 +111,12 @@ static epicsEnum16 colType(tableRecord *prec, int i)
     case  7: return prec->col07type;
     case  8: return prec->col08type;
     case  9: return prec->col09type;
-    case 10: return prec->col0Atype;
-    case 11: return prec->col0Btype;
-    case 12: return prec->col0Ctype;
-    case 13: return prec->col0Dtype;
-    case 14: return prec->col0Etype;
-    case 15: return prec->col0Ftype;
+    case 10: return prec->col0atype;
+    case 11: return prec->col0btype;
+    case 12: return prec->col0ctype;
+    case 13: return prec->col0dtype;
+    case 14: return prec->col0etype;
+    case 15: return prec->col0ftype;
     default: return DBF_UCHAR;
     }
 }

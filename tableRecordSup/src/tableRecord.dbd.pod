@@ -437,7 +437,7 @@ recordtype(table) {
         prompt("Column 10 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0Aval")
+        extra("void *col0aval")
         interest(2)
     }
     field(COL0ACHGD, DBF_UCHAR) {
@@ -474,7 +474,7 @@ recordtype(table) {
         prompt("Column 11 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0Bval")
+        extra("void *col0bval")
         interest(2)
     }
     field(COL0BCHGD, DBF_UCHAR) {
@@ -511,7 +511,7 @@ recordtype(table) {
         prompt("Column 12 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0Cval")
+        extra("void *col0cval")
         interest(2)
     }
     field(COL0CCHGD, DBF_UCHAR) {
@@ -548,7 +548,7 @@ recordtype(table) {
         prompt("Column 13 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0Dval")
+        extra("void *col0dval")
         interest(2)
     }
     field(COL0DCHGD, DBF_UCHAR) {
@@ -585,7 +585,7 @@ recordtype(table) {
         prompt("Column 14 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0Eval")
+        extra("void *col0eval")
         interest(2)
     }
     field(COL0ECHGD, DBF_UCHAR) {
@@ -622,7 +622,7 @@ recordtype(table) {
         prompt("Column 15 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0Fval")
+        extra("void *col0fval")
         interest(2)
     }
     field(COL0FCHGD, DBF_UCHAR) {

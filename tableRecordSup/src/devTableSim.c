@@ -39,14 +39,14 @@ static long sim_init_record(struct dbCommon *pcommon)
     char *names[16] = {
         prec->col00name, prec->col01name, prec->col02name, prec->col03name,
         prec->col04name, prec->col05name, prec->col06name, prec->col07name,
-        prec->col08name, prec->col09name, prec->col0Aname, prec->col0Bname,
-        prec->col0Cname, prec->col0Dname, prec->col0Ename, prec->col0Fname
+        prec->col08name, prec->col09name, prec->col0aname, prec->col0bname,
+        prec->col0cname, prec->col0dname, prec->col0ename, prec->col0fname
     };
     char *labels[16] = {
         prec->col00label, prec->col01label, prec->col02label, prec->col03label,
         prec->col04label, prec->col05label, prec->col06label, prec->col07label,
-        prec->col08label, prec->col09label, prec->col0Alabel, prec->col0Blabel,
-        prec->col0Clabel, prec->col0Dlabel, prec->col0Elabel, prec->col0Flabel
+        prec->col08label, prec->col09label, prec->col0alabel, prec->col0blabel,
+        prec->col0clabel, prec->col0dlabel, prec->col0elabel, prec->col0flabel
     };
     epicsUInt32 i;
     prec->numcols = TABLE_SIM_NCOL;
@@ -68,8 +68,8 @@ static long read_table(tableRecord *prec)
     Col cols[] = {
         COL(00), COL(01), COL(02), COL(03),
         COL(04), COL(05), COL(06), COL(07),
-        COL(08), COL(09), COL(10), COL(11),
-        COL(12), COL(13), COL(14), COL(15)
+        COL(08), COL(09), COL(0a), COL(0b),
+        COL(0c), COL(0d), COL(0e), COL(0f)
     };
     epicsUInt32 col, row;
 

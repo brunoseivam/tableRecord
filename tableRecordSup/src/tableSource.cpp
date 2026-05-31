@@ -141,12 +141,12 @@ static void getCols(tableRecord *prec, Col cols[16])
     cols[ 7] = {prec->col07name, prec->col07label, prec->col07type, prec->col07val};
     cols[ 8] = {prec->col08name, prec->col08label, prec->col08type, prec->col08val};
     cols[ 9] = {prec->col09name, prec->col09label, prec->col09type, prec->col09val};
-    cols[10] = {prec->col0Aname, prec->col0Alabel, prec->col0Atype, prec->col0Aval};
-    cols[11] = {prec->col0Bname, prec->col0Blabel, prec->col0Btype, prec->col0Bval};
-    cols[12] = {prec->col0Cname, prec->col0Clabel, prec->col0Ctype, prec->col0Cval};
-    cols[13] = {prec->col0Dname, prec->col0Dlabel, prec->col0Dtype, prec->col0Dval};
-    cols[14] = {prec->col0Ename, prec->col0Elabel, prec->col0Etype, prec->col0Eval};
-    cols[15] = {prec->col0Fname, prec->col0Flabel, prec->col0Ftype, prec->col0Fval};
+    cols[10] = {prec->col0aname, prec->col0alabel, prec->col0atype, prec->col0aval};
+    cols[11] = {prec->col0bname, prec->col0blabel, prec->col0btype, prec->col0bval};
+    cols[12] = {prec->col0cname, prec->col0clabel, prec->col0ctype, prec->col0cval};
+    cols[13] = {prec->col0dname, prec->col0dlabel, prec->col0dtype, prec->col0dval};
+    cols[14] = {prec->col0ename, prec->col0elabel, prec->col0etype, prec->col0eval};
+    cols[15] = {prec->col0fname, prec->col0flabel, prec->col0ftype, prec->col0fval};
 }
 
 /* Snapshot a table record into a Value clone (caller holds lock) */
@@ -194,12 +194,12 @@ static void getColsPut(tableRecord *prec, ColPut cols[16])
     cols[ 7] = {prec->col07name, prec->col07type, &prec->col07val, &prec->col07chgd};
     cols[ 8] = {prec->col08name, prec->col08type, &prec->col08val, &prec->col08chgd};
     cols[ 9] = {prec->col09name, prec->col09type, &prec->col09val, &prec->col09chgd};
-    cols[10] = {prec->col0Aname, prec->col0Atype, &prec->col0Aval, &prec->col0Achgd};
-    cols[11] = {prec->col0Bname, prec->col0Btype, &prec->col0Bval, &prec->col0Bchgd};
-    cols[12] = {prec->col0Cname, prec->col0Ctype, &prec->col0Cval, &prec->col0Cchgd};
-    cols[13] = {prec->col0Dname, prec->col0Dtype, &prec->col0Dval, &prec->col0Dchgd};
-    cols[14] = {prec->col0Ename, prec->col0Etype, &prec->col0Eval, &prec->col0Echgd};
-    cols[15] = {prec->col0Fname, prec->col0Ftype, &prec->col0Fval, &prec->col0Fchgd};
+    cols[10] = {prec->col0aname, prec->col0atype, &prec->col0aval, &prec->col0achgd};
+    cols[11] = {prec->col0bname, prec->col0btype, &prec->col0bval, &prec->col0bchgd};
+    cols[12] = {prec->col0cname, prec->col0ctype, &prec->col0cval, &prec->col0cchgd};
+    cols[13] = {prec->col0dname, prec->col0dtype, &prec->col0dval, &prec->col0dchgd};
+    cols[14] = {prec->col0ename, prec->col0etype, &prec->col0eval, &prec->col0echgd};
+    cols[15] = {prec->col0fname, prec->col0ftype, &prec->col0fval, &prec->col0fchgd};
 }
 
 /* Write NTTable value into a table record (caller holds lock + calls dbProcess) */

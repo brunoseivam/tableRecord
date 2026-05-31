@@ -23,8 +23,8 @@ static long soft_init_record(struct dbCommon *pcommon)
     char *names[16] = {
         prec->col00name, prec->col01name, prec->col02name, prec->col03name,
         prec->col04name, prec->col05name, prec->col06name, prec->col07name,
-        prec->col08name, prec->col09name, prec->col0Aname, prec->col0Bname,
-        prec->col0Cname, prec->col0Dname, prec->col0Ename, prec->col0Fname
+        prec->col08name, prec->col09name, prec->col0aname, prec->col0bname,
+        prec->col0cname, prec->col0dname, prec->col0ename, prec->col0fname
     };
     epicsUInt32 n = 0;
     while (n < 16 && names[n][0] != '\0') n++;
@@ -42,8 +42,8 @@ static long read_table(tableRecord *prec)
     Col cols[] = {
         COL(00), COL(01), COL(02), COL(03),
         COL(04), COL(05), COL(06), COL(07),
-        COL(08), COL(09), COL(10), COL(11),
-        COL(12), COL(13), COL(14), COL(15)
+        COL(08), COL(09), COL(0a), COL(0b),
+        COL(0c), COL(0d), COL(0e), COL(0f)
     };
     epicsUInt32 i;
     epicsUInt32 numrows = 0;
