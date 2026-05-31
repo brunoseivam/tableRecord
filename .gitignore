@@ -32,3 +32,5 @@ O.*/
 
 # Common files created by other tools
 .DS_Store
+
+.claude/
