@@ -17,14 +17,13 @@
 #include "cantProceed.h"
 
 #define GEN_SIZE_OFFSET
-#include "tableBRecord.h"
+#include "tableRecord.h"
 #undef GEN_SIZE_OFFSET
 #include "epicsExport.h"
 
-#define TABLB_MAX_COLS 8
-/* Derived from the generated header — equals the number of fields per column bundle.
-   Recomputed automatically if the bundle size changes. */
-#define TABLB_COL_STRIDE (tableBRecordCOL01VAL - tableBRecordCOL00VAL)
+#define TABLE_MAX_COLS 16
+/* Stride between consecutive COLxxVAL field indices in the generated header */
+#define TABLE_COL_STRIDE (tableRecordCOL01VAL - tableRecordCOL00VAL)
 
 #define report       NULL
 #define initialize   NULL
@@ -44,64 +43,88 @@ static long get_precision(const DBADDR *, long *);
 #define get_control_double NULL
 #define get_alarm_double   NULL
 
-rset tableBRSET = {
+rset tableRSET = {
     RSETNUMBER,
     report, initialize, init_record, process, special, get_value,
     cvt_dbaddr, get_array_info, put_array_info, get_units, get_precision,
     get_enum_str, get_enum_strs, put_enum_str,
     get_graphic_double, get_control_double, get_alarm_double
 };
-epicsExportAddress(rset, tableBRSET);
+epicsExportAddress(rset, tableRSET);
 
-static DBLINK *colInpAddr(tableBRecord *prec, int i)
+static DBLINK *colInpAddr(tableRecord *prec, int i)
 {
     switch (i) {
-    case 0: return &prec->col00inp;
-    case 1: return &prec->col01inp;
-    case 2: return &prec->col02inp;
-    case 3: return &prec->col03inp;
-    case 4: return &prec->col04inp;
-    case 5: return &prec->col05inp;
-    case 6: return &prec->col06inp;
-    case 7: return &prec->col07inp;
+    case  0: return &prec->col00inp;
+    case  1: return &prec->col01inp;
+    case  2: return &prec->col02inp;
+    case  3: return &prec->col03inp;
+    case  4: return &prec->col04inp;
+    case  5: return &prec->col05inp;
+    case  6: return &prec->col06inp;
+    case  7: return &prec->col07inp;
+    case  8: return &prec->col08inp;
+    case  9: return &prec->col09inp;
+    case 10: return &prec->col10inp;
+    case 11: return &prec->col11inp;
+    case 12: return &prec->col12inp;
+    case 13: return &prec->col13inp;
+    case 14: return &prec->col14inp;
+    case 15: return &prec->col15inp;
     default: return NULL;
     }
 }
 
-static void **colValAddr(tableBRecord *prec, int i)
+static void **colValAddr(tableRecord *prec, int i)
 {
     switch (i) {
-    case 0: return &prec->col00val;
-    case 1: return &prec->col01val;
-    case 2: return &prec->col02val;
-    case 3: return &prec->col03val;
-    case 4: return &prec->col04val;
-    case 5: return &prec->col05val;
-    case 6: return &prec->col06val;
-    case 7: return &prec->col07val;
+    case  0: return &prec->col00val;
+    case  1: return &prec->col01val;
+    case  2: return &prec->col02val;
+    case  3: return &prec->col03val;
+    case  4: return &prec->col04val;
+    case  5: return &prec->col05val;
+    case  6: return &prec->col06val;
+    case  7: return &prec->col07val;
+    case  8: return &prec->col08val;
+    case  9: return &prec->col09val;
+    case 10: return &prec->col10val;
+    case 11: return &prec->col11val;
+    case 12: return &prec->col12val;
+    case 13: return &prec->col13val;
+    case 14: return &prec->col14val;
+    case 15: return &prec->col15val;
     default: return NULL;
     }
 }
 
-static epicsEnum16 colFtvl(tableBRecord *prec, int i)
+static epicsEnum16 colType(tableRecord *prec, int i)
 {
     switch (i) {
-    case 0: return prec->col00ftvl;
-    case 1: return prec->col01ftvl;
-    case 2: return prec->col02ftvl;
-    case 3: return prec->col03ftvl;
-    case 4: return prec->col04ftvl;
-    case 5: return prec->col05ftvl;
-    case 6: return prec->col06ftvl;
-    case 7: return prec->col07ftvl;
+    case  0: return prec->col00type;
+    case  1: return prec->col01type;
+    case  2: return prec->col02type;
+    case  3: return prec->col03type;
+    case  4: return prec->col04type;
+    case  5: return prec->col05type;
+    case  6: return prec->col06type;
+    case  7: return prec->col07type;
+    case  8: return prec->col08type;
+    case  9: return prec->col09type;
+    case 10: return prec->col10type;
+    case 11: return prec->col11type;
+    case 12: return prec->col12type;
+    case 13: return prec->col13type;
+    case 14: return prec->col14type;
+    case 15: return prec->col15type;
     default: return DBF_UCHAR;
     }
 }
 
 static long init_record(struct dbCommon *pcommon, int pass)
 {
-    tableBRecord *prec = (tableBRecord *)pcommon;
-    tableBdset *pdset;
+    tableRecord *prec = (tableRecord *)pcommon;
+    tabledset *pdset;
     epicsUInt32 i;
 
     if (pass == 0) {
@@ -113,12 +136,12 @@ static long init_record(struct dbCommon *pcommon, int pass)
 
     /* pass 1: validate DSET, call its init_record (which sets numcols),
        then allocate per-column data buffers. */
-    if (!(pdset = (tableBdset *)prec->dset)) {
-        recGblRecordError(S_dev_noDSET, prec, "tableB: init_record");
+    if (!(pdset = (tabledset *)prec->dset)) {
+        recGblRecordError(S_dev_noDSET, prec, "table: init_record");
         return S_dev_noDSET;
     }
     if (pdset->common.number < 5 || !pdset->read_table) {
-        recGblRecordError(S_dev_missingSup, prec, "tableB: init_record");
+        recGblRecordError(S_dev_missingSup, prec, "table: init_record");
         return S_dev_missingSup;
     }
     if (pdset->common.init_record) {
@@ -126,16 +149,16 @@ static long init_record(struct dbCommon *pcommon, int pass)
         if (s) return s;
     }
 
-    if (prec->numcols > TABLB_MAX_COLS)
-        prec->numcols = TABLB_MAX_COLS;
+    if (prec->numcols > TABLE_MAX_COLS)
+        prec->numcols = TABLE_MAX_COLS;
 
     for (i = 0; i < prec->numcols; i++) {
-        epicsEnum16 ftvl = colFtvl(prec, i);
-        if (ftvl > DBF_ENUM)
-            ftvl = DBF_DOUBLE;
+        epicsEnum16 type = colType(prec, i);
+        if (type > DBF_ENUM)
+            type = DBF_DOUBLE;
         *colValAddr(prec, i) = callocMustSucceed(prec->maxrows,
-                                                 dbValueSize(ftvl),
-                                                 "tableB: column data");
+                                                 dbValueSize(type),
+                                                 "table: column data");
     }
 
     /* Load constant COLxxINP links into column buffers at init time.
@@ -145,7 +168,7 @@ static long init_record(struct dbCommon *pcommon, int pass)
         DBLINK *inp = colInpAddr(prec, i);
         void *buf = *colValAddr(prec, i);
         long nReq = prec->maxrows;
-        if (inp && buf && !dbLoadLinkArray(inp, colFtvl(prec, i), buf, &nReq)) {
+        if (inp && buf && !dbLoadLinkArray(inp, colType(prec, i), buf, &nReq)) {
             if ((epicsUInt32)nReq > prec->numrows)
                 prec->numrows = (epicsUInt32)nReq;
             prec->udf = FALSE;
@@ -156,13 +179,13 @@ static long init_record(struct dbCommon *pcommon, int pass)
 
 static long process(struct dbCommon *pcommon)
 {
-    tableBRecord *prec = (tableBRecord *)pcommon;
-    tableBdset *pdset = (tableBdset *)prec->dset;
+    tableRecord *prec = (tableRecord *)pcommon;
+    tabledset *pdset = (tabledset *)prec->dset;
     long status;
 
     if (!pdset || !pdset->read_table) {
         prec->pact = TRUE;
-        recGblRecordError(S_dev_missingSup, prec, "tableB: process");
+        recGblRecordError(S_dev_missingSup, prec, "table: process");
         return S_dev_missingSup;
     }
 
@@ -183,17 +206,17 @@ static long process(struct dbCommon *pcommon)
 
 static long cvt_dbaddr(DBADDR *paddr)
 {
-    tableBRecord *prec = (tableBRecord *)paddr->precord;
+    tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
-    if (fi >= tableBRecordCOL00VAL && fi <= tableBRecordCOL07VAL) {
-        int i = (fi - tableBRecordCOL00VAL) / TABLB_COL_STRIDE;
-        epicsEnum16 ftvl = colFtvl(prec, i);
+    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL15VAL) {
+        int i = (fi - tableRecordCOL00VAL) / TABLE_COL_STRIDE;
+        epicsEnum16 type = colType(prec, i);
         void **vp = colValAddr(prec, i);
         paddr->pfield         = vp ? *vp : NULL;
-        paddr->field_type     = ftvl;
-        paddr->field_size     = dbValueSize(ftvl);
-        paddr->dbr_field_type = ftvl;
+        paddr->field_type     = type;
+        paddr->field_size     = dbValueSize(type);
+        paddr->dbr_field_type = type;
         paddr->no_elements    = prec->maxrows;
     }
     return 0;
@@ -201,11 +224,11 @@ static long cvt_dbaddr(DBADDR *paddr)
 
 static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
 {
-    tableBRecord *prec = (tableBRecord *)paddr->precord;
+    tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
     *offset = 0;
-    if (fi >= tableBRecordCOL00VAL && fi <= tableBRecordCOL07VAL)
+    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL15VAL)
         *no_elements = prec->numrows;
     else
         *no_elements = 0;
@@ -214,10 +237,10 @@ static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
 
 static long put_array_info(DBADDR *paddr, long nNew)
 {
-    tableBRecord *prec = (tableBRecord *)paddr->precord;
+    tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
-    if (fi >= tableBRecordCOL00VAL && fi <= tableBRecordCOL07VAL) {
+    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL15VAL) {
         epicsUInt32 n = (epicsUInt32)nNew;
         if (n > prec->maxrows) n = prec->maxrows;
         prec->numrows = n;

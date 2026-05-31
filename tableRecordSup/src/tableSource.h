@@ -16,8 +16,7 @@
 namespace table {
 
 struct RecInfo {
-    const char *type;   /* "tableA" or "tableB" */
-    dbCommon   *prec;
+    dbCommon *prec;
 };
 
 struct SubCtx {
@@ -31,9 +30,9 @@ struct SubCtx {
 };
 
 /**
- * Custom pvxs Source that publishes tableA and tableB records as NTTable PVs.
+ * Custom pvxs Source that publishes table records as NTTable PVs.
  *
- * Registered at priority 1, it intercepts channels for table records before
+ * Registered at priority -1, it intercepts channels for table records before
  * the default qsrvSingle source (priority 0).
  */
 class TableSource final : public pvxs::server::Source {

@@ -1,10 +1,9 @@
-#!../../bin/linux-x86_64/tableRecord
+#!../../bin/linux-x86_64/table
 
-dbLoadDatabase("../../dbd/tableRecord.dbd", 0, 0)
-tableRecord_registerRecordDeviceDriver(pdbbase)
+dbLoadDatabase("../../dbd/table.dbd", 0, 0)
+table_registerRecordDeviceDriver(pdbbase)
 
-dbLoadRecords("../../db/tableA_demo.db")
-dbLoadRecords("../../db/tableB_demo.db")
+dbLoadRecords("../../db/table_demo.db")
 
 iocInit()
 

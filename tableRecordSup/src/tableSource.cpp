@@ -14,8 +14,7 @@
 #include <pvxs/nt.h>
 
 #include "tableSource.h"
-#include "tableARecord.h"
-#include "tableBRecord.h"
+#include "tableRecord.h"
 
 DEFINE_LOGGER(tlog, "pvxs.table.source");
 
@@ -29,9 +28,9 @@ struct RecLock {
 };
 
 /* Map EPICS menuFtype → pvxs scalar TypeCode */
-static pvxs::TypeCode ftypeToTC(epicsEnum16 ftvl)
+static pvxs::TypeCode ftypeToTC(epicsEnum16 type)
 {
-    switch (ftvl) {
+    switch (type) {
     case DBF_STRING: return pvxs::TypeCode::String;
     case DBF_CHAR:   return pvxs::TypeCode::Int8;
     case DBF_UCHAR:  return pvxs::TypeCode::UInt8;
@@ -48,11 +47,11 @@ static pvxs::TypeCode ftypeToTC(epicsEnum16 ftvl)
 }
 
 /* Copy one column buffer into a pvxs Value column field (called under lock) */
-static void fillCol(pvxs::Value col, epicsEnum16 ftvl, const void *buf, epicsUInt32 nrow)
+static void fillCol(pvxs::Value col, epicsEnum16 type, const void *buf, epicsUInt32 nrow)
 {
     if (!col.valid() || !buf || nrow == 0) return;
 
-    if (ftvl == DBF_STRING) {
+    if (type == DBF_STRING) {
         pvxs::shared_array<std::string> arr(nrow);
         for (epicsUInt32 r = 0; r < nrow; r++)
             arr[r] = (const char *)buf + r * MAX_STRING_SIZE;
@@ -60,7 +59,7 @@ static void fillCol(pvxs::Value col, epicsEnum16 ftvl, const void *buf, epicsUIn
         return;
     }
 
-    switch (ftypeToTC(ftvl).code) {
+    switch (ftypeToTC(type).code) {
 #define COPY(TC_VAL, CTYPE) \
     case pvxs::TypeCode::TC_VAL: { \
         pvxs::shared_array<CTYPE> arr(nrow); \
@@ -82,12 +81,12 @@ static void fillCol(pvxs::Value col, epicsEnum16 ftvl, const void *buf, epicsUIn
 }
 
 /* Extract data from a pvxs Value column and write into a record buffer (under lock) */
-static void drainCol(pvxs::Value col, epicsEnum16 ftvl, void *buf,
+static void drainCol(pvxs::Value col, epicsEnum16 type, void *buf,
                      epicsUInt32 maxelm, epicsUInt32 &nout)
 {
     if (!col.valid() || !buf) return;
 
-    if (ftvl == DBF_STRING) {
+    if (type == DBF_STRING) {
         auto arr = col.as<pvxs::shared_array<const std::string>>();
         epicsUInt32 n = (epicsUInt32)arr.size();
         if (n > maxelm) n = maxelm;
@@ -100,7 +99,7 @@ static void drainCol(pvxs::Value col, epicsEnum16 ftvl, void *buf,
         return;
     }
 
-    switch (ftypeToTC(ftvl).code) {
+    switch (ftypeToTC(type).code) {
 #define PUT(TC_VAL, CTYPE) \
     case pvxs::TypeCode::TC_VAL: { \
         auto arr = col.as<pvxs::shared_array<const CTYPE>>(); \
@@ -123,55 +122,47 @@ static void drainCol(pvxs::Value col, epicsEnum16 ftvl, void *buf,
     }
 }
 
-/* Snapshot a tableA record into a Value clone (caller holds lock) */
-static void snapshotA(tableARecord *prec, pvxs::Value &v)
-{
-    void *colbufs[] = {
-        prec->col00, prec->col01, prec->col02, prec->col03,
-        prec->col04, prec->col05, prec->col06, prec->col07
-    };
-    for (epicsUInt32 i = 0; i < prec->ncol; i++) {
-        const char *cname = prec->colnames + i * MAX_STRING_SIZE;
-        auto col = v["value"][cname];
-        fillCol(col, prec->coltypes[i], colbufs[i], prec->nrow);
-    }
-}
-
-struct ColB {
+struct Col {
     const char  *name;
     const char  *label;
-    epicsEnum16  ftvl;
+    epicsEnum16  type;
     void        *val;
 };
-static void getColsB(tableBRecord *prec, ColB cols[8])
+
+static void getCols(tableRecord *prec, Col cols[16])
 {
-    cols[0] = {prec->col00name, prec->col00label, prec->col00ftvl, prec->col00val};
-    cols[1] = {prec->col01name, prec->col01label, prec->col01ftvl, prec->col01val};
-    cols[2] = {prec->col02name, prec->col02label, prec->col02ftvl, prec->col02val};
-    cols[3] = {prec->col03name, prec->col03label, prec->col03ftvl, prec->col03val};
-    cols[4] = {prec->col04name, prec->col04label, prec->col04ftvl, prec->col04val};
-    cols[5] = {prec->col05name, prec->col05label, prec->col05ftvl, prec->col05val};
-    cols[6] = {prec->col06name, prec->col06label, prec->col06ftvl, prec->col06val};
-    cols[7] = {prec->col07name, prec->col07label, prec->col07ftvl, prec->col07val};
+    cols[ 0] = {prec->col00name, prec->col00label, prec->col00type, prec->col00val};
+    cols[ 1] = {prec->col01name, prec->col01label, prec->col01type, prec->col01val};
+    cols[ 2] = {prec->col02name, prec->col02label, prec->col02type, prec->col02val};
+    cols[ 3] = {prec->col03name, prec->col03label, prec->col03type, prec->col03val};
+    cols[ 4] = {prec->col04name, prec->col04label, prec->col04type, prec->col04val};
+    cols[ 5] = {prec->col05name, prec->col05label, prec->col05type, prec->col05val};
+    cols[ 6] = {prec->col06name, prec->col06label, prec->col06type, prec->col06val};
+    cols[ 7] = {prec->col07name, prec->col07label, prec->col07type, prec->col07val};
+    cols[ 8] = {prec->col08name, prec->col08label, prec->col08type, prec->col08val};
+    cols[ 9] = {prec->col09name, prec->col09label, prec->col09type, prec->col09val};
+    cols[10] = {prec->col10name, prec->col10label, prec->col10type, prec->col10val};
+    cols[11] = {prec->col11name, prec->col11label, prec->col11type, prec->col11val};
+    cols[12] = {prec->col12name, prec->col12label, prec->col12type, prec->col12val};
+    cols[13] = {prec->col13name, prec->col13label, prec->col13type, prec->col13val};
+    cols[14] = {prec->col14name, prec->col14label, prec->col14type, prec->col14val};
+    cols[15] = {prec->col15name, prec->col15label, prec->col15type, prec->col15val};
 }
 
-/* Snapshot a tableB record into a Value clone (caller holds lock) */
-static void snapshotB(tableBRecord *prec, pvxs::Value &v)
+/* Snapshot a table record into a Value clone (caller holds lock) */
+static void snapshotTable(tableRecord *prec, pvxs::Value &v)
 {
-    ColB cols[8];
-    getColsB(prec, cols);
+    Col cols[16];
+    getCols(prec, cols);
     for (epicsUInt32 i = 0; i < prec->numcols; i++) {
         auto col = v["value"][cols[i].name];
-        fillCol(col, cols[i].ftvl, cols[i].val, prec->numrows);
+        fillCol(col, cols[i].type, cols[i].val, prec->numrows);
     }
 }
 
 /* Build a snapshot Value from the current record state.
    withMeta=true: include static metadata (labels, descriptor) that only needs
-   to be sent once per client — on the initial monitor post and every GET.
-   The client's cache_sync mechanism re-populates these from its accumulated
-   prototype for all subsequent monitor updates.
-   timeStamp is included in every snapshot regardless of withMeta. */
+   to be sent once per client — on the initial monitor post and every GET. */
 static pvxs::Value snapshot(const RecInfo &ri, const pvxs::Value &proto,
                              bool withMeta = false)
 {
@@ -180,59 +171,47 @@ static pvxs::Value snapshot(const RecInfo &ri, const pvxs::Value &proto,
     v["timeStamp.nanoseconds"]      = (int32_t)ri.prec->time.nsec;
     if (withMeta)
         v["descriptor"] = std::string(ri.prec->desc);
-    if (std::strcmp(ri.type, "tableA") == 0)
-        snapshotA((tableARecord *)ri.prec, v);
-    else
-        snapshotB((tableBRecord *)ri.prec, v);
+    snapshotTable((tableRecord *)ri.prec, v);
     return v;
 }
 
-/* Write NTTable value into a tableA record (caller holds lock + calls dbProcess) */
-static void putValueA(tableARecord *prec, const pvxs::Value &val)
-{
-    void *colbufs[] = {
-        prec->col00, prec->col01, prec->col02, prec->col03,
-        prec->col04, prec->col05, prec->col06, prec->col07
-    };
-    for (epicsUInt32 i = 0; i < prec->ncol; i++) {
-        const char *cname = prec->colnames + i * MAX_STRING_SIZE;
-        auto col = val["value"][cname];
-        if (!col.valid() || !col.isMarked(true, true)) continue;
-        epicsUInt32 nout = 0;
-        drainCol(col, prec->coltypes[i], colbufs[i], prec->maxrows, nout);
-        prec->nrow = nout;
-        prec->chgd[i] = 1;
-    }
-}
-
-struct ColBPut {
+struct ColPut {
     const char  *name;
-    epicsEnum16  ftvl;
+    epicsEnum16  type;
     void       **val;
     epicsUInt8  *chgd;
 };
-static void getColsBPut(tableBRecord *prec, ColBPut cols[8])
+
+static void getColsPut(tableRecord *prec, ColPut cols[16])
 {
-    cols[0] = {prec->col00name, prec->col00ftvl, &prec->col00val, &prec->col00chgd};
-    cols[1] = {prec->col01name, prec->col01ftvl, &prec->col01val, &prec->col01chgd};
-    cols[2] = {prec->col02name, prec->col02ftvl, &prec->col02val, &prec->col02chgd};
-    cols[3] = {prec->col03name, prec->col03ftvl, &prec->col03val, &prec->col03chgd};
-    cols[4] = {prec->col04name, prec->col04ftvl, &prec->col04val, &prec->col04chgd};
-    cols[5] = {prec->col05name, prec->col05ftvl, &prec->col05val, &prec->col05chgd};
-    cols[6] = {prec->col06name, prec->col06ftvl, &prec->col06val, &prec->col06chgd};
-    cols[7] = {prec->col07name, prec->col07ftvl, &prec->col07val, &prec->col07chgd};
+    cols[ 0] = {prec->col00name, prec->col00type, &prec->col00val, &prec->col00chgd};
+    cols[ 1] = {prec->col01name, prec->col01type, &prec->col01val, &prec->col01chgd};
+    cols[ 2] = {prec->col02name, prec->col02type, &prec->col02val, &prec->col02chgd};
+    cols[ 3] = {prec->col03name, prec->col03type, &prec->col03val, &prec->col03chgd};
+    cols[ 4] = {prec->col04name, prec->col04type, &prec->col04val, &prec->col04chgd};
+    cols[ 5] = {prec->col05name, prec->col05type, &prec->col05val, &prec->col05chgd};
+    cols[ 6] = {prec->col06name, prec->col06type, &prec->col06val, &prec->col06chgd};
+    cols[ 7] = {prec->col07name, prec->col07type, &prec->col07val, &prec->col07chgd};
+    cols[ 8] = {prec->col08name, prec->col08type, &prec->col08val, &prec->col08chgd};
+    cols[ 9] = {prec->col09name, prec->col09type, &prec->col09val, &prec->col09chgd};
+    cols[10] = {prec->col10name, prec->col10type, &prec->col10val, &prec->col10chgd};
+    cols[11] = {prec->col11name, prec->col11type, &prec->col11val, &prec->col11chgd};
+    cols[12] = {prec->col12name, prec->col12type, &prec->col12val, &prec->col12chgd};
+    cols[13] = {prec->col13name, prec->col13type, &prec->col13val, &prec->col13chgd};
+    cols[14] = {prec->col14name, prec->col14type, &prec->col14val, &prec->col14chgd};
+    cols[15] = {prec->col15name, prec->col15type, &prec->col15val, &prec->col15chgd};
 }
 
-/* Write NTTable value into a tableB record (caller holds lock + calls dbProcess) */
-static void putValueB(tableBRecord *prec, const pvxs::Value &val)
+/* Write NTTable value into a table record (caller holds lock + calls dbProcess) */
+static void putValueTable(tableRecord *prec, const pvxs::Value &val)
 {
-    ColBPut cols[8];
-    getColsBPut(prec, cols);
+    ColPut cols[16];
+    getColsPut(prec, cols);
     for (epicsUInt32 i = 0; i < prec->numcols; i++) {
         auto col = val["value"][cols[i].name];
         if (!col.valid() || !col.isMarked(true, true)) continue;
         epicsUInt32 nout = 0;
-        drainCol(col, cols[i].ftvl, *cols[i].val, prec->maxrows, nout);
+        drainCol(col, cols[i].type, *cols[i].val, prec->maxrows, nout);
         if (nout > prec->numrows) prec->numrows = nout;
         *cols[i].chgd = 1;
     }
@@ -262,32 +241,18 @@ pvxs::Value TableSource::makeProto(const RecInfo &ri) const
 {
     pvxs::nt::NTTable builder;
     char fallback[32];
-    if (std::strcmp(ri.type, "tableA") == 0) {
-        tableARecord *prec = (tableARecord *)ri.prec;
-        for (epicsUInt32 i = 0; i < prec->ncol; i++) {
-            const char *name = prec->colnames + i * MAX_STRING_SIZE;
-            if (!name[0]) {
-                snprintf(fallback, sizeof(fallback), "col%u", i);
-                name = fallback;
-            }
-            const char *label = prec->collabels + i * MAX_STRING_SIZE;
-            if (!label[0]) label = name;
-            builder.add_column(ftypeToTC(prec->coltypes[i]), name, label);
+    tableRecord *prec = (tableRecord *)ri.prec;
+    Col cols[16];
+    getCols(prec, cols);
+    for (epicsUInt32 i = 0; i < prec->numcols; i++) {
+        const char *name = cols[i].name;
+        if (!name || !name[0]) {
+            snprintf(fallback, sizeof(fallback), "col%u", i);
+            name = fallback;
         }
-    } else {
-        tableBRecord *prec = (tableBRecord *)ri.prec;
-        ColB cols[8];
-        getColsB(prec, cols);
-        for (epicsUInt32 i = 0; i < prec->numcols; i++) {
-            const char *name = cols[i].name;
-            if (!name || !name[0]) {
-                snprintf(fallback, sizeof(fallback), "col%u", i);
-                name = fallback;
-            }
-            const char *label = cols[i].label;
-            if (!label || !label[0]) label = name;
-            builder.add_column(ftypeToTC(cols[i].ftvl), name, label);
-        }
+        const char *label = cols[i].label;
+        if (!label || !label[0]) label = name;
+        builder.add_column(ftypeToTC(cols[i].type), name, label);
     }
     return builder.create();
 }
@@ -301,15 +266,11 @@ TableSource::TableSource()
     DBENTRY dbe;
     dbInitEntry(pdbbase, &dbe);
 
-    const char *rtypes[] = {"tableA", "tableB", nullptr};
-    for (int ti = 0; rtypes[ti]; ti++) {
-        const char *rtype = rtypes[ti];
-        if (dbFindRecordType(&dbe, rtype) != 0)
-            continue;
+    if (dbFindRecordType(&dbe, "table") == 0) {
         for (long s = dbFirstRecord(&dbe); !s; s = dbNextRecord(&dbe)) {
             const char *rname = dbGetRecordName(&dbe);
             dbCommon *prec = (dbCommon *)dbe.precnode->precord;
-            records_[rname] = RecInfo{rtype, prec};
+            records_[rname] = RecInfo{prec};
             names->insert(rname);
         }
     }
@@ -380,10 +341,7 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
             try {
                 {
                     RecLock lk(ri.prec);
-                    if (std::strcmp(ri.type, "tableA") == 0)
-                        putValueA((tableARecord *)ri.prec, val);
-                    else
-                        putValueB((tableBRecord *)ri.prec, val);
+                    putValueTable((tableRecord *)ri.prec, val);
                     dbProcess(ri.prec);
                 }
                 put->reply();
@@ -404,10 +362,8 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
             ctx->evtCtx   = evtCtx;
             ctx->ctrl     = sub->connect(proto);
 
-            /* Open a dbChannel to subscribe for events.
-               tableB has no VAL field; use COL00VAL as the trigger instead. */
-            std::string chname = ri.prec->name;
-            chname += (std::strcmp(ri.type, "tableB") == 0) ? ".COL00VAL" : ".VAL";
+            /* Open a dbChannel on COL00VAL to subscribe for value-change events. */
+            std::string chname = std::string(ri.prec->name) + ".COL00VAL";
             dbChannel *pChan = dbChannelCreate(chname.c_str());
             if (!pChan)
                 pChan = dbChannelCreate(ri.prec->name);
@@ -426,7 +382,7 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
                     db_event_enable(ctx->evtSub);
                     /* Initial snapshot includes labels so the client's
                        cache_sync prototype is seeded; subsequent posts
-                       via eventCallback omit them (cache_sync supplies them). */
+                       via eventCallback omit them. */
                     try {
                         pvxs::Value v;
                         {

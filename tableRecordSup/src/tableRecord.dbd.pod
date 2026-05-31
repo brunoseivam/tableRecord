@@ -1,0 +1,632 @@
+=title Table Record (table)
+
+The table record stores a multi-column table using per-column field bundles
+(analogous to the aSub record's A..U input fields). Each column has its own
+NAME, LABEL, TYPE, INP, VAL, and CHGD fields. qsrv publishes this record as
+an NTTable.
+
+=recordtype table
+
+=cut
+
+recordtype(table) {
+    include "dbCommon.dbd"
+
+    %
+    %/* Device Support Entry Table */
+    %struct tableRecord;
+    %typedef struct {
+    %    dset common;
+    %    long (*read_table)(struct tableRecord *prec);
+    %} tabledset;
+    %#define HAS_tabledset
+    %
+
+    field(NUMCOLS, DBF_ULONG) {
+        prompt("Number of active columns (set by device support)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+    field(MAXROWS, DBF_ULONG) {
+        prompt("Max number of rows per column")
+        special(SPC_NOMOD)
+        interest(1)
+        initial("16")
+    }
+    field(NUMROWS, DBF_ULONG) {
+        prompt("Number of valid rows (all columns)")
+        interest(1)
+    }
+
+    field(COL00NAME, DBF_STRING) {
+        prompt("Column 0 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL00LABEL, DBF_STRING) {
+        prompt("Column 0 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL00TYPE, DBF_MENU) {
+        prompt("Column 0 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL00INP, DBF_INLINK) {
+        prompt("Column 0 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL00VAL, DBF_NOACCESS) {
+        prompt("Column 0 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col00val")
+        interest(2)
+    }
+    field(COL00CHGD, DBF_UCHAR) {
+        prompt("Column 0 changed flag")
+        interest(2)
+    }
+
+    field(COL01NAME, DBF_STRING) {
+        prompt("Column 1 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL01LABEL, DBF_STRING) {
+        prompt("Column 1 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL01TYPE, DBF_MENU) {
+        prompt("Column 1 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL01INP, DBF_INLINK) {
+        prompt("Column 1 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL01VAL, DBF_NOACCESS) {
+        prompt("Column 1 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col01val")
+        interest(2)
+    }
+    field(COL01CHGD, DBF_UCHAR) {
+        prompt("Column 1 changed flag")
+        interest(2)
+    }
+
+    field(COL02NAME, DBF_STRING) {
+        prompt("Column 2 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL02LABEL, DBF_STRING) {
+        prompt("Column 2 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL02TYPE, DBF_MENU) {
+        prompt("Column 2 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL02INP, DBF_INLINK) {
+        prompt("Column 2 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL02VAL, DBF_NOACCESS) {
+        prompt("Column 2 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col02val")
+        interest(2)
+    }
+    field(COL02CHGD, DBF_UCHAR) {
+        prompt("Column 2 changed flag")
+        interest(2)
+    }
+
+    field(COL03NAME, DBF_STRING) {
+        prompt("Column 3 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL03LABEL, DBF_STRING) {
+        prompt("Column 3 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL03TYPE, DBF_MENU) {
+        prompt("Column 3 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL03INP, DBF_INLINK) {
+        prompt("Column 3 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL03VAL, DBF_NOACCESS) {
+        prompt("Column 3 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col03val")
+        interest(2)
+    }
+    field(COL03CHGD, DBF_UCHAR) {
+        prompt("Column 3 changed flag")
+        interest(2)
+    }
+
+    field(COL04NAME, DBF_STRING) {
+        prompt("Column 4 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL04LABEL, DBF_STRING) {
+        prompt("Column 4 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL04TYPE, DBF_MENU) {
+        prompt("Column 4 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL04INP, DBF_INLINK) {
+        prompt("Column 4 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL04VAL, DBF_NOACCESS) {
+        prompt("Column 4 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col04val")
+        interest(2)
+    }
+    field(COL04CHGD, DBF_UCHAR) {
+        prompt("Column 4 changed flag")
+        interest(2)
+    }
+
+    field(COL05NAME, DBF_STRING) {
+        prompt("Column 5 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL05LABEL, DBF_STRING) {
+        prompt("Column 5 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL05TYPE, DBF_MENU) {
+        prompt("Column 5 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL05INP, DBF_INLINK) {
+        prompt("Column 5 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL05VAL, DBF_NOACCESS) {
+        prompt("Column 5 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col05val")
+        interest(2)
+    }
+    field(COL05CHGD, DBF_UCHAR) {
+        prompt("Column 5 changed flag")
+        interest(2)
+    }
+
+    field(COL06NAME, DBF_STRING) {
+        prompt("Column 6 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL06LABEL, DBF_STRING) {
+        prompt("Column 6 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL06TYPE, DBF_MENU) {
+        prompt("Column 6 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL06INP, DBF_INLINK) {
+        prompt("Column 6 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL06VAL, DBF_NOACCESS) {
+        prompt("Column 6 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col06val")
+        interest(2)
+    }
+    field(COL06CHGD, DBF_UCHAR) {
+        prompt("Column 6 changed flag")
+        interest(2)
+    }
+
+    field(COL07NAME, DBF_STRING) {
+        prompt("Column 7 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL07LABEL, DBF_STRING) {
+        prompt("Column 7 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL07TYPE, DBF_MENU) {
+        prompt("Column 7 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL07INP, DBF_INLINK) {
+        prompt("Column 7 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL07VAL, DBF_NOACCESS) {
+        prompt("Column 7 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col07val")
+        interest(2)
+    }
+    field(COL07CHGD, DBF_UCHAR) {
+        prompt("Column 7 changed flag")
+        interest(2)
+    }
+
+    field(COL08NAME, DBF_STRING) {
+        prompt("Column 8 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL08LABEL, DBF_STRING) {
+        prompt("Column 8 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL08TYPE, DBF_MENU) {
+        prompt("Column 8 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL08INP, DBF_INLINK) {
+        prompt("Column 8 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL08VAL, DBF_NOACCESS) {
+        prompt("Column 8 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col08val")
+        interest(2)
+    }
+    field(COL08CHGD, DBF_UCHAR) {
+        prompt("Column 8 changed flag")
+        interest(2)
+    }
+
+    field(COL09NAME, DBF_STRING) {
+        prompt("Column 9 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL09LABEL, DBF_STRING) {
+        prompt("Column 9 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL09TYPE, DBF_MENU) {
+        prompt("Column 9 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL09INP, DBF_INLINK) {
+        prompt("Column 9 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL09VAL, DBF_NOACCESS) {
+        prompt("Column 9 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col09val")
+        interest(2)
+    }
+    field(COL09CHGD, DBF_UCHAR) {
+        prompt("Column 9 changed flag")
+        interest(2)
+    }
+
+    field(COL10NAME, DBF_STRING) {
+        prompt("Column 10 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL10LABEL, DBF_STRING) {
+        prompt("Column 10 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL10TYPE, DBF_MENU) {
+        prompt("Column 10 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL10INP, DBF_INLINK) {
+        prompt("Column 10 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL10VAL, DBF_NOACCESS) {
+        prompt("Column 10 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col10val")
+        interest(2)
+    }
+    field(COL10CHGD, DBF_UCHAR) {
+        prompt("Column 10 changed flag")
+        interest(2)
+    }
+
+    field(COL11NAME, DBF_STRING) {
+        prompt("Column 11 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL11LABEL, DBF_STRING) {
+        prompt("Column 11 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL11TYPE, DBF_MENU) {
+        prompt("Column 11 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL11INP, DBF_INLINK) {
+        prompt("Column 11 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL11VAL, DBF_NOACCESS) {
+        prompt("Column 11 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col11val")
+        interest(2)
+    }
+    field(COL11CHGD, DBF_UCHAR) {
+        prompt("Column 11 changed flag")
+        interest(2)
+    }
+
+    field(COL12NAME, DBF_STRING) {
+        prompt("Column 12 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL12LABEL, DBF_STRING) {
+        prompt("Column 12 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL12TYPE, DBF_MENU) {
+        prompt("Column 12 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL12INP, DBF_INLINK) {
+        prompt("Column 12 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL12VAL, DBF_NOACCESS) {
+        prompt("Column 12 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col12val")
+        interest(2)
+    }
+    field(COL12CHGD, DBF_UCHAR) {
+        prompt("Column 12 changed flag")
+        interest(2)
+    }
+
+    field(COL13NAME, DBF_STRING) {
+        prompt("Column 13 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL13LABEL, DBF_STRING) {
+        prompt("Column 13 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL13TYPE, DBF_MENU) {
+        prompt("Column 13 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL13INP, DBF_INLINK) {
+        prompt("Column 13 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL13VAL, DBF_NOACCESS) {
+        prompt("Column 13 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col13val")
+        interest(2)
+    }
+    field(COL13CHGD, DBF_UCHAR) {
+        prompt("Column 13 changed flag")
+        interest(2)
+    }
+
+    field(COL14NAME, DBF_STRING) {
+        prompt("Column 14 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL14LABEL, DBF_STRING) {
+        prompt("Column 14 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL14TYPE, DBF_MENU) {
+        prompt("Column 14 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL14INP, DBF_INLINK) {
+        prompt("Column 14 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL14VAL, DBF_NOACCESS) {
+        prompt("Column 14 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col14val")
+        interest(2)
+    }
+    field(COL14CHGD, DBF_UCHAR) {
+        prompt("Column 14 changed flag")
+        interest(2)
+    }
+
+    field(COL15NAME, DBF_STRING) {
+        prompt("Column 15 name")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL15LABEL, DBF_STRING) {
+        prompt("Column 15 label")
+        promptgroup("41 - Input")
+        interest(1)
+        size(40)
+    }
+    field(COL15TYPE, DBF_MENU) {
+        prompt("Column 15 field type")
+        promptgroup("41 - Input")
+        special(SPC_NOMOD)
+        interest(1)
+        menu(menuFtype)
+        initial("DOUBLE")
+    }
+    field(COL15INP, DBF_INLINK) {
+        prompt("Column 15 input link")
+        promptgroup("41 - Input")
+        interest(1)
+    }
+    field(COL15VAL, DBF_NOACCESS) {
+        prompt("Column 15 data")
+        special(SPC_DBADDR)
+        pp(TRUE)
+        extra("void *col15val")
+        interest(2)
+    }
+    field(COL15CHGD, DBF_UCHAR) {
+        prompt("Column 15 changed flag")
+        interest(2)
+    }
+}

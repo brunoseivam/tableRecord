@@ -8,35 +8,49 @@
 #include "devSup.h"
 #include "epicsStdio.h"
 #include "epicsExport.h"
-#include "tableBRecord.h"
+#include "tableRecord.h"
 
 /*
- * Random Sim device support for tableB.
+ * Random Sim device support for the table record.
  *
  * sim_init_record sets NUMCOLS and fills in default names/labels for any
  * column left unset in the .db file.  read_table fills every active column
- * with MAXROWS random elements typed by COLiFTVL and sets NUMROWS.
+ * with MAXROWS random elements typed by COLiTYPE and sets NUMROWS.
  */
 
-#define TABLB_SIM_NCOL 4
+#define TABLE_SIM_NCOL 4
 
-static const char *SIM_NAMES[]  = {"x", "y", "label", "flag", "c4", "c5", "c6", "c7"};
-static const char *SIM_LABELS[] = {"X axis", "Y axis", "Label", "Flag", "C4", "C5", "C6", "C7"};
+static const char *SIM_NAMES[] = {
+    "x",   "y",   "label", "flag",
+    "c4",  "c5",  "c6",    "c7",
+    "c8",  "c9",  "c10",   "c11",
+    "c12", "c13", "c14",   "c15"
+};
+static const char *SIM_LABELS[] = {
+    "X axis", "Y axis", "Label", "Flag",
+    "C4",     "C5",     "C6",   "C7",
+    "C8",     "C9",     "C10",  "C11",
+    "C12",    "C13",    "C14",  "C15"
+};
 
 static long sim_init_record(struct dbCommon *pcommon)
 {
-    tableBRecord *prec = (tableBRecord *)pcommon;
-    char *names[8]  = {
+    tableRecord *prec = (tableRecord *)pcommon;
+    char *names[16] = {
         prec->col00name, prec->col01name, prec->col02name, prec->col03name,
-        prec->col04name, prec->col05name, prec->col06name, prec->col07name
+        prec->col04name, prec->col05name, prec->col06name, prec->col07name,
+        prec->col08name, prec->col09name, prec->col10name, prec->col11name,
+        prec->col12name, prec->col13name, prec->col14name, prec->col15name
     };
-    char *labels[8] = {
+    char *labels[16] = {
         prec->col00label, prec->col01label, prec->col02label, prec->col03label,
-        prec->col04label, prec->col05label, prec->col06label, prec->col07label
+        prec->col04label, prec->col05label, prec->col06label, prec->col07label,
+        prec->col08label, prec->col09label, prec->col10label, prec->col11label,
+        prec->col12label, prec->col13label, prec->col14label, prec->col15label
     };
     epicsUInt32 i;
-    prec->numcols = TABLB_SIM_NCOL;
-    for (i = 0; i < TABLB_SIM_NCOL; i++) {
+    prec->numcols = TABLE_SIM_NCOL;
+    for (i = 0; i < TABLE_SIM_NCOL; i++) {
         if (!names[i][0])
             strncpy(names[i],  SIM_NAMES[i],  MAX_STRING_SIZE - 1);
         if (!labels[i][0])
@@ -45,27 +59,29 @@ static long sim_init_record(struct dbCommon *pcommon)
     return 0;
 }
 
-typedef struct { epicsEnum16 *ftvl; void **val; epicsUInt8 *chgd; } ColB;
+typedef struct { epicsEnum16 *type; void **val; epicsUInt8 *chgd; } Col;
 
-#define COLB(n) { &prec->col##n##ftvl, &prec->col##n##val, &prec->col##n##chgd }
+#define COL(n) { &prec->col##n##type, &prec->col##n##val, &prec->col##n##chgd }
 
-static long read_table(tableBRecord *prec)
+static long read_table(tableRecord *prec)
 {
-    ColB cols[] = {
-        COLB(00), COLB(01), COLB(02), COLB(03),
-        COLB(04), COLB(05), COLB(06), COLB(07)
+    Col cols[] = {
+        COL(00), COL(01), COL(02), COL(03),
+        COL(04), COL(05), COL(06), COL(07),
+        COL(08), COL(09), COL(10), COL(11),
+        COL(12), COL(13), COL(14), COL(15)
     };
     epicsUInt32 col, row;
 
-    for (col = 0; col < prec->numcols && col < 8; col++) {
-        epicsEnum16 ftvl = *cols[col].ftvl;
+    for (col = 0; col < prec->numcols && col < 16; col++) {
+        epicsEnum16 type = *cols[col].type;
         void *buf        = *cols[col].val;
 
         if (!buf) continue;
 
         for (row = 0; row < prec->maxrows; row++) {
             long rval = random();
-            switch (ftvl) {
+            switch (type) {
             case DBF_STRING: {
                 char *s = (char *)buf + row * MAX_STRING_SIZE;
                 epicsSnprintf(s, MAX_STRING_SIZE, "row_%u", row);
@@ -101,10 +117,10 @@ static long read_table(tableBRecord *prec)
     prec->numrows = prec->maxrows;
     return 0;
 }
-#undef COLB
+#undef COL
 
-tableBdset devTableBSim = {
+tabledset devTableSim = {
     {5, NULL, NULL, sim_init_record, NULL},
     read_table
 };
-epicsExportAddress(dset, devTableBSim);
+epicsExportAddress(dset, devTableSim);

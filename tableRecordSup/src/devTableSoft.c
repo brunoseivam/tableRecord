@@ -7,10 +7,10 @@
 #include "dbLink.h"
 #include "devSup.h"
 #include "epicsExport.h"
-#include "tableBRecord.h"
+#include "tableRecord.h"
 
 /*
- * Soft Channel device support for tableB.
+ * Soft Channel device support for the table record.
  *
  * soft_init_record derives NUMCOLS by counting the first unbroken streak of
  * non-empty COLxxNAME fields.  read_table fetches each active column via its
@@ -19,38 +19,42 @@
 
 static long soft_init_record(struct dbCommon *pcommon)
 {
-    tableBRecord *prec = (tableBRecord *)pcommon;
-    char *names[8] = {
+    tableRecord *prec = (tableRecord *)pcommon;
+    char *names[16] = {
         prec->col00name, prec->col01name, prec->col02name, prec->col03name,
-        prec->col04name, prec->col05name, prec->col06name, prec->col07name
+        prec->col04name, prec->col05name, prec->col06name, prec->col07name,
+        prec->col08name, prec->col09name, prec->col10name, prec->col11name,
+        prec->col12name, prec->col13name, prec->col14name, prec->col15name
     };
     epicsUInt32 n = 0;
-    while (n < 8 && names[n][0] != '\0') n++;
+    while (n < 16 && names[n][0] != '\0') n++;
     prec->numcols = n;
     return 0;
 }
 
-typedef struct { DBLINK *inp; epicsEnum16 *ftvl; void **val; epicsUInt8 *chgd; } ColB;
+typedef struct { DBLINK *inp; epicsEnum16 *type; void **val; epicsUInt8 *chgd; } Col;
 
-#define COLB(n) { &prec->col##n##inp, &prec->col##n##ftvl, \
+#define COL(n) { &prec->col##n##inp, &prec->col##n##type, \
                   &prec->col##n##val, &prec->col##n##chgd }
 
-static long read_table(tableBRecord *prec)
+static long read_table(tableRecord *prec)
 {
-    ColB cols[] = {
-        COLB(00), COLB(01), COLB(02), COLB(03),
-        COLB(04), COLB(05), COLB(06), COLB(07)
+    Col cols[] = {
+        COL(00), COL(01), COL(02), COL(03),
+        COL(04), COL(05), COL(06), COL(07),
+        COL(08), COL(09), COL(10), COL(11),
+        COL(12), COL(13), COL(14), COL(15)
     };
     epicsUInt32 i;
     epicsUInt32 numrows = 0;
 
-    for (i = 0; i < prec->numcols && i < 8; i++) {
+    for (i = 0; i < prec->numcols && i < 16; i++) {
         long nReq = (long)prec->maxrows;
-        /* Constant links are loaded once at init time (tableBRecord.c).
+        /* Constant links are loaded once at init time (tableRecord.c).
            Only re-read non-constant (CA/DB) links here, matching devWfSoft. */
         if (dbLinkIsConstant(cols[i].inp)) continue;
         if (!*cols[i].val) continue;
-        if (dbGetLink(cols[i].inp, *cols[i].ftvl, *cols[i].val, 0, &nReq) == 0) {
+        if (dbGetLink(cols[i].inp, *cols[i].type, *cols[i].val, 0, &nReq) == 0) {
             *cols[i].chgd = 1;
             if ((epicsUInt32)nReq > numrows)
                 numrows = (epicsUInt32)nReq;
@@ -59,10 +63,10 @@ static long read_table(tableBRecord *prec)
     prec->numrows = numrows;
     return 0;
 }
-#undef COLB
+#undef COL
 
-tableBdset devTableBSoft = {
+tabledset devTableSoft = {
     {5, NULL, NULL, soft_init_record, NULL},
     read_table
 };
-epicsExportAddress(dset, devTableBSoft);
+epicsExportAddress(dset, devTableSoft);

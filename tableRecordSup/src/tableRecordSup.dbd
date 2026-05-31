@@ -1,10 +1,6 @@
 include "pvxsIoc.dbd"
-include "tableARecord.dbd"
-device(tableA, CONSTANT, devTableASoft, "Soft Channel")
-device(tableA, CONSTANT, devTableASim,  "Random Sim")
-
-include "tableBRecord.dbd"
-device(tableB, CONSTANT, devTableBSoft, "Soft Channel")
-device(tableB, CONSTANT, devTableBSim,  "Random Sim")
+include "tableRecord.dbd"
+device(table, CONSTANT, devTableSoft, "Soft Channel")
+device(table, CONSTANT, devTableSim,  "Random Sim")
 
 registrar(registerTableSourceCmds)

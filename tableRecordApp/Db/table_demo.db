@@ -1,0 +1,18 @@
+record(table, "TST:Sim") {
+    field(DTYP,        "Random Sim")
+    field(SCAN,        "1 second")
+    field(MAXROWS,     "16")
+    field(COL00NAME,   "x")      field(COL00LABEL,  "X axis")  field(COL00TYPE,  "DOUBLE")
+    field(COL01NAME,   "y")      field(COL01LABEL,  "Y axis")  field(COL01TYPE,  "DOUBLE")
+    field(COL02NAME,   "label")  field(COL02LABEL,  "Label")   field(COL02TYPE,  "STRING")
+    field(COL03NAME,   "flag")   field(COL03LABEL,  "Flag")    field(COL03TYPE,  "UCHAR")
+}
+
+record(table, "TST:Soft") {
+    field(DTYP,        "Soft Channel")
+    field(COL00NAME,   "x")  field(COL00LABEL,  "X axis")  field(COL00TYPE,  "DOUBLE")
+    field(COL01NAME,   "y")  field(COL01LABEL,  "Y axis")  field(COL01TYPE,  "DOUBLE")
+    # Constant links: loaded once at iocInit — no SCAN needed.
+    field(COL00INP,    "[1.1, 2.2, 3.3, 4.4]")
+    field(COL01INP,    "[10.0, 20.0, 30.0, 40.0]")
+}
