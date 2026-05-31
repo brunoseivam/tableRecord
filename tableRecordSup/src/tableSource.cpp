@@ -167,17 +167,19 @@ static void snapshotB(tableBRecord *prec, pvxs::Value &v)
 }
 
 /* Build a snapshot Value from the current record state.
-   withLabels=true: start from proto.clone() so the marked labels field is
-   included in the transmission (needed for the first send to each client).
-   withLabels=false: start from proto.cloneEmpty() — labels are omitted and
-   the client's cache_sync mechanism re-populates them from the prototype it
-   accumulated on the first send. */
+   withMeta=true: include static metadata (labels, descriptor) that only needs
+   to be sent once per client — on the initial monitor post and every GET.
+   The client's cache_sync mechanism re-populates these from its accumulated
+   prototype for all subsequent monitor updates.
+   timeStamp is included in every snapshot regardless of withMeta. */
 static pvxs::Value snapshot(const RecInfo &ri, const pvxs::Value &proto,
-                             bool withLabels = false)
+                             bool withMeta = false)
 {
-    pvxs::Value v = withLabels ? proto.clone() : proto.cloneEmpty();
+    pvxs::Value v = withMeta ? proto.clone() : proto.cloneEmpty();
     v["timeStamp.secondsPastEpoch"] = (int64_t)ri.prec->time.secPastEpoch;
     v["timeStamp.nanoseconds"]      = (int32_t)ri.prec->time.nsec;
+    if (withMeta)
+        v["descriptor"] = std::string(ri.prec->desc);
     if (std::strcmp(ri.type, "tableA") == 0)
         snapshotA((tableARecord *)ri.prec, v);
     else
@@ -287,9 +289,7 @@ pvxs::Value TableSource::makeProto(const RecInfo &ri) const
             builder.add_column(ftypeToTC(cols[i].ftvl), name, label);
         }
     }
-    pvxs::Value proto = builder.create();
-    proto["descriptor"] = std::string(ri.prec->desc);
-    return proto;
+    return builder.create();
 }
 
 /* ------------------------------------------------------------------ */
