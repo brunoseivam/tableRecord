@@ -69,6 +69,21 @@ static epicsEnum16 colType(tableRecord *prec, int i)
     return (&prec->col00type)[i];
 }
 
+static DBLINK *colOptInpAddr(tableRecord *prec, int i)
+{
+    return &prec->colopt00inp + i;
+}
+
+static void **colOptValAddr(tableRecord *prec, int i)
+{
+    return &prec->colopt00val + i;
+}
+
+static epicsEnum16 colOptType(tableRecord *prec, int i)
+{
+    return (&prec->colopt00type)[i];
+}
+
 static long init_record(struct dbCommon *pcommon, int pass)
 {
     tableRecord *prec = (tableRecord *)pcommon;
@@ -122,6 +137,29 @@ static long init_record(struct dbCommon *pcommon, int pass)
             prec->udf = FALSE;
         }
     }
+
+    if (prec->numoptcols > TABLE_MAX_COLS)
+        prec->numoptcols = TABLE_MAX_COLS;
+
+    for (i = 0; i < prec->numoptcols; i++) {
+        epicsEnum16 type = colOptType(prec, i);
+        if (type > DBF_ENUM)
+            type = DBF_DOUBLE;
+        *colOptValAddr(prec, i) = callocMustSucceed(prec->maxrows,
+                                                    dbValueSize(type),
+                                                    "table: optional column data");
+    }
+
+    for (i = 0; i < prec->numoptcols; i++) {
+        DBLINK *inp = colOptInpAddr(prec, i);
+        void *buf = *colOptValAddr(prec, i);
+        long nReq = prec->maxrows;
+        if (inp && buf && !dbLoadLinkArray(inp, colOptType(prec, i), buf, &nReq)) {
+            if ((epicsUInt32)nReq > prec->numrows)
+                prec->numrows = (epicsUInt32)nReq;
+            prec->udf = FALSE;
+        }
+    }
     return 0;
 }
 
@@ -166,6 +204,15 @@ static long cvt_dbaddr(DBADDR *paddr)
         paddr->field_size     = dbValueSize(type);
         paddr->dbr_field_type = type;
         paddr->no_elements    = prec->maxrows;
+    } else if (fi >= tableRecordCOLOPT00VAL && fi <= tableRecordCOLOPT0FVAL) {
+        int i = fi - tableRecordCOLOPT00VAL;
+        epicsEnum16 type = colOptType(prec, i);
+        void **vp = colOptValAddr(prec, i);
+        paddr->pfield         = vp ? *vp : NULL;
+        paddr->field_type     = type;
+        paddr->field_size     = dbValueSize(type);
+        paddr->dbr_field_type = type;
+        paddr->no_elements    = prec->maxrows;
     }
     return 0;
 }
@@ -177,6 +224,8 @@ static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
 
     *offset = 0;
     if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL)
+        *no_elements = prec->numrows;
+    else if (fi >= tableRecordCOLOPT00VAL && fi <= tableRecordCOLOPT0FVAL)
         *no_elements = prec->numrows;
     else
         *no_elements = 0;
@@ -192,6 +241,10 @@ static long put_array_info(DBADDR *paddr, long nNew)
         epicsUInt32 n = (epicsUInt32)nNew;
         if (n > prec->maxrows) n = prec->maxrows;
         prec->numrows = n;
+    } else if (fi >= tableRecordCOLOPT00VAL && fi <= tableRecordCOLOPT0FVAL) {
+        epicsUInt32 n = (epicsUInt32)nNew;
+        if (n > prec->maxrows) n = prec->maxrows;
+        if (n > prec->numrows) prec->numrows = n;
     }
     return 0;
 }

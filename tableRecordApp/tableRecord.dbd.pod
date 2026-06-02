@@ -1083,4 +1083,79 @@ recordtype(table) {
         extra("void *colopt0fval")
         interest(2)
     }
+
+    field(NUMOPTCOLS, DBF_ULONG) {
+        prompt("Number of active optional columns (set by device support)")
+        special(SPC_NOMOD)
+        interest(1)
+    }
+
+    # ----------------------------------------------------------------
+    # Optional column changed flags — COLOPT00CHGD .. COLOPT0FCHGD
+    # ----------------------------------------------------------------
+
+    field(COLOPT00CHGD, DBF_UCHAR) {
+        prompt("Optional column 0 changed flag")
+        interest(2)
+    }
+    field(COLOPT01CHGD, DBF_UCHAR) {
+        prompt("Optional column 1 changed flag")
+        interest(2)
+    }
+    field(COLOPT02CHGD, DBF_UCHAR) {
+        prompt("Optional column 2 changed flag")
+        interest(2)
+    }
+    field(COLOPT03CHGD, DBF_UCHAR) {
+        prompt("Optional column 3 changed flag")
+        interest(2)
+    }
+    field(COLOPT04CHGD, DBF_UCHAR) {
+        prompt("Optional column 4 changed flag")
+        interest(2)
+    }
+    field(COLOPT05CHGD, DBF_UCHAR) {
+        prompt("Optional column 5 changed flag")
+        interest(2)
+    }
+    field(COLOPT06CHGD, DBF_UCHAR) {
+        prompt("Optional column 6 changed flag")
+        interest(2)
+    }
+    field(COLOPT07CHGD, DBF_UCHAR) {
+        prompt("Optional column 7 changed flag")
+        interest(2)
+    }
+    field(COLOPT08CHGD, DBF_UCHAR) {
+        prompt("Optional column 8 changed flag")
+        interest(2)
+    }
+    field(COLOPT09CHGD, DBF_UCHAR) {
+        prompt("Optional column 9 changed flag")
+        interest(2)
+    }
+    field(COLOPT0ACHGD, DBF_UCHAR) {
+        prompt("Optional column 10 changed flag")
+        interest(2)
+    }
+    field(COLOPT0BCHGD, DBF_UCHAR) {
+        prompt("Optional column 11 changed flag")
+        interest(2)
+    }
+    field(COLOPT0CCHGD, DBF_UCHAR) {
+        prompt("Optional column 12 changed flag")
+        interest(2)
+    }
+    field(COLOPT0DCHGD, DBF_UCHAR) {
+        prompt("Optional column 13 changed flag")
+        interest(2)
+    }
+    field(COLOPT0ECHGD, DBF_UCHAR) {
+        prompt("Optional column 14 changed flag")
+        interest(2)
+    }
+    field(COLOPT0FCHGD, DBF_UCHAR) {
+        prompt("Optional column 15 changed flag")
+        interest(2)
+    }
 }

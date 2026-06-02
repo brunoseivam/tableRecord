@@ -1,6 +1,9 @@
 #include <cstring>
 #include <stdexcept>
 #include <memory>
+#include <string>
+#include <vector>
+#include <map>
 
 #include <dbAccess.h>
 #include <dbChannel.h>
@@ -149,6 +152,32 @@ static void getCols(tableRecord *prec, Col cols[16])
     cols[15] = {prec->col0fname, prec->col0flabel, prec->col0ftype, prec->col0fval};
 }
 
+struct OptCol {
+    const char  *name;
+    epicsEnum16  type;
+    void        *val;
+};
+
+static void getOptCols(tableRecord *prec, OptCol cols[16])
+{
+    cols[ 0] = {prec->colopt00name, prec->colopt00type, prec->colopt00val};
+    cols[ 1] = {prec->colopt01name, prec->colopt01type, prec->colopt01val};
+    cols[ 2] = {prec->colopt02name, prec->colopt02type, prec->colopt02val};
+    cols[ 3] = {prec->colopt03name, prec->colopt03type, prec->colopt03val};
+    cols[ 4] = {prec->colopt04name, prec->colopt04type, prec->colopt04val};
+    cols[ 5] = {prec->colopt05name, prec->colopt05type, prec->colopt05val};
+    cols[ 6] = {prec->colopt06name, prec->colopt06type, prec->colopt06val};
+    cols[ 7] = {prec->colopt07name, prec->colopt07type, prec->colopt07val};
+    cols[ 8] = {prec->colopt08name, prec->colopt08type, prec->colopt08val};
+    cols[ 9] = {prec->colopt09name, prec->colopt09type, prec->colopt09val};
+    cols[10] = {prec->colopt0aname, prec->colopt0atype, prec->colopt0aval};
+    cols[11] = {prec->colopt0bname, prec->colopt0btype, prec->colopt0bval};
+    cols[12] = {prec->colopt0cname, prec->colopt0ctype, prec->colopt0cval};
+    cols[13] = {prec->colopt0dname, prec->colopt0dtype, prec->colopt0dval};
+    cols[14] = {prec->colopt0ename, prec->colopt0etype, prec->colopt0eval};
+    cols[15] = {prec->colopt0fname, prec->colopt0ftype, prec->colopt0fval};
+}
+
 /* Snapshot a table record into a Value clone (caller holds lock) */
 static void snapshotTable(tableRecord *prec, pvxs::Value &v)
 {
@@ -157,6 +186,15 @@ static void snapshotTable(tableRecord *prec, pvxs::Value &v)
     for (epicsUInt32 i = 0; i < prec->numcols; i++) {
         auto col = v["value"][cols[i].name];
         fillCol(col, cols[i].type, cols[i].val, prec->numrows);
+    }
+
+    OptCol optcols[16];
+    getOptCols(prec, optcols);
+    for (epicsUInt32 i = 0; i < prec->numoptcols; i++) {
+        if (!optcols[i].name || !optcols[i].name[0]) continue;
+        /* pvxs uses '.' as path separator, so "meta.field" accesses v["meta"]["field"] */
+        auto col = v[optcols[i].name];
+        fillCol(col, optcols[i].type, optcols[i].val, prec->numrows);
     }
 }
 
@@ -254,6 +292,58 @@ pvxs::Value TableSource::makeProto(const RecInfo &ri) const
         if (!label || !label[0]) label = name;
         builder.add_column(ftypeToTC(cols[i].type), name, label);
     }
+
+    /* Extend the NTTable TypeDef with optional top-level fields.
+       Names containing '.' (e.g. "meta.field") are grouped into a
+       nested Struct named by the prefix; order of first occurrence is kept. */
+    OptCol optcols[16];
+    getOptCols(prec, optcols);
+
+    /* ordered list of group keys (empty key = top-level scalar fields) */
+    std::vector<std::string> groupOrder;
+    /* prefix → list of array Members within that group */
+    std::map<std::string, std::vector<pvxs::Member>> groups;
+
+    for (epicsUInt32 i = 0; i < prec->numoptcols; i++) {
+        const char *fullname = optcols[i].name;
+        if (!fullname || !fullname[0]) continue;
+
+        std::string fname(fullname);
+        auto dot = fname.find('.');
+        std::string prefix, fieldname;
+        if (dot == std::string::npos) {
+            prefix    = "";
+            fieldname = fname;
+        } else {
+            prefix    = fname.substr(0, dot);
+            fieldname = fname.substr(dot + 1);
+        }
+
+        if (groups.find(prefix) == groups.end()) {
+            groupOrder.push_back(prefix);
+            groups[prefix] = {};
+        }
+        pvxs::TypeCode arrCode = ftypeToTC(optcols[i].type).arrayOf();
+        groups[prefix].emplace_back(arrCode, fieldname);
+    }
+
+    if (!groupOrder.empty()) {
+        std::vector<pvxs::Member> extras;
+        for (const auto &key : groupOrder) {
+            auto &members = groups[key];
+            if (key.empty()) {
+                /* top-level scalar-array fields */
+                for (auto &m : members)
+                    extras.push_back(m);
+            } else {
+                extras.emplace_back(pvxs::TypeCode::Struct, key, members);
+            }
+        }
+        auto def = builder.build();
+        def += extras;
+        return def.create();
+    }
+
     return builder.create();
 }
 
