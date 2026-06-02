@@ -7,7 +7,8 @@
                 "/home/bmartins/osprey/epics/epics-base/include",
                 "/home/bmartins/osprey/epics/epics-base/include/compiler/gcc",
                 "/home/bmartins/osprey/epics/epics-base/include/os/Linux",
-                "/home/bmartins/osprey/epics/pvxs/include"
+                "/home/bmartins/osprey/epics/pvxs/include",
+                "${workspaceFolder}/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

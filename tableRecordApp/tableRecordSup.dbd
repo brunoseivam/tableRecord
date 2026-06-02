@@ -1,5 +1,5 @@
 include "pvxsIoc.dbd"
-include "tableRecord.dbd"
+include "tableRecordRec.dbd"
 device(table, CONSTANT, devTableSoft, "Soft Channel")
 device(table, CONSTANT, devTableSim,  "Random Sim")
 

@@ -22,8 +22,6 @@
 #include "epicsExport.h"
 
 #define TABLE_MAX_COLS 16
-/* Stride between consecutive COLxxVAL field indices in the generated header */
-#define TABLE_COL_STRIDE (tableRecordCOL01VAL - tableRecordCOL00VAL)
 
 #define report       NULL
 #define initialize   NULL
@@ -52,73 +50,23 @@ rset tableRSET = {
 };
 epicsExportAddress(rset, tableRSET);
 
+/* Pointer-arithmetic helpers — valid because COLxxINP/TYPE/VAL fields are
+   declared in consecutive groups in the DBD, so the struct members are laid
+   out without intervening fields of other types. */
+
 static DBLINK *colInpAddr(tableRecord *prec, int i)
 {
-    switch (i) {
-    case  0: return &prec->col00inp;
-    case  1: return &prec->col01inp;
-    case  2: return &prec->col02inp;
-    case  3: return &prec->col03inp;
-    case  4: return &prec->col04inp;
-    case  5: return &prec->col05inp;
-    case  6: return &prec->col06inp;
-    case  7: return &prec->col07inp;
-    case  8: return &prec->col08inp;
-    case  9: return &prec->col09inp;
-    case 10: return &prec->col0ainp;
-    case 11: return &prec->col0binp;
-    case 12: return &prec->col0cinp;
-    case 13: return &prec->col0dinp;
-    case 14: return &prec->col0einp;
-    case 15: return &prec->col0finp;
-    default: return NULL;
-    }
+    return &prec->col00inp + i;
 }
 
 static void **colValAddr(tableRecord *prec, int i)
 {
-    switch (i) {
-    case  0: return &prec->col00val;
-    case  1: return &prec->col01val;
-    case  2: return &prec->col02val;
-    case  3: return &prec->col03val;
-    case  4: return &prec->col04val;
-    case  5: return &prec->col05val;
-    case  6: return &prec->col06val;
-    case  7: return &prec->col07val;
-    case  8: return &prec->col08val;
-    case  9: return &prec->col09val;
-    case 10: return &prec->col0aval;
-    case 11: return &prec->col0bval;
-    case 12: return &prec->col0cval;
-    case 13: return &prec->col0dval;
-    case 14: return &prec->col0eval;
-    case 15: return &prec->col0fval;
-    default: return NULL;
-    }
+    return &prec->col00val + i;
 }
 
 static epicsEnum16 colType(tableRecord *prec, int i)
 {
-    switch (i) {
-    case  0: return prec->col00type;
-    case  1: return prec->col01type;
-    case  2: return prec->col02type;
-    case  3: return prec->col03type;
-    case  4: return prec->col04type;
-    case  5: return prec->col05type;
-    case  6: return prec->col06type;
-    case  7: return prec->col07type;
-    case  8: return prec->col08type;
-    case  9: return prec->col09type;
-    case 10: return prec->col0atype;
-    case 11: return prec->col0btype;
-    case 12: return prec->col0ctype;
-    case 13: return prec->col0dtype;
-    case 14: return prec->col0etype;
-    case 15: return prec->col0ftype;
-    default: return DBF_UCHAR;
-    }
+    return (&prec->col00type)[i];
 }
 
 static long init_record(struct dbCommon *pcommon, int pass)
@@ -210,7 +158,7 @@ static long cvt_dbaddr(DBADDR *paddr)
     int fi = dbGetFieldIndex(paddr);
 
     if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL) {
-        int i = (fi - tableRecordCOL00VAL) / TABLE_COL_STRIDE;
+        int i = fi - tableRecordCOL00VAL;
         epicsEnum16 type = colType(prec, i);
         void **vp = colValAddr(prec, i);
         paddr->pfield         = vp ? *vp : NULL;

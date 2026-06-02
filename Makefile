@@ -8,6 +8,7 @@ include $(TOP)/configure/CONFIG
 
 # Directories to build, any order
 DIRS += configure
+DIRS += $(wildcard *Rec)
 DIRS += $(wildcard *Sup)
 DIRS += $(wildcard *App)
 DIRS += $(wildcard *Top)
@@ -19,13 +20,17 @@ DIRS += $(wildcard iocBoot)
 $(foreach dir, $(filter-out configure, $(DIRS)), \
     $(eval $(dir)_DEPEND_DIRS += configure))
 
-# Any *App dirs depend on all *Sup dirs
-$(foreach dir, $(filter %App, $(DIRS)), \
-    $(eval $(dir)_DEPEND_DIRS += $(filter %Sup, $(DIRS))))
+# Any *Sup dirs depend on all *Rec dirs
+$(foreach dir, $(filter %Sup, $(DIRS)), \
+    $(eval $(dir)_DEPEND_DIRS += $(filter %Rec, $(DIRS))))
 
-# Any *Top dirs depend on all *Sup and *App dirs
+# Any *App dirs depend on all *Rec and *Sup dirs
+$(foreach dir, $(filter %App, $(DIRS)), \
+    $(eval $(dir)_DEPEND_DIRS += $(filter %Rec %Sup, $(DIRS))))
+
+# Any *Top dirs depend on all *Rec, *Sup, and *App dirs
 $(foreach dir, $(filter %Top, $(DIRS)), \
-    $(eval $(dir)_DEPEND_DIRS += $(filter %Sup %App, $(DIRS))))
+    $(eval $(dir)_DEPEND_DIRS += $(filter %Rec %Sup %App, $(DIRS))))
 
 # iocBoot depends on all *App dirs
 iocBoot_DEPEND_DIRS += $(filter %App,$(DIRS))
