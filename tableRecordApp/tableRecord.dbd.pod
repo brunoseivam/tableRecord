@@ -21,7 +21,11 @@ recordtype(table) {
     %} tabledset;
     %#define HAS_tabledset
     %
-
+    field(INP,DBF_INLINK) {
+        prompt("Input Specification")
+        promptgroup("40 - Input")
+        interest(1)
+    }
     field(NUMCOLS, DBF_ULONG) {
         prompt("Number of active columns (set by device support)")
         special(SPC_NOMOD)
@@ -31,11 +35,11 @@ recordtype(table) {
         prompt("Max number of rows per column")
         special(SPC_NOMOD)
         interest(1)
-        initial("16")
+        initial("1")
     }
     field(NUMROWS, DBF_ULONG) {
         prompt("Number of valid rows (all columns)")
-        interest(1)
+        special(SPC_NOMOD)
     }
 
     # ----------------------------------------------------------------

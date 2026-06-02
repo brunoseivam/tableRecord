@@ -51,7 +51,7 @@ static long read_table(tableRecord *prec)
     for (i = 0; i < prec->numcols && i < 16; i++) {
         long nReq = (long)prec->maxrows;
         /* Constant links are loaded once at init time (tableRecord.c).
-           Only re-read non-constant (CA/DB) links here, matching devWfSoft. */
+           Only re-read non-constant (CA/DB) links here. */
         if (dbLinkIsConstant(cols[i].inp)) continue;
         if (!*cols[i].val) continue;
         if (dbGetLink(cols[i].inp, *cols[i].type, *cols[i].val, 0, &nReq) == 0) {

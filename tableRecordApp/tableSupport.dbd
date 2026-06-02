@@ -1,6 +1,5 @@
 include "pvxsIoc.dbd"
-include "tableRecordRec.dbd"
+include "tableRecord.dbd"
 device(table, CONSTANT, devTableSoft, "Soft Channel")
-device(table, CONSTANT, devTableSim,  "Random Sim")
 
 registrar(registerTableSourceCmds)
