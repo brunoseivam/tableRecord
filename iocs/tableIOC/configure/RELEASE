@@ -25,22 +25,12 @@
 # Build variables that are NOT used in paths should be set in
 # the CONFIG_SITE file.
 
-# Variables and paths to dependent modules:
-#MODULES = /path/to/modules
-#MYMODULE = $(MODULES)/my-module
-
-# If using the sequencer, point SNCSEQ at its top directory:
-#SNCSEQ = $(MODULES)/seq-ver
+TABLE = $(TOP)/../..
+PVXS = /home/bmartins/osprey/epics/pvxs
 
 # EPICS_BASE should appear last so earlier modules can override stuff:
 EPICS_BASE = /home/bmartins/osprey/epics/epics-base
 
-# Set RULES here if you want to use build rules from somewhere
-# other than EPICS_BASE:
-#RULES = $(MODULES)/build-rules
-
-# These lines allow developers to override these RELEASE settings
-# without having to modify this file directly.
 -include $(TOP)/../RELEASE.local
 -include $(TOP)/../RELEASE.$(EPICS_HOST_ARCH).local
 -include $(TOP)/configure/RELEASE.local
