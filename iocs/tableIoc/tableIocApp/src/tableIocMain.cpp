@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: EPICS
 
-/* tableRecordMain.cpp */
+/* tableIocMain.cpp */
 /* Author:  Marty Kraimer Date:    17MAR2000 */
 
 #include <stddef.h>

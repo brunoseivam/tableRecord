@@ -9,40 +9,38 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 #=============================
 
-USR_CFLAGS += -DUSE_TYPED_RSET -DUSE_TYPED_DSET -DDUSE_TYPED_DRVET
-
 #=============================
 # Build the IOC application
 
-PROD_IOC = table
-# table.dbd will be created and installed
-DBD += table.dbd
+PROD_IOC = tableIoc
+# tableIoc.dbd will be created and installed
+DBD += tableIoc.dbd
 
-# table.dbd will be made up from these files:
-table_DBD += base.dbd
-table_DBD += tableRecordSup.dbd
+# tableIoc.dbd will be made up from these files:
+tableIoc_DBD += base.dbd
 
 # Include dbd files from all support applications:
-#table_DBD += xxx.dbd
+#tableIoc_DBD += xxx.dbd
 
 # Add all the support libraries needed by this IOC
-#table_LIBS += xxx
+#tableIoc_LIBS += xxx
 
-# table_registerRecordDeviceDriver.cpp derives from table.dbd
-table_SRCS += table_registerRecordDeviceDriver.cpp
+# tableIoc_registerRecordDeviceDriver.cpp derives from tableIoc.dbd
+tableIoc_SRCS += tableIoc_registerRecordDeviceDriver.cpp
 
 # Build the main IOC entry point on workstation OSs.
-table_SRCS_DEFAULT += tableRecordMain.cpp
-table_SRCS_vxWorks += -nil-
+tableIoc_SRCS_DEFAULT += tableIocMain.cpp
+tableIoc_SRCS_vxWorks += -nil-
 
 # Add support from base/src/vxWorks if needed
-#table_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
+#tableIoc_OBJS_vxWorks += $(EPICS_BASE_BIN)/vxComLibrary
 
 # Finally link to the EPICS Base libraries
-table_LIBS += tableRecordSup pvxsIoc pvxs $(EPICS_BASE_IOC_LIBS)
+tableIoc_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
 
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
+
