@@ -6,12 +6,17 @@ TOP=../..
 
 include $(TOP)/configure/CONFIG
 
+USR_CFLAGS   += -DUSE_TYPED_RSET -DUSE_TYPED_DSET -DDUSE_TYPED_DRVET
+USR_CXXFLAGS += -DUSE_TYPED_RSET -DUSE_TYPED_DSET -DDUSE_TYPED_DRVET
+
 PROD_IOC = tableIoc
 
 DBD += $(PROD_IOC).dbd
 $(PROD_IOC)_DBD += base.dbd
 $(PROD_IOC)_DBD += tableSupport.dbd
+$(PROD_IOC)_DBD += devTableSim.dbd
 
+$(PROD_IOC)_SRCS += devTableSim.c
 $(PROD_IOC)_SRCS += $(PROD_IOC)_registerRecordDeviceDriver.cpp
 $(PROD_IOC)_SRCS += $(PROD_IOC)Main.cpp
 

@@ -145,7 +145,7 @@ static long init_record(struct dbCommon *pcommon, int pass)
         epicsEnum16 type = colOptType(prec, i);
         if (type > DBF_ENUM)
             type = DBF_DOUBLE;
-        *colOptValAddr(prec, i) = callocMustSucceed(prec->maxrows,
+        *colOptValAddr(prec, i) = callocMustSucceed(prec->numcols,
                                                     dbValueSize(type),
                                                     "table: optional column data");
     }

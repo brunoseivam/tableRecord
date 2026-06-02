@@ -3,10 +3,11 @@
 < envPaths
 
 dbLoadDatabase("$(TOP)/dbd/tableIoc.dbd")
-tableIoc_registerRecordDeviceDriver(pdbbase) 
+tableIoc_registerRecordDeviceDriver(pdbbase)
 
-# Load record instances
-#dbLoadRecords("../../db/tableIoc.db","user=bmartins")
+dbLoadRecords("$(TOP)/db/tableSim.db","")
 
 iocInit()
+
+addTableSource()
 

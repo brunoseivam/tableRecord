@@ -18,109 +18,123 @@
  * with MAXROWS random elements typed by COLiTYPE and sets NUMROWS.
  */
 
-#define TABLE_SIM_NCOL 4
+// TODO: get this from record utils
+static const size_t MAX_COLS = 16;
 
-static const char *SIM_NAMES[] = {
-    "x",   "y",   "label", "flag",
-    "c4",  "c5",  "c6",    "c7",
-    "c8",  "c9",  "c10",   "c11",
-    "c12", "c13", "c14",   "c15"
-};
-static const char *SIM_LABELS[] = {
-    "X axis", "Y axis", "Label", "Flag",
-    "C4",     "C5",     "C6",   "C7",
-    "C8",     "C9",     "C10",  "C11",
-    "C12",    "C13",    "C14",  "C15"
+struct TableSimPrivate {
+    size_t num_data_cols;
+    size_t num_opt_cols;
 };
 
 static long sim_init_record(struct dbCommon *pcommon)
 {
     tableRecord *prec = (tableRecord *)pcommon;
-    char *names[16] = {
-        prec->col00name, prec->col01name, prec->col02name, prec->col03name,
-        prec->col04name, prec->col05name, prec->col06name, prec->col07name,
-        prec->col08name, prec->col09name, prec->col0aname, prec->col0bname,
-        prec->col0cname, prec->col0dname, prec->col0ename, prec->col0fname
-    };
-    char *labels[16] = {
-        prec->col00label, prec->col01label, prec->col02label, prec->col03label,
-        prec->col04label, prec->col05label, prec->col06label, prec->col07label,
-        prec->col08label, prec->col09label, prec->col0alabel, prec->col0blabel,
-        prec->col0clabel, prec->col0dlabel, prec->col0elabel, prec->col0flabel
-    };
-    epicsUInt32 i;
-    prec->numcols = TABLE_SIM_NCOL;
-    for (i = 0; i < TABLE_SIM_NCOL; i++) {
-        if (!names[i][0])
-            strncpy(names[i],  SIM_NAMES[i],  MAX_STRING_SIZE - 1);
-        if (!labels[i][0])
-            strncpy(labels[i], SIM_LABELS[i], MAX_STRING_SIZE - 1);
+
+    struct TableSimPrivate *pvt = (struct TableSimPrivate*)malloc(sizeof(*pvt));
+    pvt->num_data_cols = 0;
+    pvt->num_opt_cols = 0;
+
+    // Determine number of named columns
+    for (size_t i = 0; i < MAX_COLS; ++i) {
+        char *name = prec->col00name + sizeof(prec->col00name)*i;
+
+        if (strlen(name) == 0)
+            break;
+
+        pvt->num_data_cols++;
     }
+
+    // Determine number of named optional columns
+    for (size_t i = 0; i < MAX_COLS; ++i) {
+        char *name = prec->colopt00name + sizeof(prec->colopt00name)*i;
+
+        if (strlen(name) == 0)
+            break;
+
+        pvt->num_opt_cols++;
+    }
+
+    prec->numcols = pvt->num_data_cols;
+    prec->numoptcols = pvt->num_opt_cols;
+    prec->dpvt = (void*)pvt;
     return 0;
 }
 
-typedef struct { epicsEnum16 *type; void **val; epicsUInt8 *chgd; } Col;
+static void fill_random_value(void *val, epicsEnum16 type, size_t num_rows) {
 
-#define COL(n) { &prec->col##n##type, &prec->col##n##val, &prec->col##n##chgd }
+    for (size_t row = 0; row < num_rows; ++row) {
+        long rnd_val = random();
 
-static long read_table(tableRecord *prec)
-{
-    Col cols[] = {
-        COL(00), COL(01), COL(02), COL(03),
-        COL(04), COL(05), COL(06), COL(07),
-        COL(08), COL(09), COL(0a), COL(0b),
-        COL(0c), COL(0d), COL(0e), COL(0f)
-    };
-    epicsUInt32 col, row;
-
-    for (col = 0; col < prec->numcols && col < 16; col++) {
-        epicsEnum16 type = *cols[col].type;
-        void *buf        = *cols[col].val;
-
-        if (!buf) continue;
-
-        for (row = 0; row < prec->maxrows; row++) {
-            long rval = random();
-            switch (type) {
-            case DBF_STRING: {
-                char *s = (char *)buf + row * MAX_STRING_SIZE;
-                epicsSnprintf(s, MAX_STRING_SIZE, "row_%u", row);
+        switch (type) {
+            case DBF_STRING:
+                char *s = (char *)val + row * MAX_STRING_SIZE;
+                epicsSnprintf(s, MAX_STRING_SIZE, "val: %ld", rnd_val);
                 break;
-            }
             case DBF_CHAR:
-                ((epicsInt8 *)buf)[row]    = (epicsInt8)rval;   break;
+                ((epicsInt8 *)val)[row]    = (epicsInt8)rnd_val;   break;
             case DBF_UCHAR:
-                ((epicsUInt8 *)buf)[row]   = (epicsUInt8)rval;  break;
+                ((epicsUInt8 *)val)[row]   = (epicsUInt8)rnd_val;  break;
             case DBF_SHORT:
-                ((epicsInt16 *)buf)[row]   = (epicsInt16)rval;  break;
+                ((epicsInt16 *)val)[row]   = (epicsInt16)rnd_val;  break;
             case DBF_USHORT:
-                ((epicsUInt16 *)buf)[row]  = (epicsUInt16)rval; break;
+                ((epicsUInt16 *)val)[row]  = (epicsUInt16)rnd_val; break;
             case DBF_LONG:
-                ((epicsInt32 *)buf)[row]   = (epicsInt32)rval;  break;
+                ((epicsInt32 *)val)[row]   = (epicsInt32)rnd_val;  break;
             case DBF_ULONG:
-                ((epicsUInt32 *)buf)[row]  = (epicsUInt32)rval; break;
+                ((epicsUInt32 *)val)[row]  = (epicsUInt32)rnd_val; break;
             case DBF_INT64:
-                ((epicsInt64 *)buf)[row]   = (epicsInt64)rval;  break;
+                ((epicsInt64 *)val)[row]   = (epicsInt64)rnd_val;  break;
             case DBF_UINT64:
-                ((epicsUInt64 *)buf)[row]  = (epicsUInt64)rval; break;
+                ((epicsUInt64 *)val)[row]  = (epicsUInt64)rnd_val; break;
             case DBF_FLOAT:
-                ((epicsFloat32 *)buf)[row] = (epicsFloat32)rval * 0.001f; break;
+                ((epicsFloat32 *)val)[row] = (epicsFloat32)rnd_val * 0.001f; break;
             case DBF_DOUBLE:
-                ((epicsFloat64 *)buf)[row] = (epicsFloat64)rval * 0.001;  break;
+                ((epicsFloat64 *)val)[row] = (epicsFloat64)rnd_val * 0.001;  break;
             default:
-                ((epicsUInt8 *)buf)[row]   = 0; break;
-            }
+                ((epicsUInt8 *)val)[row]   = 0; break;
         }
+    }
+}
 
-        *cols[col].chgd = 1;
+static long sim_read_table(tableRecord *prec)
+{
+    struct TableSimPrivate *pvt = (struct TableSimPrivate*)prec->dpvt;
+
+    // Set all changed fields to zero
+    for (size_t col = 0; col < pvt->num_data_cols; ++col) {
+        *(&prec->col00chgd + col) = 0;
+    }
+
+    // Generate random data for each column
+    for (size_t col = 0; col < pvt->num_data_cols; ++col) {
+        epicsEnum16 type = *(&prec->col00type + col);
+        void **val = (&prec->col00val) + col;
+
+        if (!*val)
+            continue;
+
+        fill_random_value(*val, type, prec->maxrows);
+        *(&prec->col00chgd + col) = 1;
     }
     prec->numrows = prec->maxrows;
+
+    // Generate random data for optional columns
+    //for (size_t col = 0; col < pvt->num_opt_cols; ++col) {
+    //    epicsEnum16 type = *(&prec->colopt00type + col);
+    //    void **val = (&prec->colopt00val) + col;
+
+    //    if (!*val)
+    //        continue;
+
+    //    fill_random_value(*val, type, prec->numcols);
+    //    *(&prec->col00chgd + col) = 1;
+    //}
+
     return 0;
 }
-#undef COL
 
 tabledset devTableSim = {
     {5, NULL, NULL, sim_init_record, NULL},
-    read_table
+    sim_read_table
 };
 epicsExportAddress(dset, devTableSim);

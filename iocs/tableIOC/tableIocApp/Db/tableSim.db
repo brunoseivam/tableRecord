@@ -1,0 +1,15 @@
+record(table, "TBL:SIM") {
+    field(DTYP, "Random Sim")
+    field(SCAN, "1 second")
+    field(MAXROWS, "4")
+
+    field(COL00NAME, "x") field(COL00LABEL, "X axis") field(COL00TYPE, "FLOAT")
+    field(COL01NAME, "y") field(COL01LABEL, "Y axis") field(COL01TYPE, "DOUBLE")
+    field(COL02NAME, "z") field(COL02LABEL, "Z axis") field(COL02TYPE, "STRING")
+
+    field(COLOPT00NAME, "meta.units")
+    field(COLOPT00TYPE, "STRING")
+    field(COLOPT00INP, {const: ["um", "um", "umstr"]})
+
+    field(TPRO, "1")
+}
