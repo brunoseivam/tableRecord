@@ -13,9 +13,9 @@
 /*
  * Random Sim device support for the table record.
  *
- * sim_init_record sets NUMCOLS and fills in default names/labels for any
- * column left unset in the .db file.  read_table fills every active column
- * with MAXROWS random elements typed by COLiTYPE and sets NUMROWS.
+ * sim_init_record sets NUMCOLS based on the first contiguous run of non-empty
+ * names and labels set in the .db file. sim_read_table fills every active column
+ * with MAXROWS random elements typed by COLxxTYPE and sets NUMROWS.
  */
 
 // TODO: get this from record utils
@@ -117,18 +117,6 @@ static long sim_read_table(tableRecord *prec)
         *(&prec->col00chgd + col) = 1;
     }
     prec->numrows = prec->maxrows;
-
-    // Generate random data for optional columns
-    //for (size_t col = 0; col < pvt->num_opt_cols; ++col) {
-    //    epicsEnum16 type = *(&prec->colopt00type + col);
-    //    void **val = (&prec->colopt00val) + col;
-
-    //    if (!*val)
-    //        continue;
-
-    //    fill_random_value(*val, type, prec->numcols);
-    //    *(&prec->col00chgd + col) = 1;
-    //}
 
     return 0;
 }

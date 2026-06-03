@@ -48,7 +48,7 @@ typedef struct { DBLINK *inp; epicsEnum16 *type; void **val; epicsUInt8 *chgd; }
 #define COLOPT(n) { &prec->colopt##n##inp, &prec->colopt##n##type, \
                      &prec->colopt##n##val, &prec->colopt##n##chgd }
 
-static long read_table(tableRecord *prec)
+static long soft_read_table(tableRecord *prec)
 {
     Col cols[] = {
         COL(00), COL(01), COL(02), COL(03),
@@ -93,6 +93,6 @@ static long read_table(tableRecord *prec)
 
 tabledset devTableSoft = {
     {5, NULL, NULL, soft_init_record, NULL},
-    read_table
+    soft_read_table
 };
 epicsExportAddress(dset, devTableSoft);
