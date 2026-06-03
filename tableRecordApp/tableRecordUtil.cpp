@@ -1,0 +1,163 @@
+#include "tableRecordUtil.h"
+
+#include <string.h>
+
+TableRecordWrapper::DataColumnConfig::DataColumnConfig(
+    const std::string & name, const std::string & label, epicsEnum16 type
+) : name(name), label(label), type(type)
+{}
+
+TableRecordWrapper::OptColumnConfig::OptColumnConfig(
+    const std::string & name, epicsEnum16 type
+) : name(name), type(type)
+{}
+
+TableRecordWrapper::DataColumn::DataColumn(
+    const std::string & name, const std::string & label, epicsEnum16 type, void **val
+) : config(name, label, type), val(val)
+{}
+
+TableRecordWrapper::OptColumn::OptColumn(
+    const std::string & name, epicsEnum16 type, void **val
+) : config(name, type), val(val)
+{}
+
+
+TableRecordWrapper::TableRecordWrapper(tableRecord & rec)
+: rec(rec)
+{}
+
+TableRecordWrapper::TableRecordWrapper(struct dbCommon *prec)
+: TableRecordWrapper::TableRecordWrapper(*(tableRecord*)prec)
+{}
+
+TableRecordWrapper::~TableRecordWrapper()
+{}
+
+size_t TableRecordWrapper::num_data_cols() {
+    return rec.numcols;
+}
+
+size_t TableRecordWrapper::max_data_cols() {
+    return TABLEREC_MAX_DATA_COLS;
+}
+
+size_t TableRecordWrapper::num_opt_cols() {
+    assert(false);
+    // TODO
+    return 0;
+}
+
+size_t TableRecordWrapper::max_opt_cols() {
+    return TABLEREC_MAX_OPT_COLS;
+}
+
+size_t TableRecordWrapper::max_data_rows() {
+    return rec.maxrows;
+}
+
+size_t TableRecordWrapper::max_opt_rows() {
+    return rec.numcols;
+}
+
+// Copy source into dest, fill remainder with NUL
+static void copy_into(std::string const & source, char * dest, size_t dest_size) {
+    size_t copied = source.copy(dest, dest_size - 1);
+    for (size_t i = copied; i < dest_size; ++i)
+        dest[i] = '\0';
+}
+
+size_t TableRecordWrapper::configure_data_columns(
+    std::vector<TableRecordWrapper::DataColumnConfig> const & data_cols
+) {
+    const size_t NAME_SIZE = sizeof(rec.col00name);
+    const size_t LABEL_SIZE = sizeof(rec.col00label);
+
+    size_t num_data_cols = 0;
+
+    char *name = rec.col00name;
+    char *label = rec.col00label;
+    epicsEnum16 *type = &rec.col00type;
+
+    for (auto & data_col : data_cols) {
+        // Stop at first column with an empty name
+        if (data_col.name.empty())
+            break;
+
+        copy_into(data_col.name, name, NAME_SIZE);
+        copy_into(data_col.label, label, LABEL_SIZE);
+        *type = data_col.type;
+
+        name += NAME_SIZE;
+        label += LABEL_SIZE;
+        type += 1;
+
+        ++num_data_cols;
+    }
+
+    return num_data_cols;
+}
+
+size_t TableRecordWrapper::configure_opt_columns(
+    std::vector<TableRecordWrapper::OptColumnConfig> const & opt_cols
+) {
+    const size_t NAME_SIZE = sizeof(rec.colopt00name);
+
+    size_t num_opt_cols = 0;
+
+    char *name = rec.colopt00name;
+    epicsEnum16 *type = &rec.colopt00type;
+
+    for (auto & opt_col : opt_cols) {
+        // Stop at first column with an empty name
+        if (opt_col.name.empty())
+            break;
+
+        copy_into(opt_col.name, name, NAME_SIZE);
+        *type = opt_col.type;
+
+        name += NAME_SIZE;
+        type += 1;
+
+        ++num_opt_cols;
+    }
+
+    return num_opt_cols;
+}
+
+std::vector<TableRecordWrapper::DataColumn> TableRecordWrapper::data_cols() {
+    std::vector<TableRecordWrapper::DataColumn> cols;
+
+    for (size_t i = 0; i < max_data_cols(); ++i) {
+        char *name = rec.col00name + i*sizeof(rec.col00name);
+
+        if (strlen(name) == 0)
+            break;
+
+        char *label = rec.col00label + i*sizeof(rec.col00label);
+        epicsEnum16 type = *(&rec.col00type + i);
+        void **val = &rec.col00val + i;
+
+        cols.emplace_back(name, label, type, val);
+    }
+
+    return cols;
+}
+
+std::vector<TableRecordWrapper::OptColumn> TableRecordWrapper::opt_cols() {
+    std::vector<TableRecordWrapper::OptColumn> cols;
+
+    for (size_t i = 0; i < max_opt_cols(); ++i) {
+        char *name = rec.col00name + i*sizeof(rec.colopt00name);
+
+        if (strlen(name) == 0)
+            break;
+
+        epicsEnum16 type = *(&rec.colopt00type + i);
+        void **val = &rec.colopt00val + i;
+
+        cols.emplace_back(name, type, val);
+    }
+
+    return cols;
+}

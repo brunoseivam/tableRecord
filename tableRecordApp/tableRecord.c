@@ -21,8 +21,6 @@
 #undef GEN_SIZE_OFFSET
 #include "epicsExport.h"
 
-#define TABLE_MAX_COLS 16
-
 #define report       NULL
 #define initialize   NULL
 static long init_record(struct dbCommon *, int);
@@ -88,7 +86,6 @@ static long init_record(struct dbCommon *pcommon, int pass)
 {
     tableRecord *prec = (tableRecord *)pcommon;
     tabledset *pdset;
-    epicsUInt32 i;
 
     if (pass == 0) {
         if (prec->maxrows == 0)
@@ -97,7 +94,7 @@ static long init_record(struct dbCommon *pcommon, int pass)
         return 0;
     }
 
-    /* pass 1: validate DSET, call its init_record (which sets numcols),
+    /* pass 1: validate DSET, call its init_record
        then allocate per-column data buffers. */
     if (!(pdset = (tabledset *)prec->dset)) {
         recGblRecordError(S_dev_noDSET, prec, "table: init_record");
@@ -112,22 +109,37 @@ static long init_record(struct dbCommon *pcommon, int pass)
         if (s) return s;
     }
 
-    if (prec->numcols > TABLE_MAX_COLS)
-        prec->numcols = TABLE_MAX_COLS;
+    // Calculate NUMCOLS and NUMOPTCOLS after devsup had a chance to fill
+    // data column names
+    {
+        prec->numcols = 0;
+        char *datacolname = prec->col00name;
+        for (size_t i = 0; i < TABLEREC_MAX_DATA_COLS && strlen(datacolname) > 0; ++i) {
+            ++prec->numcols;
+            datacolname += sizeof(prec->col00name);
+        }
 
-    for (i = 0; i < prec->numcols; i++) {
+        prec->numoptcols = 0;
+        char *optcolname = prec->colopt00name;
+        for (size_t i = 0; i < TABLEREC_MAX_DATA_COLS && strlen(optcolname) > 0; ++i) {
+            ++prec->numoptcols;
+            optcolname += sizeof(prec->colopt00name);
+        }
+    }
+
+    // Pre-allocate data value arrays
+    for (size_t i = 0; i < prec->numcols; i++) {
         epicsEnum16 type = colType(prec, i);
         if (type > DBF_ENUM)
             type = DBF_DOUBLE;
-        *colValAddr(prec, i) = callocMustSucceed(prec->maxrows,
-                                                 dbValueSize(type),
-                                                 "table: column data");
+        *colValAddr(prec, i) = callocMustSucceed(
+            prec->maxrows, dbValueSize(type), "table: column data");
     }
 
     /* Load constant COLxxINP links into column buffers at init time.
        Mirrors devWfSoft: constant links are loaded here; dbGetLink is only
        for non-constant (CA/DB) links at process time. */
-    for (i = 0; i < prec->numcols; i++) {
+    for (size_t i = 0; i < prec->numcols; i++) {
         DBLINK *inp = colInpAddr(prec, i);
         void *buf = *colValAddr(prec, i);
         long nReq = prec->maxrows;
@@ -138,10 +150,7 @@ static long init_record(struct dbCommon *pcommon, int pass)
         }
     }
 
-    if (prec->numoptcols > TABLE_MAX_COLS)
-        prec->numoptcols = TABLE_MAX_COLS;
-
-    for (i = 0; i < prec->numoptcols; i++) {
+    for (size_t i = 0; i < prec->numoptcols; i++) {
         epicsEnum16 type = colOptType(prec, i);
         if (type > DBF_ENUM)
             type = DBF_DOUBLE;
@@ -150,7 +159,7 @@ static long init_record(struct dbCommon *pcommon, int pass)
                                                     "table: optional column data");
     }
 
-    for (i = 0; i < prec->numoptcols; i++) {
+    for (size_t i = 0; i < prec->numoptcols; i++) {
         DBLINK *inp = colOptInpAddr(prec, i);
         void *buf = *colOptValAddr(prec, i);
         long nReq = prec->maxrows;

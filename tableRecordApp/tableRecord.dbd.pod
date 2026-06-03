@@ -20,6 +20,8 @@ recordtype(table) {
     %    long (*read_table)(struct tableRecord *prec);
     %} tabledset;
     %#define HAS_tabledset
+    %#define TABLEREC_MAX_DATA_COLS 16
+    %#define TABLEREC_MAX_OPT_COLS 16
     %
     field(INP,DBF_INLINK) {
         prompt("Input Specification")
