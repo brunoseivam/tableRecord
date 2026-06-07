@@ -14,9 +14,9 @@ PROD_IOC = tableIoc
 DBD += $(PROD_IOC).dbd
 $(PROD_IOC)_DBD += base.dbd
 $(PROD_IOC)_DBD += tableSupport.dbd
-$(PROD_IOC)_DBD += devTableSim.dbd
+#$(PROD_IOC)_DBD += devTableSim.dbd
 
-$(PROD_IOC)_SRCS += devTableSim.cpp
+#$(PROD_IOC)_SRCS += devTableSim.cpp
 $(PROD_IOC)_SRCS += $(PROD_IOC)_registerRecordDeviceDriver.cpp
 $(PROD_IOC)_SRCS += $(PROD_IOC)Main.cpp
 

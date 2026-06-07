@@ -5,7 +5,7 @@
 TOP=../..
 include $(TOP)/configure/CONFIG
 
-DB += tableSim.db
+DB += table.db
 
 include $(TOP)/configure/RULES
 

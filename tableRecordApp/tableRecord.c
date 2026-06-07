@@ -48,127 +48,158 @@ rset tableRSET = {
 };
 epicsExportAddress(rset, tableRSET);
 
-/* Pointer-arithmetic helpers — valid because COLxxINP/TYPE/VAL fields are
+/* Pointer-arithmetic helpers — valid because column fields are
    declared in consecutive groups in the DBD, so the struct members are laid
    out without intervening fields of other types. */
 
-static DBLINK *colInpAddr(tableRecord *prec, int i)
+static void **tablerec_col_val_addr(tableRecord *prec, size_t i)
 {
-    return &prec->col00inp + i;
-}
-
-static void **colValAddr(tableRecord *prec, int i)
-{
+    assert(i < TABLEREC_MAX_DATA_COLS);
     return &prec->col00val + i;
 }
 
-static epicsEnum16 colType(tableRecord *prec, int i)
+static epicsEnum16 tablerec_col_type(tableRecord *prec, size_t i)
 {
+    assert(i < TABLEREC_MAX_DATA_COLS);
     return (&prec->col00type)[i];
 }
 
-static DBLINK *colOptInpAddr(tableRecord *prec, int i)
+static char* tablerec_col_name(tableRecord *prec, size_t i)
 {
-    return &prec->colopt00inp + i;
+    assert(i < TABLEREC_MAX_DATA_COLS);
+    return prec->col00name + i*sizeof(prec->col00name);
 }
 
-static void **colOptValAddr(tableRecord *prec, int i)
+static void **tablerec_col_opt_val_addr(tableRecord *prec, size_t i)
 {
+    assert(i < TABLEREC_MAX_OPT_COLS);
     return &prec->colopt00val + i;
 }
 
-static epicsEnum16 colOptType(tableRecord *prec, int i)
+static epicsEnum16 tablerec_col_opt_type(tableRecord *prec, size_t i)
 {
+    assert(i < TABLEREC_MAX_OPT_COLS);
     return (&prec->colopt00type)[i];
+}
+
+static char* tablerec_col_opt_name(tableRecord *prec, size_t i)
+{
+    assert(i < TABLEREC_MAX_OPT_COLS);
+    return prec->colopt00name + i*sizeof(prec->colopt00name);
 }
 
 static long init_record(struct dbCommon *pcommon, int pass)
 {
     tableRecord *prec = (tableRecord *)pcommon;
-    tabledset *pdset;
+    tabledset *pdset = (tabledset *)(prec->dset);
 
-    if (pass == 0) {
-        if (prec->maxrows == 0)
-            prec->maxrows = 16;
-        prec->numrows = 0;
-        return 0;
-    }
-
-    /* pass 1: validate DSET, call its init_record
-       then allocate per-column data buffers. */
-    if (!(pdset = (tabledset *)prec->dset)) {
+    /* must have dset defined */
+    if (!pdset) {
         recGblRecordError(S_dev_noDSET, prec, "table: init_record");
         return S_dev_noDSET;
     }
+
+    /* must have read_table function defined */
     if (pdset->common.number < 5 || !pdset->read_table) {
         recGblRecordError(S_dev_missingSup, prec, "table: init_record");
         return S_dev_missingSup;
     }
-    if (pdset->common.init_record) {
-        long s = pdset->common.init_record(pcommon);
-        if (s) return s;
-    }
 
-    // Calculate NUMCOLS and NUMOPTCOLS after devsup had a chance to fill
-    // data column names
-    {
+    if (pass == 0) {
+        if (prec->maxrows == 0)
+            prec->maxrows = 1;
+
+        /* call pdset->init_record() in pass 0 so it can do its own
+         * memory allocation and set prec->colXXval and prec->coloptXXval,
+         * which must be set by the end of pass 0.
+         */
+        if (pdset->common.init_record) {
+            long status = pdset->common.init_record(pcommon);
+
+            if (status == TABLEREC_DEVINIT_PASS1) {
+                /* requesting pass 1 callback, remember to do that */
+                prec->pact = TABLEREC_DEVINIT_PASS1;
+            }
+            else if (status)
+                return status;
+        }
+
+        prec->numrows = 0;
+
+        /* calculate NUMCOLS after devsup had a chance to fill column names */
         prec->numcols = 0;
-        char *datacolname = prec->col00name;
-        for (size_t i = 0; i < TABLEREC_MAX_DATA_COLS && strlen(datacolname) > 0; ++i) {
+        for (size_t i = 0; i < TABLEREC_MAX_DATA_COLS; ++i) {
+            if (strlen(tablerec_col_name(prec, i)) == 0)
+                break;
+
             ++prec->numcols;
-            datacolname += sizeof(prec->col00name);
         }
 
+        /* ensure that all remaining data columns have empty names (no gaps) */
+        for (size_t i = prec->numcols; i < TABLEREC_MAX_DATA_COLS; ++i) {
+            if (strlen(tablerec_col_name(prec, i)) != 0) {
+                recGblRecordError(S_db_errArg, prec, "table: init_record");
+                return S_db_errArg;
+            }
+        }
+
+        /* calculate NUMOPTCOLS after devsup had a chance to fill column names */
         prec->numoptcols = 0;
-        char *optcolname = prec->colopt00name;
-        for (size_t i = 0; i < TABLEREC_MAX_DATA_COLS && strlen(optcolname) > 0; ++i) {
+        for (size_t i = 0; i < TABLEREC_MAX_OPT_COLS; ++i) {
+            if (strlen(tablerec_col_opt_name(prec, i)) == 0)
+                break;
+
             ++prec->numoptcols;
-            optcolname += sizeof(prec->colopt00name);
         }
-    }
 
-    // Pre-allocate data value arrays
-    for (size_t i = 0; i < prec->numcols; i++) {
-        epicsEnum16 type = colType(prec, i);
-        if (type > DBF_ENUM)
-            type = DBF_DOUBLE;
-        *colValAddr(prec, i) = callocMustSucceed(
-            prec->maxrows, dbValueSize(type), "table: column data");
-    }
-
-    /* Load constant COLxxINP links into column buffers at init time.
-       Mirrors devWfSoft: constant links are loaded here; dbGetLink is only
-       for non-constant (CA/DB) links at process time. */
-    for (size_t i = 0; i < prec->numcols; i++) {
-        DBLINK *inp = colInpAddr(prec, i);
-        void *buf = *colValAddr(prec, i);
-        long nReq = prec->maxrows;
-        if (inp && buf && !dbLoadLinkArray(inp, colType(prec, i), buf, &nReq)) {
-            if ((epicsUInt32)nReq > prec->numrows)
-                prec->numrows = (epicsUInt32)nReq;
-            prec->udf = FALSE;
+        /* ensure that all remaining optional columns have empty names (no gaps) */
+        for (size_t i = prec->numoptcols; i < TABLEREC_MAX_OPT_COLS; ++i) {
+            if (strlen(tablerec_col_opt_name(prec, i)) != 0) {
+                recGblRecordError(S_db_errArg, prec, "table: init_record");
+                return S_db_errArg;
+            }
         }
-    }
 
-    for (size_t i = 0; i < prec->numoptcols; i++) {
-        epicsEnum16 type = colOptType(prec, i);
-        if (type > DBF_ENUM)
-            type = DBF_DOUBLE;
-        *colOptValAddr(prec, i) = callocMustSucceed(prec->numcols,
-                                                    dbValueSize(type),
-                                                    "table: optional column data");
-    }
+        /* allocate memory for value fields that were not allocated by devsup */
+        for (size_t i = 0; i < prec->numcols; ++i) {
+            void **val = tablerec_col_val_addr(prec, i);
 
-    for (size_t i = 0; i < prec->numoptcols; i++) {
-        DBLINK *inp = colOptInpAddr(prec, i);
-        void *buf = *colOptValAddr(prec, i);
-        long nReq = prec->maxrows;
-        if (inp && buf && !dbLoadLinkArray(inp, colOptType(prec, i), buf, &nReq)) {
-            if ((epicsUInt32)nReq > prec->numrows)
-                prec->numrows = (epicsUInt32)nReq;
-            prec->udf = FALSE;
+            if (*val)
+                continue;
+
+            epicsEnum16 type = tablerec_col_type(prec, i);
+            if (type > DBF_ENUM)
+                type = DBF_DOUBLE;
+
+            *val = callocMustSucceed(
+                prec->maxrows, dbValueSize(type), "table: column data");
         }
+
+        for (size_t i = 0; i < prec->numoptcols; ++i) {
+            void **val = tablerec_col_opt_val_addr(prec, i);
+
+            if (*val)
+                continue;
+
+            epicsEnum16 type = tablerec_col_opt_type(prec, i);
+            if (type > DBF_ENUM)
+                type = DBF_DOUBLE;
+
+            *val = callocMustSucceed(
+                prec->numcols, dbValueSize(type), "table: optional column data");
+        }
+
+        return 0;
     }
+
+    if (prec->pact == TABLEREC_DEVINIT_PASS1) {
+        /* device support asked for an init_record() callback in pass 1 */
+        long status = pdset->common.init_record(pcommon);
+        if (status)
+            return status;
+        prec->pact = FALSE;
+    }
+
     return 0;
 }
 
@@ -206,8 +237,8 @@ static long cvt_dbaddr(DBADDR *paddr)
 
     if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL) {
         int i = fi - tableRecordCOL00VAL;
-        epicsEnum16 type = colType(prec, i);
-        void **vp = colValAddr(prec, i);
+        epicsEnum16 type = tablerec_col_type(prec, i);
+        void **vp = tablerec_col_val_addr(prec, i);
         paddr->pfield         = vp ? *vp : NULL;
         paddr->field_type     = type;
         paddr->field_size     = dbValueSize(type);
@@ -215,8 +246,8 @@ static long cvt_dbaddr(DBADDR *paddr)
         paddr->no_elements    = prec->maxrows;
     } else if (fi >= tableRecordCOLOPT00VAL && fi <= tableRecordCOLOPT0FVAL) {
         int i = fi - tableRecordCOLOPT00VAL;
-        epicsEnum16 type = colOptType(prec, i);
-        void **vp = colOptValAddr(prec, i);
+        epicsEnum16 type = tablerec_col_opt_type(prec, i);
+        void **vp = tablerec_col_opt_val_addr(prec, i);
         paddr->pfield         = vp ? *vp : NULL;
         paddr->field_type     = type;
         paddr->field_size     = dbValueSize(type);

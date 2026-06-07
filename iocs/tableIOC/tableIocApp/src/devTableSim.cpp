@@ -28,8 +28,7 @@ struct TableSimPrivate {
     {}
 };
 
-static long sim_init_record(struct dbCommon *prec)
-{
+static long sim_init_record(struct dbCommon *prec) {
     TableRecordWrapper rec(prec);
     TableSimPrivate *pvt = new TableSimPrivate(rec.data_cols());
     rec.set_private(pvt);
@@ -74,8 +73,7 @@ static void fill_random_values(void *val, epicsEnum16 type, size_t num_rows) {
     }
 }
 
-static long sim_read_table(tableRecord *prec)
-{
+static long sim_read_table(tableRecord *prec) {
     TableRecordWrapper rec(*prec);
     TableSimPrivate *pvt = rec.get_private<TableSimPrivate>();
 

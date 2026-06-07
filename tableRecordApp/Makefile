@@ -12,7 +12,7 @@ LIBRARY_IOC += tableRecord
 
 tableRecord_SRCS += tableRecord.c
 tableRecord_SRCS += tableRecordUtil.cpp
-tableRecord_SRCS += devTableSoft.c
+tableRecord_SRCS += devTableSoft.cpp
 tableRecord_SRCS += tableSource.cpp
 tableRecord_SRCS += tableSourceRegistrar.cpp
 

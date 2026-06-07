@@ -23,17 +23,19 @@ struct TableRecordWrapper {
 
     struct DataColumn {
         struct DataColumnConfig config;
+        DBLINK *inp;
         void **val;
 
         DataColumn(const std::string & name, const std::string & label,
-            epicsEnum16 type, void **val);
+            epicsEnum16 type, DBLINK *inp, void **val);
     };
 
     struct OptColumn {
         struct OptColumnConfig config;
+        DBLINK *inp;
         void **val;
 
-        OptColumn(const std::string & name, epicsEnum16 type, void **val);
+        OptColumn(const std::string & name, epicsEnum16 type, DBLINK *inp, void **val);
     };
 
     tableRecord & rec;
@@ -74,21 +76,32 @@ struct TableRecordWrapper {
     // Returns the maximum number of rows in opt columns
     size_t max_opt_rows();
 
+    // Set/get number of valid data rows
+    size_t get_num_data_rows();
+    void set_num_data_rows(size_t num_rows);
+
+    // Set/get number of valid optional rows
+    size_t get_num_opt_rows();
+    void set_num_opt_rows(size_t num_rows);
+
+    void configure_data_column(size_t data_col_num, DataColumnConfig & data_col);
+    void configure_opt_column(size_t opt_col_num, OptColumnConfig & opt_col);
+
     // Configures this record's active data columns, setting the following fields:
     // COLxxNAME, COLxxLABEL, COLxxTYPE. Intended to be called at record
-    // initialization. The input must be shorter than or equal to max_data_cols().
-    // Returns the list of configured data columns
+    // initialization, pass 0. The input must be shorter than or equal to max_data_cols().
+    // Returns the number of configured data columns
     size_t configure_data_columns(std::vector<DataColumnConfig> const & data_cols);
 
     // Configures this record's active optional columns, setting the following fields:
-    // COLOPTxxNAME, COLOPTxxTYPE. Intended to be called at record initialization.
+    // COLOPTxxNAME, COLOPTxxTYPE. Intended to be called at record initialization, pass 0.
     // The input must be shorter than or equal to max_opt_cols().
-    // Returns the list of configured data columns
+    // Returns the number of configured optional columns
     size_t configure_opt_columns(std::vector<OptColumnConfig> const & opt_cols);
 
     // Returns a list of active data columns
-    std::vector<DataColumn> data_cols();
+    void data_cols(std::vector<DataColumn> & cols);
 
     // Returns a list of active optional columns
-    std::vector<OptColumn> opt_cols();
+    void opt_cols(std::vector<OptColumn> & cols);
 };

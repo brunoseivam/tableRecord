@@ -5,7 +5,7 @@
 dbLoadDatabase("$(TOP)/dbd/tableIoc.dbd")
 tableIoc_registerRecordDeviceDriver(pdbbase)
 
-dbLoadRecords("$(TOP)/db/tableSim.db","")
+dbLoadRecords("$(TOP)/db/table.db")
 
 iocInit()
 
