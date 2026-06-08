@@ -25,17 +25,20 @@ struct TableRecordWrapper {
         struct DataColumnConfig config;
         DBLINK *inp;
         void **val;
+        epicsUInt32 *numrows;
 
         DataColumn(const std::string & name, const std::string & label,
-            epicsEnum16 type, DBLINK *inp, void **val);
+            epicsEnum16 type, DBLINK *inp, void **val, epicsUInt32 *numrows);
     };
 
     struct OptColumn {
         struct OptColumnConfig config;
         DBLINK *inp;
         void **val;
+        epicsUInt32 *numrows;
 
-        OptColumn(const std::string & name, epicsEnum16 type, DBLINK *inp, void **val);
+        OptColumn(const std::string & name, epicsEnum16 type, DBLINK *inp, void **val,
+            epicsUInt32 *numrows);
     };
 
     tableRecord & rec;
@@ -74,15 +77,8 @@ struct TableRecordWrapper {
     size_t max_data_rows();
 
     // Returns the maximum number of rows in opt columns
+    // (= number of active data columns: one opt row per data column)
     size_t max_opt_rows();
-
-    // Set/get number of valid data rows
-    size_t get_num_data_rows();
-    void set_num_data_rows(size_t num_rows);
-
-    // Set/get number of valid optional rows
-    size_t get_num_opt_rows();
-    void set_num_opt_rows(size_t num_rows);
 
     void configure_data_column(size_t data_col_num, DataColumnConfig & data_col);
     void configure_opt_column(size_t opt_col_num, OptColumnConfig & opt_col);

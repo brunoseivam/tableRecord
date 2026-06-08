@@ -14,13 +14,14 @@ TableRecordWrapper::OptColumnConfig::OptColumnConfig(
 
 TableRecordWrapper::DataColumn::DataColumn(
     const std::string & name, const std::string & label, epicsEnum16 type,
-    DBLINK *inp, void **val
-) : config(name, label, type), inp(inp), val(val)
+    DBLINK *inp, void **val, epicsUInt32 *numrows
+) : config(name, label, type), inp(inp), val(val), numrows(numrows)
 {}
 
 TableRecordWrapper::OptColumn::OptColumn(
-    const std::string & name, epicsEnum16 type, DBLINK *inp, void **val
-) : config(name, type), inp(inp), val(val)
+    const std::string & name, epicsEnum16 type, DBLINK *inp, void **val,
+    epicsUInt32 *numrows
+) : config(name, type), inp(inp), val(val), numrows(numrows)
 {}
 
 TableRecordWrapper::TableRecordWrapper(tableRecord & rec)
@@ -59,29 +60,6 @@ size_t TableRecordWrapper::max_data_rows() {
 size_t TableRecordWrapper::max_opt_rows() {
     return rec.numcols;
 }
-
-size_t TableRecordWrapper::get_num_data_rows() {
-    return rec.numrows;
-}
-
-void TableRecordWrapper::set_num_data_rows(size_t num_rows) {
-    if (num_rows > rec.maxrows)
-        num_rows = rec.maxrows;
-
-    rec.numrows = num_rows;
-}
-
-size_t TableRecordWrapper::get_num_opt_rows() {
-    return rec.numoptcols;
-}
-
-void TableRecordWrapper::set_num_opt_rows(size_t num_rows) {
-    //if (num_rows > rec.numcols)
-    //    num_rows = rec.numcols;
-
-    //rec.numoptcols
-}
-
 
 // Copy source into dest, fill remainder with NUL
 static void copy_into(std::string const & source, char * dest, size_t dest_size) {
@@ -161,8 +139,9 @@ void TableRecordWrapper::data_cols(std::vector<TableRecordWrapper::DataColumn> &
         epicsEnum16 type = *(&rec.col00type + i);
         DBLINK *inp = &rec.col00inp + i;
         void **val = &rec.col00val + i;
+        epicsUInt32 *numrows = &rec.col00numrows + i;
 
-        cols.emplace_back(name, label, type, inp, val);
+        cols.emplace_back(name, label, type, inp, val, numrows);
     }
 }
 
@@ -177,7 +156,8 @@ void TableRecordWrapper::opt_cols(std::vector<TableRecordWrapper::OptColumn> & c
         epicsEnum16 type = *(&rec.colopt00type + i);
         DBLINK *inp = &rec.colopt00inp + i;
         void **val = &rec.colopt00val + i;
+        epicsUInt32 *numrows = &rec.colopt00numrows + i;
 
-        cols.emplace_back(name, type, inp, val);
+        cols.emplace_back(name, type, inp, val, numrows);
     }
 }

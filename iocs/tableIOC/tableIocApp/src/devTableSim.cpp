@@ -89,9 +89,9 @@ static long sim_read_table(tableRecord *prec) {
             continue;
 
         fill_random_values(*col.val, col.config.type, rec.max_data_rows());
+        *col.numrows = (epicsUInt32)rec.max_data_rows();
     }
 
-    prec->numrows = rec.max_data_rows();
     return 0;
 }
 

@@ -124,8 +124,6 @@ static long init_record(struct dbCommon *pcommon, int pass)
                 return status;
         }
 
-        prec->numrows = 0;
-
         /* calculate NUMCOLS after devsup had a chance to fill column names */
         prec->numcols = 0;
         for (size_t i = 0; i < TABLEREC_MAX_DATA_COLS; ++i) {
@@ -264,9 +262,9 @@ static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
 
     *offset = 0;
     if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL)
-        *no_elements = prec->numrows;
+        *no_elements = *(&prec->col00numrows + (fi - tableRecordCOL00VAL));
     else if (fi >= tableRecordCOLOPT00VAL && fi <= tableRecordCOLOPT0FVAL)
-        *no_elements = prec->numrows;
+        *no_elements = *(&prec->colopt00numrows + (fi - tableRecordCOLOPT00VAL));
     else
         *no_elements = 0;
     return 0;
@@ -280,11 +278,11 @@ static long put_array_info(DBADDR *paddr, long nNew)
     if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL) {
         epicsUInt32 n = (epicsUInt32)nNew;
         if (n > prec->maxrows) n = prec->maxrows;
-        prec->numrows = n;
+        *(&prec->col00numrows + (fi - tableRecordCOL00VAL)) = n;
     } else if (fi >= tableRecordCOLOPT00VAL && fi <= tableRecordCOLOPT0FVAL) {
         epicsUInt32 n = (epicsUInt32)nNew;
         if (n > prec->maxrows) n = prec->maxrows;
-        if (n > prec->numrows) prec->numrows = n;
+        *(&prec->colopt00numrows + (fi - tableRecordCOLOPT00VAL)) = n;
     }
     return 0;
 }

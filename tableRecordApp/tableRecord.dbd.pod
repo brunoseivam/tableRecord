@@ -41,11 +41,6 @@ recordtype(table) {
         interest(1)
         initial("1")
     }
-    field(NUMROWS, DBF_ULONG) {
-        prompt("Number of valid rows (all columns)")
-        special(SPC_NOMOD)
-    }
-
     # ----------------------------------------------------------------
     # Column names — COL00NAME .. COL0FNAME
     # ----------------------------------------------------------------
@@ -653,6 +648,91 @@ recordtype(table) {
     }
 
     # ----------------------------------------------------------------
+    # Column valid row counts — COL00NUMROWS .. COL0FNUMROWS
+    # ----------------------------------------------------------------
+
+    field(COL00NUMROWS, DBF_ULONG) {
+        prompt("Column 00 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL01NUMROWS, DBF_ULONG) {
+        prompt("Column 01 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL02NUMROWS, DBF_ULONG) {
+        prompt("Column 02 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL03NUMROWS, DBF_ULONG) {
+        prompt("Column 03 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL04NUMROWS, DBF_ULONG) {
+        prompt("Column 04 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL05NUMROWS, DBF_ULONG) {
+        prompt("Column 05 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL06NUMROWS, DBF_ULONG) {
+        prompt("Column 06 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL07NUMROWS, DBF_ULONG) {
+        prompt("Column 07 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL08NUMROWS, DBF_ULONG) {
+        prompt("Column 08 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL09NUMROWS, DBF_ULONG) {
+        prompt("Column 09 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL0ANUMROWS, DBF_ULONG) {
+        prompt("Column 0A number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL0BNUMROWS, DBF_ULONG) {
+        prompt("Column 0B number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL0CNUMROWS, DBF_ULONG) {
+        prompt("Column 0C number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL0DNUMROWS, DBF_ULONG) {
+        prompt("Column 0D number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL0ENUMROWS, DBF_ULONG) {
+        prompt("Column 0E number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COL0FNUMROWS, DBF_ULONG) {
+        prompt("Column 0F number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+
+    # ----------------------------------------------------------------
     # Optional column names — COLOPT00NAME .. COLOPT0FNAME
     # ----------------------------------------------------------------
 
@@ -1160,6 +1240,91 @@ recordtype(table) {
     }
     field(COLOPT0FCHGD, DBF_UCHAR) {
         prompt("Optional column 0F changed flag")
+        interest(2)
+    }
+
+    # ----------------------------------------------------------------
+    # Optional column valid row counts — COLOPT00NUMROWS .. COLOPT0FNUMROWS
+    # ----------------------------------------------------------------
+
+    field(COLOPT00NUMROWS, DBF_ULONG) {
+        prompt("Optional column 00 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT01NUMROWS, DBF_ULONG) {
+        prompt("Optional column 01 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT02NUMROWS, DBF_ULONG) {
+        prompt("Optional column 02 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT03NUMROWS, DBF_ULONG) {
+        prompt("Optional column 03 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT04NUMROWS, DBF_ULONG) {
+        prompt("Optional column 04 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT05NUMROWS, DBF_ULONG) {
+        prompt("Optional column 05 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT06NUMROWS, DBF_ULONG) {
+        prompt("Optional column 06 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT07NUMROWS, DBF_ULONG) {
+        prompt("Optional column 07 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT08NUMROWS, DBF_ULONG) {
+        prompt("Optional column 08 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT09NUMROWS, DBF_ULONG) {
+        prompt("Optional column 09 number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT0ANUMROWS, DBF_ULONG) {
+        prompt("Optional column 0A number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT0BNUMROWS, DBF_ULONG) {
+        prompt("Optional column 0B number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT0CNUMROWS, DBF_ULONG) {
+        prompt("Optional column 0C number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT0DNUMROWS, DBF_ULONG) {
+        prompt("Optional column 0D number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT0ENUMROWS, DBF_ULONG) {
+        prompt("Optional column 0E number of valid rows")
+        special(SPC_NOMOD)
+        interest(2)
+    }
+    field(COLOPT0FNUMROWS, DBF_ULONG) {
+        prompt("Optional column 0F number of valid rows")
+        special(SPC_NOMOD)
         interest(2)
     }
 }
