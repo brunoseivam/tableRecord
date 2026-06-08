@@ -71,14 +71,14 @@ static void copy_into(std::string const & source, char * dest, size_t dest_size)
 size_t TableRecordWrapper::configure_data_columns(
     std::vector<TableRecordWrapper::DataColumnConfig> const & data_cols
 ) {
-    const size_t NAME_SIZE = sizeof(rec.col00name);
-    const size_t LABEL_SIZE = sizeof(rec.col00label);
+    const size_t NAME_SIZE = sizeof(rec.c00name);
+    const size_t LABEL_SIZE = sizeof(rec.c00label);
 
     size_t num_data_cols = 0;
 
-    char *name = rec.col00name;
-    char *label = rec.col00label;
-    epicsEnum16 *type = &rec.col00type;
+    char *name = rec.c00name;
+    char *label = rec.c00label;
+    epicsEnum16 *type = &rec.c00type;
 
     for (auto & data_col : data_cols) {
         // Stop at first column with an empty name
@@ -102,12 +102,12 @@ size_t TableRecordWrapper::configure_data_columns(
 size_t TableRecordWrapper::configure_opt_columns(
     std::vector<TableRecordWrapper::OptColumnConfig> const & opt_cols
 ) {
-    const size_t NAME_SIZE = sizeof(rec.colopt00name);
+    const size_t NAME_SIZE = sizeof(rec.co00name);
 
     size_t num_opt_cols = 0;
 
-    char *name = rec.colopt00name;
-    epicsEnum16 *type = &rec.colopt00type;
+    char *name = rec.co00name;
+    epicsEnum16 *type = &rec.co00type;
 
     for (auto & opt_col : opt_cols) {
         // Stop at first column with an empty name
@@ -130,16 +130,16 @@ void TableRecordWrapper::data_cols(std::vector<TableRecordWrapper::DataColumn> &
     cols.clear();
 
     for (size_t i = 0; i < max_data_cols(); ++i) {
-        char *name = rec.col00name + i*sizeof(rec.col00name);
+        char *name = rec.c00name + i*sizeof(rec.c00name);
 
         if (strlen(name) == 0)
             break;
 
-        char *label = rec.col00label + i*sizeof(rec.col00label);
-        epicsEnum16 type = *(&rec.col00type + i);
-        DBLINK *inp = &rec.col00inp + i;
-        void **val = &rec.col00val + i;
-        epicsUInt32 *numrows = &rec.col00numrows + i;
+        char *label = rec.c00label + i*sizeof(rec.c00label);
+        epicsEnum16 type = *(&rec.c00type + i);
+        DBLINK *inp = &rec.c00inp + i;
+        void **val = &rec.c00val + i;
+        epicsUInt32 *numrows = &rec.c00nrows + i;
 
         cols.emplace_back(name, label, type, inp, val, numrows);
     }
@@ -148,15 +148,15 @@ void TableRecordWrapper::data_cols(std::vector<TableRecordWrapper::DataColumn> &
 void TableRecordWrapper::opt_cols(std::vector<TableRecordWrapper::OptColumn> & cols) {
     cols.clear();
     for (size_t i = 0; i < max_opt_cols(); ++i) {
-        char *name = rec.colopt00name + i*sizeof(rec.colopt00name);
+        char *name = rec.co00name + i*sizeof(rec.co00name);
 
         if (strlen(name) == 0)
             break;
 
-        epicsEnum16 type = *(&rec.colopt00type + i);
-        DBLINK *inp = &rec.colopt00inp + i;
-        void **val = &rec.colopt00val + i;
-        epicsUInt32 *numrows = &rec.colopt00numrows + i;
+        epicsEnum16 type = *(&rec.co00type + i);
+        DBLINK *inp = &rec.co00inp + i;
+        void **val = &rec.co00val + i;
+        epicsUInt32 *numrows = &rec.co00nrows + i;
 
         cols.emplace_back(name, type, inp, val, numrows);
     }

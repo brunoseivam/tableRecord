@@ -55,37 +55,37 @@ epicsExportAddress(rset, tableRSET);
 static void **tablerec_col_val_addr(tableRecord *prec, size_t i)
 {
     assert(i < TABLEREC_MAX_DATA_COLS);
-    return &prec->col00val + i;
+    return &prec->c00val + i;
 }
 
 static epicsEnum16 tablerec_col_type(tableRecord *prec, size_t i)
 {
     assert(i < TABLEREC_MAX_DATA_COLS);
-    return (&prec->col00type)[i];
+    return (&prec->c00type)[i];
 }
 
 static char* tablerec_col_name(tableRecord *prec, size_t i)
 {
     assert(i < TABLEREC_MAX_DATA_COLS);
-    return prec->col00name + i*sizeof(prec->col00name);
+    return prec->c00name + i*sizeof(prec->c00name);
 }
 
 static void **tablerec_col_opt_val_addr(tableRecord *prec, size_t i)
 {
     assert(i < TABLEREC_MAX_OPT_COLS);
-    return &prec->colopt00val + i;
+    return &prec->co00val + i;
 }
 
 static epicsEnum16 tablerec_col_opt_type(tableRecord *prec, size_t i)
 {
     assert(i < TABLEREC_MAX_OPT_COLS);
-    return (&prec->colopt00type)[i];
+    return (&prec->co00type)[i];
 }
 
 static char* tablerec_col_opt_name(tableRecord *prec, size_t i)
 {
     assert(i < TABLEREC_MAX_OPT_COLS);
-    return prec->colopt00name + i*sizeof(prec->colopt00name);
+    return prec->co00name + i*sizeof(prec->co00name);
 }
 
 static long init_record(struct dbCommon *pcommon, int pass)
@@ -220,8 +220,8 @@ static long process(struct dbCommon *pcommon)
     recGblGetTimeStamp(prec);
     recGblResetAlarms(prec);
 
-    if (prec->col00val)
-        db_post_events(prec, prec->col00val, DBE_VALUE | DBE_LOG);
+    if (prec->c00val)
+        db_post_events(prec, prec->c00val, DBE_VALUE | DBE_LOG);
 
     recGblFwdLink(prec);
     prec->pact = FALSE;
@@ -233,8 +233,8 @@ static long cvt_dbaddr(DBADDR *paddr)
     tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
-    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL) {
-        int i = fi - tableRecordCOL00VAL;
+    if (fi >= tableRecordC00VAL && fi <= tableRecordC0FVAL) {
+        int i = fi - tableRecordC00VAL;
         epicsEnum16 type = tablerec_col_type(prec, i);
         void **vp = tablerec_col_val_addr(prec, i);
         paddr->pfield         = vp ? *vp : NULL;
@@ -242,8 +242,8 @@ static long cvt_dbaddr(DBADDR *paddr)
         paddr->field_size     = dbValueSize(type);
         paddr->dbr_field_type = type;
         paddr->no_elements    = prec->maxrows;
-    } else if (fi >= tableRecordCOLOPT00VAL && fi <= tableRecordCOLOPT0FVAL) {
-        int i = fi - tableRecordCOLOPT00VAL;
+    } else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL) {
+        int i = fi - tableRecordCO00VAL;
         epicsEnum16 type = tablerec_col_opt_type(prec, i);
         void **vp = tablerec_col_opt_val_addr(prec, i);
         paddr->pfield         = vp ? *vp : NULL;
@@ -261,10 +261,10 @@ static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
     int fi = dbGetFieldIndex(paddr);
 
     *offset = 0;
-    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL)
-        *no_elements = *(&prec->col00numrows + (fi - tableRecordCOL00VAL));
-    else if (fi >= tableRecordCOLOPT00VAL && fi <= tableRecordCOLOPT0FVAL)
-        *no_elements = *(&prec->colopt00numrows + (fi - tableRecordCOLOPT00VAL));
+    if (fi >= tableRecordC00VAL && fi <= tableRecordC0FVAL)
+        *no_elements = *(&prec->c00nrows + (fi - tableRecordC00VAL));
+    else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL)
+        *no_elements = *(&prec->co00nrows + (fi - tableRecordCO00VAL));
     else
         *no_elements = 0;
     return 0;
@@ -275,14 +275,14 @@ static long put_array_info(DBADDR *paddr, long nNew)
     tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
-    if (fi >= tableRecordCOL00VAL && fi <= tableRecordCOL0FVAL) {
+    if (fi >= tableRecordC00VAL && fi <= tableRecordC0FVAL) {
         epicsUInt32 n = (epicsUInt32)nNew;
         if (n > prec->maxrows) n = prec->maxrows;
-        *(&prec->col00numrows + (fi - tableRecordCOL00VAL)) = n;
-    } else if (fi >= tableRecordCOLOPT00VAL && fi <= tableRecordCOLOPT0FVAL) {
+        *(&prec->c00nrows + (fi - tableRecordC00VAL)) = n;
+    } else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL) {
         epicsUInt32 n = (epicsUInt32)nNew;
         if (n > prec->maxrows) n = prec->maxrows;
-        *(&prec->colopt00numrows + (fi - tableRecordCOLOPT00VAL)) = n;
+        *(&prec->co00nrows + (fi - tableRecordCO00VAL)) = n;
     }
     return 0;
 }

@@ -42,100 +42,100 @@ recordtype(table) {
         initial("1")
     }
     # ----------------------------------------------------------------
-    # Column names — COL00NAME .. COL0FNAME
+    # Column names — C00NAME .. C0FNAME
     # ----------------------------------------------------------------
 
-    field(COL00NAME, DBF_STRING) {
+    field(C00NAME, DBF_STRING) {
         prompt("Column 00 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL01NAME, DBF_STRING) {
+    field(C01NAME, DBF_STRING) {
         prompt("Column 01 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL02NAME, DBF_STRING) {
+    field(C02NAME, DBF_STRING) {
         prompt("Column 02 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL03NAME, DBF_STRING) {
+    field(C03NAME, DBF_STRING) {
         prompt("Column 03 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL04NAME, DBF_STRING) {
+    field(C04NAME, DBF_STRING) {
         prompt("Column 04 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL05NAME, DBF_STRING) {
+    field(C05NAME, DBF_STRING) {
         prompt("Column 05 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL06NAME, DBF_STRING) {
+    field(C06NAME, DBF_STRING) {
         prompt("Column 06 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL07NAME, DBF_STRING) {
+    field(C07NAME, DBF_STRING) {
         prompt("Column 07 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL08NAME, DBF_STRING) {
+    field(C08NAME, DBF_STRING) {
         prompt("Column 08 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL09NAME, DBF_STRING) {
+    field(C09NAME, DBF_STRING) {
         prompt("Column 09 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0ANAME, DBF_STRING) {
+    field(C0ANAME, DBF_STRING) {
         prompt("Column 0A name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0BNAME, DBF_STRING) {
+    field(C0BNAME, DBF_STRING) {
         prompt("Column 0B name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0CNAME, DBF_STRING) {
+    field(C0CNAME, DBF_STRING) {
         prompt("Column 0C name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0DNAME, DBF_STRING) {
+    field(C0DNAME, DBF_STRING) {
         prompt("Column 0D name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0ENAME, DBF_STRING) {
+    field(C0ENAME, DBF_STRING) {
         prompt("Column 0E name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0FNAME, DBF_STRING) {
+    field(C0FNAME, DBF_STRING) {
         prompt("Column 0F name")
         promptgroup("41 - Input")
         interest(1)
@@ -143,100 +143,100 @@ recordtype(table) {
     }
 
     # ----------------------------------------------------------------
-    # Column labels — COL00LABEL .. COL0FLABEL
+    # Column labels — C00LABEL .. C0FLABEL
     # ----------------------------------------------------------------
 
-    field(COL00LABEL, DBF_STRING) {
+    field(C00LABEL, DBF_STRING) {
         prompt("Column 00 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL01LABEL, DBF_STRING) {
+    field(C01LABEL, DBF_STRING) {
         prompt("Column 01 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL02LABEL, DBF_STRING) {
+    field(C02LABEL, DBF_STRING) {
         prompt("Column 02 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL03LABEL, DBF_STRING) {
+    field(C03LABEL, DBF_STRING) {
         prompt("Column 03 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL04LABEL, DBF_STRING) {
+    field(C04LABEL, DBF_STRING) {
         prompt("Column 04 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL05LABEL, DBF_STRING) {
+    field(C05LABEL, DBF_STRING) {
         prompt("Column 05 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL06LABEL, DBF_STRING) {
+    field(C06LABEL, DBF_STRING) {
         prompt("Column 06 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL07LABEL, DBF_STRING) {
+    field(C07LABEL, DBF_STRING) {
         prompt("Column 07 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL08LABEL, DBF_STRING) {
+    field(C08LABEL, DBF_STRING) {
         prompt("Column 08 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL09LABEL, DBF_STRING) {
+    field(C09LABEL, DBF_STRING) {
         prompt("Column 09 label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0ALABEL, DBF_STRING) {
+    field(C0ALABEL, DBF_STRING) {
         prompt("Column 0A label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0BLABEL, DBF_STRING) {
+    field(C0BLABEL, DBF_STRING) {
         prompt("Column 0B label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0CLABEL, DBF_STRING) {
+    field(C0CLABEL, DBF_STRING) {
         prompt("Column 0C label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0DLABEL, DBF_STRING) {
+    field(C0DLABEL, DBF_STRING) {
         prompt("Column 0D label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0ELABEL, DBF_STRING) {
+    field(C0ELABEL, DBF_STRING) {
         prompt("Column 0E label")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COL0FLABEL, DBF_STRING) {
+    field(C0FLABEL, DBF_STRING) {
         prompt("Column 0F label")
         promptgroup("41 - Input")
         interest(1)
@@ -244,10 +244,10 @@ recordtype(table) {
     }
 
     # ----------------------------------------------------------------
-    # Column field types — COL00TYPE .. COL0FTYPE
+    # Column field types — C00TYPE .. C0FTYPE
     # ----------------------------------------------------------------
 
-    field(COL00TYPE, DBF_MENU) {
+    field(C00TYPE, DBF_MENU) {
         prompt("Column 00 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -255,7 +255,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL01TYPE, DBF_MENU) {
+    field(C01TYPE, DBF_MENU) {
         prompt("Column 01 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -263,7 +263,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL02TYPE, DBF_MENU) {
+    field(C02TYPE, DBF_MENU) {
         prompt("Column 02 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -271,7 +271,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL03TYPE, DBF_MENU) {
+    field(C03TYPE, DBF_MENU) {
         prompt("Column 03 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -279,7 +279,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL04TYPE, DBF_MENU) {
+    field(C04TYPE, DBF_MENU) {
         prompt("Column 04 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -287,7 +287,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL05TYPE, DBF_MENU) {
+    field(C05TYPE, DBF_MENU) {
         prompt("Column 05 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -295,7 +295,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL06TYPE, DBF_MENU) {
+    field(C06TYPE, DBF_MENU) {
         prompt("Column 06 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -303,7 +303,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL07TYPE, DBF_MENU) {
+    field(C07TYPE, DBF_MENU) {
         prompt("Column 07 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -311,7 +311,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL08TYPE, DBF_MENU) {
+    field(C08TYPE, DBF_MENU) {
         prompt("Column 08 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -319,7 +319,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL09TYPE, DBF_MENU) {
+    field(C09TYPE, DBF_MENU) {
         prompt("Column 09 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -327,7 +327,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL0ATYPE, DBF_MENU) {
+    field(C0ATYPE, DBF_MENU) {
         prompt("Column 0A field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -335,7 +335,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL0BTYPE, DBF_MENU) {
+    field(C0BTYPE, DBF_MENU) {
         prompt("Column 0B field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -343,7 +343,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL0CTYPE, DBF_MENU) {
+    field(C0CTYPE, DBF_MENU) {
         prompt("Column 0C field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -351,7 +351,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL0DTYPE, DBF_MENU) {
+    field(C0DTYPE, DBF_MENU) {
         prompt("Column 0D field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -359,7 +359,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL0ETYPE, DBF_MENU) {
+    field(C0ETYPE, DBF_MENU) {
         prompt("Column 0E field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -367,7 +367,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COL0FTYPE, DBF_MENU) {
+    field(C0FTYPE, DBF_MENU) {
         prompt("Column 0F field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -377,456 +377,456 @@ recordtype(table) {
     }
 
     # ----------------------------------------------------------------
-    # Column input links — COL00INP .. COL0FINP
+    # Column input links — C00INP .. C0FINP
     # ----------------------------------------------------------------
 
-    field(COL00INP, DBF_INLINK) {
+    field(C00INP, DBF_INLINK) {
         prompt("Column 00 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL01INP, DBF_INLINK) {
+    field(C01INP, DBF_INLINK) {
         prompt("Column 01 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL02INP, DBF_INLINK) {
+    field(C02INP, DBF_INLINK) {
         prompt("Column 02 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL03INP, DBF_INLINK) {
+    field(C03INP, DBF_INLINK) {
         prompt("Column 03 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL04INP, DBF_INLINK) {
+    field(C04INP, DBF_INLINK) {
         prompt("Column 04 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL05INP, DBF_INLINK) {
+    field(C05INP, DBF_INLINK) {
         prompt("Column 05 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL06INP, DBF_INLINK) {
+    field(C06INP, DBF_INLINK) {
         prompt("Column 06 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL07INP, DBF_INLINK) {
+    field(C07INP, DBF_INLINK) {
         prompt("Column 07 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL08INP, DBF_INLINK) {
+    field(C08INP, DBF_INLINK) {
         prompt("Column 08 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL09INP, DBF_INLINK) {
+    field(C09INP, DBF_INLINK) {
         prompt("Column 09 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL0AINP, DBF_INLINK) {
+    field(C0AINP, DBF_INLINK) {
         prompt("Column 0A input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL0BINP, DBF_INLINK) {
+    field(C0BINP, DBF_INLINK) {
         prompt("Column 0B input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL0CINP, DBF_INLINK) {
+    field(C0CINP, DBF_INLINK) {
         prompt("Column 0C input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL0DINP, DBF_INLINK) {
+    field(C0DINP, DBF_INLINK) {
         prompt("Column 0D input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL0EINP, DBF_INLINK) {
+    field(C0EINP, DBF_INLINK) {
         prompt("Column 0E input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COL0FINP, DBF_INLINK) {
+    field(C0FINP, DBF_INLINK) {
         prompt("Column 0F input link")
         promptgroup("41 - Input")
         interest(1)
     }
 
     # ----------------------------------------------------------------
-    # Column data buffers — COL00VAL .. COL0FVAL
+    # Column data buffers — C00VAL .. C0FVAL
     # ----------------------------------------------------------------
 
-    field(COL00VAL, DBF_NOACCESS) {
+    field(C00VAL, DBF_NOACCESS) {
         prompt("Column 00 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col00val")
+        extra("void *c00val")
         interest(2)
     }
-    field(COL01VAL, DBF_NOACCESS) {
+    field(C01VAL, DBF_NOACCESS) {
         prompt("Column 01 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col01val")
+        extra("void *c01val")
         interest(2)
     }
-    field(COL02VAL, DBF_NOACCESS) {
+    field(C02VAL, DBF_NOACCESS) {
         prompt("Column 02 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col02val")
+        extra("void *c02val")
         interest(2)
     }
-    field(COL03VAL, DBF_NOACCESS) {
+    field(C03VAL, DBF_NOACCESS) {
         prompt("Column 03 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col03val")
+        extra("void *c03val")
         interest(2)
     }
-    field(COL04VAL, DBF_NOACCESS) {
+    field(C04VAL, DBF_NOACCESS) {
         prompt("Column 04 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col04val")
+        extra("void *c04val")
         interest(2)
     }
-    field(COL05VAL, DBF_NOACCESS) {
+    field(C05VAL, DBF_NOACCESS) {
         prompt("Column 05 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col05val")
+        extra("void *c05val")
         interest(2)
     }
-    field(COL06VAL, DBF_NOACCESS) {
+    field(C06VAL, DBF_NOACCESS) {
         prompt("Column 06 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col06val")
+        extra("void *c06val")
         interest(2)
     }
-    field(COL07VAL, DBF_NOACCESS) {
+    field(C07VAL, DBF_NOACCESS) {
         prompt("Column 07 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col07val")
+        extra("void *c07val")
         interest(2)
     }
-    field(COL08VAL, DBF_NOACCESS) {
+    field(C08VAL, DBF_NOACCESS) {
         prompt("Column 08 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col08val")
+        extra("void *c08val")
         interest(2)
     }
-    field(COL09VAL, DBF_NOACCESS) {
+    field(C09VAL, DBF_NOACCESS) {
         prompt("Column 09 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col09val")
+        extra("void *c09val")
         interest(2)
     }
-    field(COL0AVAL, DBF_NOACCESS) {
+    field(C0AVAL, DBF_NOACCESS) {
         prompt("Column 0A data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0aval")
+        extra("void *c0aval")
         interest(2)
     }
-    field(COL0BVAL, DBF_NOACCESS) {
+    field(C0BVAL, DBF_NOACCESS) {
         prompt("Column 0B data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0bval")
+        extra("void *c0bval")
         interest(2)
     }
-    field(COL0CVAL, DBF_NOACCESS) {
+    field(C0CVAL, DBF_NOACCESS) {
         prompt("Column 0C data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0cval")
+        extra("void *c0cval")
         interest(2)
     }
-    field(COL0DVAL, DBF_NOACCESS) {
+    field(C0DVAL, DBF_NOACCESS) {
         prompt("Column 0D data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0dval")
+        extra("void *c0dval")
         interest(2)
     }
-    field(COL0EVAL, DBF_NOACCESS) {
+    field(C0EVAL, DBF_NOACCESS) {
         prompt("Column 0E data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0eval")
+        extra("void *c0eval")
         interest(2)
     }
-    field(COL0FVAL, DBF_NOACCESS) {
+    field(C0FVAL, DBF_NOACCESS) {
         prompt("Column 0F data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *col0fval")
+        extra("void *c0fval")
         interest(2)
     }
 
     # ----------------------------------------------------------------
-    # Column changed flags — COL00CHGD .. COL0FCHGD
+    # Column changed flags — C00CHGD .. C0FCHGD
     # ----------------------------------------------------------------
 
-    field(COL00CHGD, DBF_UCHAR) {
+    field(C00CHGD, DBF_UCHAR) {
         prompt("Column 00 changed flag")
         interest(2)
     }
-    field(COL01CHGD, DBF_UCHAR) {
+    field(C01CHGD, DBF_UCHAR) {
         prompt("Column 01 changed flag")
         interest(2)
     }
-    field(COL02CHGD, DBF_UCHAR) {
+    field(C02CHGD, DBF_UCHAR) {
         prompt("Column 02 changed flag")
         interest(2)
     }
-    field(COL03CHGD, DBF_UCHAR) {
+    field(C03CHGD, DBF_UCHAR) {
         prompt("Column 03 changed flag")
         interest(2)
     }
-    field(COL04CHGD, DBF_UCHAR) {
+    field(C04CHGD, DBF_UCHAR) {
         prompt("Column 04 changed flag")
         interest(2)
     }
-    field(COL05CHGD, DBF_UCHAR) {
+    field(C05CHGD, DBF_UCHAR) {
         prompt("Column 05 changed flag")
         interest(2)
     }
-    field(COL06CHGD, DBF_UCHAR) {
+    field(C06CHGD, DBF_UCHAR) {
         prompt("Column 06 changed flag")
         interest(2)
     }
-    field(COL07CHGD, DBF_UCHAR) {
+    field(C07CHGD, DBF_UCHAR) {
         prompt("Column 07 changed flag")
         interest(2)
     }
-    field(COL08CHGD, DBF_UCHAR) {
+    field(C08CHGD, DBF_UCHAR) {
         prompt("Column 08 changed flag")
         interest(2)
     }
-    field(COL09CHGD, DBF_UCHAR) {
+    field(C09CHGD, DBF_UCHAR) {
         prompt("Column 09 changed flag")
         interest(2)
     }
-    field(COL0ACHGD, DBF_UCHAR) {
+    field(C0ACHGD, DBF_UCHAR) {
         prompt("Column 0A changed flag")
         interest(2)
     }
-    field(COL0BCHGD, DBF_UCHAR) {
+    field(C0BCHGD, DBF_UCHAR) {
         prompt("Column 0B changed flag")
         interest(2)
     }
-    field(COL0CCHGD, DBF_UCHAR) {
+    field(C0CCHGD, DBF_UCHAR) {
         prompt("Column 0C changed flag")
         interest(2)
     }
-    field(COL0DCHGD, DBF_UCHAR) {
+    field(C0DCHGD, DBF_UCHAR) {
         prompt("Column 0D changed flag")
         interest(2)
     }
-    field(COL0ECHGD, DBF_UCHAR) {
+    field(C0ECHGD, DBF_UCHAR) {
         prompt("Column 0E changed flag")
         interest(2)
     }
-    field(COL0FCHGD, DBF_UCHAR) {
+    field(C0FCHGD, DBF_UCHAR) {
         prompt("Column 0F changed flag")
         interest(2)
     }
 
     # ----------------------------------------------------------------
-    # Column valid row counts — COL00NUMROWS .. COL0FNUMROWS
+    # Column valid row counts — C00NROWS .. C0FNROWS
     # ----------------------------------------------------------------
 
-    field(COL00NUMROWS, DBF_ULONG) {
+    field(C00NROWS, DBF_ULONG) {
         prompt("Column 00 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL01NUMROWS, DBF_ULONG) {
+    field(C01NROWS, DBF_ULONG) {
         prompt("Column 01 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL02NUMROWS, DBF_ULONG) {
+    field(C02NROWS, DBF_ULONG) {
         prompt("Column 02 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL03NUMROWS, DBF_ULONG) {
+    field(C03NROWS, DBF_ULONG) {
         prompt("Column 03 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL04NUMROWS, DBF_ULONG) {
+    field(C04NROWS, DBF_ULONG) {
         prompt("Column 04 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL05NUMROWS, DBF_ULONG) {
+    field(C05NROWS, DBF_ULONG) {
         prompt("Column 05 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL06NUMROWS, DBF_ULONG) {
+    field(C06NROWS, DBF_ULONG) {
         prompt("Column 06 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL07NUMROWS, DBF_ULONG) {
+    field(C07NROWS, DBF_ULONG) {
         prompt("Column 07 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL08NUMROWS, DBF_ULONG) {
+    field(C08NROWS, DBF_ULONG) {
         prompt("Column 08 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL09NUMROWS, DBF_ULONG) {
+    field(C09NROWS, DBF_ULONG) {
         prompt("Column 09 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL0ANUMROWS, DBF_ULONG) {
+    field(C0ANROWS, DBF_ULONG) {
         prompt("Column 0A number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL0BNUMROWS, DBF_ULONG) {
+    field(C0BNROWS, DBF_ULONG) {
         prompt("Column 0B number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL0CNUMROWS, DBF_ULONG) {
+    field(C0CNROWS, DBF_ULONG) {
         prompt("Column 0C number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL0DNUMROWS, DBF_ULONG) {
+    field(C0DNROWS, DBF_ULONG) {
         prompt("Column 0D number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL0ENUMROWS, DBF_ULONG) {
+    field(C0ENROWS, DBF_ULONG) {
         prompt("Column 0E number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COL0FNUMROWS, DBF_ULONG) {
+    field(C0FNROWS, DBF_ULONG) {
         prompt("Column 0F number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
 
     # ----------------------------------------------------------------
-    # Optional column names — COLOPT00NAME .. COLOPT0FNAME
+    # Optional column names — CO00NAME .. CO0FNAME
     # ----------------------------------------------------------------
 
-    field(COLOPT00NAME, DBF_STRING) {
+    field(CO00NAME, DBF_STRING) {
         prompt("Optional column 00 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT01NAME, DBF_STRING) {
+    field(CO01NAME, DBF_STRING) {
         prompt("Optional column 01 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT02NAME, DBF_STRING) {
+    field(CO02NAME, DBF_STRING) {
         prompt("Optional column 02 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT03NAME, DBF_STRING) {
+    field(CO03NAME, DBF_STRING) {
         prompt("Optional column 03 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT04NAME, DBF_STRING) {
+    field(CO04NAME, DBF_STRING) {
         prompt("Optional column 04 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT05NAME, DBF_STRING) {
+    field(CO05NAME, DBF_STRING) {
         prompt("Optional column 05 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT06NAME, DBF_STRING) {
+    field(CO06NAME, DBF_STRING) {
         prompt("Optional column 06 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT07NAME, DBF_STRING) {
+    field(CO07NAME, DBF_STRING) {
         prompt("Optional column 07 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT08NAME, DBF_STRING) {
+    field(CO08NAME, DBF_STRING) {
         prompt("Optional column 08 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT09NAME, DBF_STRING) {
+    field(CO09NAME, DBF_STRING) {
         prompt("Optional column 09 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT0ANAME, DBF_STRING) {
+    field(CO0ANAME, DBF_STRING) {
         prompt("Optional column 0A name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT0BNAME, DBF_STRING) {
+    field(CO0BNAME, DBF_STRING) {
         prompt("Optional column 0B name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT0CNAME, DBF_STRING) {
+    field(CO0CNAME, DBF_STRING) {
         prompt("Optional column 0C name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT0DNAME, DBF_STRING) {
+    field(CO0DNAME, DBF_STRING) {
         prompt("Optional column 0D name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT0ENAME, DBF_STRING) {
+    field(CO0ENAME, DBF_STRING) {
         prompt("Optional column 0E name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
-    field(COLOPT0FNAME, DBF_STRING) {
+    field(CO0FNAME, DBF_STRING) {
         prompt("Optional column 0F name")
         promptgroup("41 - Input")
         interest(1)
@@ -834,10 +834,10 @@ recordtype(table) {
     }
 
     # ----------------------------------------------------------------
-    # Optional column field types — COLOPT00TYPE .. COLOPT0FTYPE
+    # Optional column field types — CO00TYPE .. CO0FTYPE
     # ----------------------------------------------------------------
 
-    field(COLOPT00TYPE, DBF_MENU) {
+    field(CO00TYPE, DBF_MENU) {
         prompt("Optional column 00 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -845,7 +845,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT01TYPE, DBF_MENU) {
+    field(CO01TYPE, DBF_MENU) {
         prompt("Optional column 01 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -853,7 +853,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT02TYPE, DBF_MENU) {
+    field(CO02TYPE, DBF_MENU) {
         prompt("Optional column 02 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -861,7 +861,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT03TYPE, DBF_MENU) {
+    field(CO03TYPE, DBF_MENU) {
         prompt("Optional column 03 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -869,7 +869,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT04TYPE, DBF_MENU) {
+    field(CO04TYPE, DBF_MENU) {
         prompt("Optional column 04 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -877,7 +877,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT05TYPE, DBF_MENU) {
+    field(CO05TYPE, DBF_MENU) {
         prompt("Optional column 05 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -885,7 +885,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT06TYPE, DBF_MENU) {
+    field(CO06TYPE, DBF_MENU) {
         prompt("Optional column 06 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -893,7 +893,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT07TYPE, DBF_MENU) {
+    field(CO07TYPE, DBF_MENU) {
         prompt("Optional column 07 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -901,7 +901,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT08TYPE, DBF_MENU) {
+    field(CO08TYPE, DBF_MENU) {
         prompt("Optional column 08 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -909,7 +909,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT09TYPE, DBF_MENU) {
+    field(CO09TYPE, DBF_MENU) {
         prompt("Optional column 09 field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -917,7 +917,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT0ATYPE, DBF_MENU) {
+    field(CO0ATYPE, DBF_MENU) {
         prompt("Optional column 0A field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -925,7 +925,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT0BTYPE, DBF_MENU) {
+    field(CO0BTYPE, DBF_MENU) {
         prompt("Optional column 0B field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -933,7 +933,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT0CTYPE, DBF_MENU) {
+    field(CO0CTYPE, DBF_MENU) {
         prompt("Optional column 0C field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -941,7 +941,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT0DTYPE, DBF_MENU) {
+    field(CO0DTYPE, DBF_MENU) {
         prompt("Optional column 0D field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -949,7 +949,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT0ETYPE, DBF_MENU) {
+    field(CO0ETYPE, DBF_MENU) {
         prompt("Optional column 0E field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -957,7 +957,7 @@ recordtype(table) {
         menu(menuFtype)
         initial("DOUBLE")
     }
-    field(COLOPT0FTYPE, DBF_MENU) {
+    field(CO0FTYPE, DBF_MENU) {
         prompt("Optional column 0F field type")
         promptgroup("41 - Input")
         special(SPC_NOMOD)
@@ -967,204 +967,204 @@ recordtype(table) {
     }
 
     # ----------------------------------------------------------------
-    # Optional column input links — COLOPT00INP .. COLOPT0FINP
+    # Optional column input links — CO00INP .. CO0FINP
     # ----------------------------------------------------------------
 
-    field(COLOPT00INP, DBF_INLINK) {
+    field(CO00INP, DBF_INLINK) {
         prompt("Optional column 00 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT01INP, DBF_INLINK) {
+    field(CO01INP, DBF_INLINK) {
         prompt("Optional column 01 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT02INP, DBF_INLINK) {
+    field(CO02INP, DBF_INLINK) {
         prompt("Optional column 02 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT03INP, DBF_INLINK) {
+    field(CO03INP, DBF_INLINK) {
         prompt("Optional column 03 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT04INP, DBF_INLINK) {
+    field(CO04INP, DBF_INLINK) {
         prompt("Optional column 04 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT05INP, DBF_INLINK) {
+    field(CO05INP, DBF_INLINK) {
         prompt("Optional column 05 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT06INP, DBF_INLINK) {
+    field(CO06INP, DBF_INLINK) {
         prompt("Optional column 06 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT07INP, DBF_INLINK) {
+    field(CO07INP, DBF_INLINK) {
         prompt("Optional column 07 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT08INP, DBF_INLINK) {
+    field(CO08INP, DBF_INLINK) {
         prompt("Optional column 08 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT09INP, DBF_INLINK) {
+    field(CO09INP, DBF_INLINK) {
         prompt("Optional column 09 input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT0AINP, DBF_INLINK) {
+    field(CO0AINP, DBF_INLINK) {
         prompt("Optional column 0A input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT0BINP, DBF_INLINK) {
+    field(CO0BINP, DBF_INLINK) {
         prompt("Optional column 0B input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT0CINP, DBF_INLINK) {
+    field(CO0CINP, DBF_INLINK) {
         prompt("Optional column 0C input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT0DINP, DBF_INLINK) {
+    field(CO0DINP, DBF_INLINK) {
         prompt("Optional column 0D input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT0EINP, DBF_INLINK) {
+    field(CO0EINP, DBF_INLINK) {
         prompt("Optional column 0E input link")
         promptgroup("41 - Input")
         interest(1)
     }
-    field(COLOPT0FINP, DBF_INLINK) {
+    field(CO0FINP, DBF_INLINK) {
         prompt("Optional column 0F input link")
         promptgroup("41 - Input")
         interest(1)
     }
 
     # ----------------------------------------------------------------
-    # Optional column data buffers — COLOPT00VAL .. COLOPT0FVAL
+    # Optional column data buffers — CO00VAL .. CO0FVAL
     # ----------------------------------------------------------------
 
-    field(COLOPT00VAL, DBF_NOACCESS) {
+    field(CO00VAL, DBF_NOACCESS) {
         prompt("Optional column 00 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt00val")
+        extra("void *co00val")
         interest(2)
     }
-    field(COLOPT01VAL, DBF_NOACCESS) {
+    field(CO01VAL, DBF_NOACCESS) {
         prompt("Optional column 01 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt01val")
+        extra("void *co01val")
         interest(2)
     }
-    field(COLOPT02VAL, DBF_NOACCESS) {
+    field(CO02VAL, DBF_NOACCESS) {
         prompt("Optional column 02 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt02val")
+        extra("void *co02val")
         interest(2)
     }
-    field(COLOPT03VAL, DBF_NOACCESS) {
+    field(CO03VAL, DBF_NOACCESS) {
         prompt("Optional column 03 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt03val")
+        extra("void *co03val")
         interest(2)
     }
-    field(COLOPT04VAL, DBF_NOACCESS) {
+    field(CO04VAL, DBF_NOACCESS) {
         prompt("Optional column 04 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt04val")
+        extra("void *co04val")
         interest(2)
     }
-    field(COLOPT05VAL, DBF_NOACCESS) {
+    field(CO05VAL, DBF_NOACCESS) {
         prompt("Optional column 05 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt05val")
+        extra("void *co05val")
         interest(2)
     }
-    field(COLOPT06VAL, DBF_NOACCESS) {
+    field(CO06VAL, DBF_NOACCESS) {
         prompt("Optional column 06 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt06val")
+        extra("void *co06val")
         interest(2)
     }
-    field(COLOPT07VAL, DBF_NOACCESS) {
+    field(CO07VAL, DBF_NOACCESS) {
         prompt("Optional column 07 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt07val")
+        extra("void *co07val")
         interest(2)
     }
-    field(COLOPT08VAL, DBF_NOACCESS) {
+    field(CO08VAL, DBF_NOACCESS) {
         prompt("Optional column 08 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt08val")
+        extra("void *co08val")
         interest(2)
     }
-    field(COLOPT09VAL, DBF_NOACCESS) {
+    field(CO09VAL, DBF_NOACCESS) {
         prompt("Optional column 09 data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt09val")
+        extra("void *co09val")
         interest(2)
     }
-    field(COLOPT0AVAL, DBF_NOACCESS) {
+    field(CO0AVAL, DBF_NOACCESS) {
         prompt("Optional column 0A data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt0aval")
+        extra("void *co0aval")
         interest(2)
     }
-    field(COLOPT0BVAL, DBF_NOACCESS) {
+    field(CO0BVAL, DBF_NOACCESS) {
         prompt("Optional column 0B data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt0bval")
+        extra("void *co0bval")
         interest(2)
     }
-    field(COLOPT0CVAL, DBF_NOACCESS) {
+    field(CO0CVAL, DBF_NOACCESS) {
         prompt("Optional column 0C data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt0cval")
+        extra("void *co0cval")
         interest(2)
     }
-    field(COLOPT0DVAL, DBF_NOACCESS) {
+    field(CO0DVAL, DBF_NOACCESS) {
         prompt("Optional column 0D data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt0dval")
+        extra("void *co0dval")
         interest(2)
     }
-    field(COLOPT0EVAL, DBF_NOACCESS) {
+    field(CO0EVAL, DBF_NOACCESS) {
         prompt("Optional column 0E data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt0eval")
+        extra("void *co0eval")
         interest(2)
     }
-    field(COLOPT0FVAL, DBF_NOACCESS) {
+    field(CO0FVAL, DBF_NOACCESS) {
         prompt("Optional column 0F data")
         special(SPC_DBADDR)
         pp(TRUE)
-        extra("void *colopt0fval")
+        extra("void *co0fval")
         interest(2)
     }
 
@@ -1175,154 +1175,154 @@ recordtype(table) {
     }
 
     # ----------------------------------------------------------------
-    # Optional column changed flags — COLOPT00CHGD .. COLOPT0FCHGD
+    # Optional column changed flags — CO00CHGD .. CO0FCHGD
     # ----------------------------------------------------------------
 
-    field(COLOPT00CHGD, DBF_UCHAR) {
+    field(CO00CHGD, DBF_UCHAR) {
         prompt("Optional column 00 changed flag")
         interest(2)
     }
-    field(COLOPT01CHGD, DBF_UCHAR) {
+    field(CO01CHGD, DBF_UCHAR) {
         prompt("Optional column 01 changed flag")
         interest(2)
     }
-    field(COLOPT02CHGD, DBF_UCHAR) {
+    field(CO02CHGD, DBF_UCHAR) {
         prompt("Optional column 02 changed flag")
         interest(2)
     }
-    field(COLOPT03CHGD, DBF_UCHAR) {
+    field(CO03CHGD, DBF_UCHAR) {
         prompt("Optional column 03 changed flag")
         interest(2)
     }
-    field(COLOPT04CHGD, DBF_UCHAR) {
+    field(CO04CHGD, DBF_UCHAR) {
         prompt("Optional column 04 changed flag")
         interest(2)
     }
-    field(COLOPT05CHGD, DBF_UCHAR) {
+    field(CO05CHGD, DBF_UCHAR) {
         prompt("Optional column 05 changed flag")
         interest(2)
     }
-    field(COLOPT06CHGD, DBF_UCHAR) {
+    field(CO06CHGD, DBF_UCHAR) {
         prompt("Optional column 06 changed flag")
         interest(2)
     }
-    field(COLOPT07CHGD, DBF_UCHAR) {
+    field(CO07CHGD, DBF_UCHAR) {
         prompt("Optional column 07 changed flag")
         interest(2)
     }
-    field(COLOPT08CHGD, DBF_UCHAR) {
+    field(CO08CHGD, DBF_UCHAR) {
         prompt("Optional column 08 changed flag")
         interest(2)
     }
-    field(COLOPT09CHGD, DBF_UCHAR) {
+    field(CO09CHGD, DBF_UCHAR) {
         prompt("Optional column 09 changed flag")
         interest(2)
     }
-    field(COLOPT0ACHGD, DBF_UCHAR) {
+    field(CO0ACHGD, DBF_UCHAR) {
         prompt("Optional column 0A changed flag")
         interest(2)
     }
-    field(COLOPT0BCHGD, DBF_UCHAR) {
+    field(CO0BCHGD, DBF_UCHAR) {
         prompt("Optional column 0B changed flag")
         interest(2)
     }
-    field(COLOPT0CCHGD, DBF_UCHAR) {
+    field(CO0CCHGD, DBF_UCHAR) {
         prompt("Optional column 0C changed flag")
         interest(2)
     }
-    field(COLOPT0DCHGD, DBF_UCHAR) {
+    field(CO0DCHGD, DBF_UCHAR) {
         prompt("Optional column 0D changed flag")
         interest(2)
     }
-    field(COLOPT0ECHGD, DBF_UCHAR) {
+    field(CO0ECHGD, DBF_UCHAR) {
         prompt("Optional column 0E changed flag")
         interest(2)
     }
-    field(COLOPT0FCHGD, DBF_UCHAR) {
+    field(CO0FCHGD, DBF_UCHAR) {
         prompt("Optional column 0F changed flag")
         interest(2)
     }
 
     # ----------------------------------------------------------------
-    # Optional column valid row counts — COLOPT00NUMROWS .. COLOPT0FNUMROWS
+    # Optional column valid row counts — CO00NROWS .. CO0FNROWS
     # ----------------------------------------------------------------
 
-    field(COLOPT00NUMROWS, DBF_ULONG) {
+    field(CO00NROWS, DBF_ULONG) {
         prompt("Optional column 00 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT01NUMROWS, DBF_ULONG) {
+    field(CO01NROWS, DBF_ULONG) {
         prompt("Optional column 01 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT02NUMROWS, DBF_ULONG) {
+    field(CO02NROWS, DBF_ULONG) {
         prompt("Optional column 02 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT03NUMROWS, DBF_ULONG) {
+    field(CO03NROWS, DBF_ULONG) {
         prompt("Optional column 03 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT04NUMROWS, DBF_ULONG) {
+    field(CO04NROWS, DBF_ULONG) {
         prompt("Optional column 04 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT05NUMROWS, DBF_ULONG) {
+    field(CO05NROWS, DBF_ULONG) {
         prompt("Optional column 05 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT06NUMROWS, DBF_ULONG) {
+    field(CO06NROWS, DBF_ULONG) {
         prompt("Optional column 06 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT07NUMROWS, DBF_ULONG) {
+    field(CO07NROWS, DBF_ULONG) {
         prompt("Optional column 07 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT08NUMROWS, DBF_ULONG) {
+    field(CO08NROWS, DBF_ULONG) {
         prompt("Optional column 08 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT09NUMROWS, DBF_ULONG) {
+    field(CO09NROWS, DBF_ULONG) {
         prompt("Optional column 09 number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT0ANUMROWS, DBF_ULONG) {
+    field(CO0ANROWS, DBF_ULONG) {
         prompt("Optional column 0A number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT0BNUMROWS, DBF_ULONG) {
+    field(CO0BNROWS, DBF_ULONG) {
         prompt("Optional column 0B number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT0CNUMROWS, DBF_ULONG) {
+    field(CO0CNROWS, DBF_ULONG) {
         prompt("Optional column 0C number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT0DNUMROWS, DBF_ULONG) {
+    field(CO0DNROWS, DBF_ULONG) {
         prompt("Optional column 0D number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT0ENUMROWS, DBF_ULONG) {
+    field(CO0ENROWS, DBF_ULONG) {
         prompt("Optional column 0E number of valid rows")
         special(SPC_NOMOD)
         interest(2)
     }
-    field(COLOPT0FNUMROWS, DBF_ULONG) {
+    field(CO0FNROWS, DBF_ULONG) {
         prompt("Optional column 0F number of valid rows")
         special(SPC_NOMOD)
         interest(2)

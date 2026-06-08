@@ -80,7 +80,7 @@ static long sim_read_table(tableRecord *prec) {
     // Set all changed fields
     // TODO: do we need chgd?
     for (size_t col = 0; col < rec.num_data_cols(); ++col) {
-        *(&prec->col00chgd + col) = 1;
+        *(&prec->c00chgd + col) = 1;
     }
 
     // Generate random data for each column

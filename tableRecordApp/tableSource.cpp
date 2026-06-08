@@ -135,22 +135,22 @@ struct Col {
 
 static void getCols(tableRecord *prec, Col cols[16])
 {
-    cols[ 0] = {prec->col00name, prec->col00label, prec->col00type, prec->col00val, prec->col00numrows};
-    cols[ 1] = {prec->col01name, prec->col01label, prec->col01type, prec->col01val, prec->col01numrows};
-    cols[ 2] = {prec->col02name, prec->col02label, prec->col02type, prec->col02val, prec->col02numrows};
-    cols[ 3] = {prec->col03name, prec->col03label, prec->col03type, prec->col03val, prec->col03numrows};
-    cols[ 4] = {prec->col04name, prec->col04label, prec->col04type, prec->col04val, prec->col04numrows};
-    cols[ 5] = {prec->col05name, prec->col05label, prec->col05type, prec->col05val, prec->col05numrows};
-    cols[ 6] = {prec->col06name, prec->col06label, prec->col06type, prec->col06val, prec->col06numrows};
-    cols[ 7] = {prec->col07name, prec->col07label, prec->col07type, prec->col07val, prec->col07numrows};
-    cols[ 8] = {prec->col08name, prec->col08label, prec->col08type, prec->col08val, prec->col08numrows};
-    cols[ 9] = {prec->col09name, prec->col09label, prec->col09type, prec->col09val, prec->col09numrows};
-    cols[10] = {prec->col0aname, prec->col0alabel, prec->col0atype, prec->col0aval, prec->col0anumrows};
-    cols[11] = {prec->col0bname, prec->col0blabel, prec->col0btype, prec->col0bval, prec->col0bnumrows};
-    cols[12] = {prec->col0cname, prec->col0clabel, prec->col0ctype, prec->col0cval, prec->col0cnumrows};
-    cols[13] = {prec->col0dname, prec->col0dlabel, prec->col0dtype, prec->col0dval, prec->col0dnumrows};
-    cols[14] = {prec->col0ename, prec->col0elabel, prec->col0etype, prec->col0eval, prec->col0enumrows};
-    cols[15] = {prec->col0fname, prec->col0flabel, prec->col0ftype, prec->col0fval, prec->col0fnumrows};
+    cols[ 0] = {prec->c00name, prec->c00label, prec->c00type, prec->c00val, prec->c00nrows};
+    cols[ 1] = {prec->c01name, prec->c01label, prec->c01type, prec->c01val, prec->c01nrows};
+    cols[ 2] = {prec->c02name, prec->c02label, prec->c02type, prec->c02val, prec->c02nrows};
+    cols[ 3] = {prec->c03name, prec->c03label, prec->c03type, prec->c03val, prec->c03nrows};
+    cols[ 4] = {prec->c04name, prec->c04label, prec->c04type, prec->c04val, prec->c04nrows};
+    cols[ 5] = {prec->c05name, prec->c05label, prec->c05type, prec->c05val, prec->c05nrows};
+    cols[ 6] = {prec->c06name, prec->c06label, prec->c06type, prec->c06val, prec->c06nrows};
+    cols[ 7] = {prec->c07name, prec->c07label, prec->c07type, prec->c07val, prec->c07nrows};
+    cols[ 8] = {prec->c08name, prec->c08label, prec->c08type, prec->c08val, prec->c08nrows};
+    cols[ 9] = {prec->c09name, prec->c09label, prec->c09type, prec->c09val, prec->c09nrows};
+    cols[10] = {prec->c0aname, prec->c0alabel, prec->c0atype, prec->c0aval, prec->c0anrows};
+    cols[11] = {prec->c0bname, prec->c0blabel, prec->c0btype, prec->c0bval, prec->c0bnrows};
+    cols[12] = {prec->c0cname, prec->c0clabel, prec->c0ctype, prec->c0cval, prec->c0cnrows};
+    cols[13] = {prec->c0dname, prec->c0dlabel, prec->c0dtype, prec->c0dval, prec->c0dnrows};
+    cols[14] = {prec->c0ename, prec->c0elabel, prec->c0etype, prec->c0eval, prec->c0enrows};
+    cols[15] = {prec->c0fname, prec->c0flabel, prec->c0ftype, prec->c0fval, prec->c0fnrows};
 }
 
 struct OptCol {
@@ -162,22 +162,22 @@ struct OptCol {
 
 static void getOptCols(tableRecord *prec, OptCol cols[16])
 {
-    cols[ 0] = {prec->colopt00name, prec->colopt00type, prec->colopt00val, prec->colopt00numrows};
-    cols[ 1] = {prec->colopt01name, prec->colopt01type, prec->colopt01val, prec->colopt01numrows};
-    cols[ 2] = {prec->colopt02name, prec->colopt02type, prec->colopt02val, prec->colopt02numrows};
-    cols[ 3] = {prec->colopt03name, prec->colopt03type, prec->colopt03val, prec->colopt03numrows};
-    cols[ 4] = {prec->colopt04name, prec->colopt04type, prec->colopt04val, prec->colopt04numrows};
-    cols[ 5] = {prec->colopt05name, prec->colopt05type, prec->colopt05val, prec->colopt05numrows};
-    cols[ 6] = {prec->colopt06name, prec->colopt06type, prec->colopt06val, prec->colopt06numrows};
-    cols[ 7] = {prec->colopt07name, prec->colopt07type, prec->colopt07val, prec->colopt07numrows};
-    cols[ 8] = {prec->colopt08name, prec->colopt08type, prec->colopt08val, prec->colopt08numrows};
-    cols[ 9] = {prec->colopt09name, prec->colopt09type, prec->colopt09val, prec->colopt09numrows};
-    cols[10] = {prec->colopt0aname, prec->colopt0atype, prec->colopt0aval, prec->colopt0anumrows};
-    cols[11] = {prec->colopt0bname, prec->colopt0btype, prec->colopt0bval, prec->colopt0bnumrows};
-    cols[12] = {prec->colopt0cname, prec->colopt0ctype, prec->colopt0cval, prec->colopt0cnumrows};
-    cols[13] = {prec->colopt0dname, prec->colopt0dtype, prec->colopt0dval, prec->colopt0dnumrows};
-    cols[14] = {prec->colopt0ename, prec->colopt0etype, prec->colopt0eval, prec->colopt0enumrows};
-    cols[15] = {prec->colopt0fname, prec->colopt0ftype, prec->colopt0fval, prec->colopt0fnumrows};
+    cols[ 0] = {prec->co00name, prec->co00type, prec->co00val, prec->co00nrows};
+    cols[ 1] = {prec->co01name, prec->co01type, prec->co01val, prec->co01nrows};
+    cols[ 2] = {prec->co02name, prec->co02type, prec->co02val, prec->co02nrows};
+    cols[ 3] = {prec->co03name, prec->co03type, prec->co03val, prec->co03nrows};
+    cols[ 4] = {prec->co04name, prec->co04type, prec->co04val, prec->co04nrows};
+    cols[ 5] = {prec->co05name, prec->co05type, prec->co05val, prec->co05nrows};
+    cols[ 6] = {prec->co06name, prec->co06type, prec->co06val, prec->co06nrows};
+    cols[ 7] = {prec->co07name, prec->co07type, prec->co07val, prec->co07nrows};
+    cols[ 8] = {prec->co08name, prec->co08type, prec->co08val, prec->co08nrows};
+    cols[ 9] = {prec->co09name, prec->co09type, prec->co09val, prec->co09nrows};
+    cols[10] = {prec->co0aname, prec->co0atype, prec->co0aval, prec->co0anrows};
+    cols[11] = {prec->co0bname, prec->co0btype, prec->co0bval, prec->co0bnrows};
+    cols[12] = {prec->co0cname, prec->co0ctype, prec->co0cval, prec->co0cnrows};
+    cols[13] = {prec->co0dname, prec->co0dtype, prec->co0dval, prec->co0dnrows};
+    cols[14] = {prec->co0ename, prec->co0etype, prec->co0eval, prec->co0enrows};
+    cols[15] = {prec->co0fname, prec->co0ftype, prec->co0fval, prec->co0fnrows};
 }
 
 /* Snapshot a table record into a Value clone (caller holds lock) */
@@ -233,22 +233,22 @@ struct ColPut {
 
 static void getColsPut(tableRecord *prec, ColPut cols[16])
 {
-    cols[ 0] = {prec->col00name, prec->col00type, &prec->col00val, &prec->col00chgd, &prec->col00numrows};
-    cols[ 1] = {prec->col01name, prec->col01type, &prec->col01val, &prec->col01chgd, &prec->col01numrows};
-    cols[ 2] = {prec->col02name, prec->col02type, &prec->col02val, &prec->col02chgd, &prec->col02numrows};
-    cols[ 3] = {prec->col03name, prec->col03type, &prec->col03val, &prec->col03chgd, &prec->col03numrows};
-    cols[ 4] = {prec->col04name, prec->col04type, &prec->col04val, &prec->col04chgd, &prec->col04numrows};
-    cols[ 5] = {prec->col05name, prec->col05type, &prec->col05val, &prec->col05chgd, &prec->col05numrows};
-    cols[ 6] = {prec->col06name, prec->col06type, &prec->col06val, &prec->col06chgd, &prec->col06numrows};
-    cols[ 7] = {prec->col07name, prec->col07type, &prec->col07val, &prec->col07chgd, &prec->col07numrows};
-    cols[ 8] = {prec->col08name, prec->col08type, &prec->col08val, &prec->col08chgd, &prec->col08numrows};
-    cols[ 9] = {prec->col09name, prec->col09type, &prec->col09val, &prec->col09chgd, &prec->col09numrows};
-    cols[10] = {prec->col0aname, prec->col0atype, &prec->col0aval, &prec->col0achgd, &prec->col0anumrows};
-    cols[11] = {prec->col0bname, prec->col0btype, &prec->col0bval, &prec->col0bchgd, &prec->col0bnumrows};
-    cols[12] = {prec->col0cname, prec->col0ctype, &prec->col0cval, &prec->col0cchgd, &prec->col0cnumrows};
-    cols[13] = {prec->col0dname, prec->col0dtype, &prec->col0dval, &prec->col0dchgd, &prec->col0dnumrows};
-    cols[14] = {prec->col0ename, prec->col0etype, &prec->col0eval, &prec->col0echgd, &prec->col0enumrows};
-    cols[15] = {prec->col0fname, prec->col0ftype, &prec->col0fval, &prec->col0fchgd, &prec->col0fnumrows};
+    cols[ 0] = {prec->c00name, prec->c00type, &prec->c00val, &prec->c00chgd, &prec->c00nrows};
+    cols[ 1] = {prec->c01name, prec->c01type, &prec->c01val, &prec->c01chgd, &prec->c01nrows};
+    cols[ 2] = {prec->c02name, prec->c02type, &prec->c02val, &prec->c02chgd, &prec->c02nrows};
+    cols[ 3] = {prec->c03name, prec->c03type, &prec->c03val, &prec->c03chgd, &prec->c03nrows};
+    cols[ 4] = {prec->c04name, prec->c04type, &prec->c04val, &prec->c04chgd, &prec->c04nrows};
+    cols[ 5] = {prec->c05name, prec->c05type, &prec->c05val, &prec->c05chgd, &prec->c05nrows};
+    cols[ 6] = {prec->c06name, prec->c06type, &prec->c06val, &prec->c06chgd, &prec->c06nrows};
+    cols[ 7] = {prec->c07name, prec->c07type, &prec->c07val, &prec->c07chgd, &prec->c07nrows};
+    cols[ 8] = {prec->c08name, prec->c08type, &prec->c08val, &prec->c08chgd, &prec->c08nrows};
+    cols[ 9] = {prec->c09name, prec->c09type, &prec->c09val, &prec->c09chgd, &prec->c09nrows};
+    cols[10] = {prec->c0aname, prec->c0atype, &prec->c0aval, &prec->c0achgd, &prec->c0anrows};
+    cols[11] = {prec->c0bname, prec->c0btype, &prec->c0bval, &prec->c0bchgd, &prec->c0bnrows};
+    cols[12] = {prec->c0cname, prec->c0ctype, &prec->c0cval, &prec->c0cchgd, &prec->c0cnrows};
+    cols[13] = {prec->c0dname, prec->c0dtype, &prec->c0dval, &prec->c0dchgd, &prec->c0dnrows};
+    cols[14] = {prec->c0ename, prec->c0etype, &prec->c0eval, &prec->c0echgd, &prec->c0enrows};
+    cols[15] = {prec->c0fname, prec->c0ftype, &prec->c0fval, &prec->c0fchgd, &prec->c0fnrows};
 }
 
 /* Write NTTable value into a table record (caller holds lock + calls dbProcess) */
