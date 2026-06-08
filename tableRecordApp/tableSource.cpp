@@ -12,6 +12,7 @@
 #include <dbLock.h>
 #include <dbStaticLib.h>
 #include <epicsString.h>
+#include <epicsTime.h>
 
 #include <pvxs/log.h>
 #include <pvxs/nt.h>
@@ -236,7 +237,9 @@ static pvxs::Value snapshot(dbCommon *prec, const pvxs::Value &proto,
                              bool withMeta = false)
 {
     pvxs::Value v = withMeta ? proto.clone() : proto.cloneEmpty();
-    v["timeStamp.secondsPastEpoch"] = (int64_t)prec->time.secPastEpoch;
+    /* prec->time is in the EPICS epoch (1990); PVA timestamps are POSIX (1970). */
+    v["timeStamp.secondsPastEpoch"] =
+        (int64_t)prec->time.secPastEpoch + POSIX_TIME_AT_EPICS_EPOCH;
     v["timeStamp.nanoseconds"]      = (int32_t)prec->time.nsec;
     if (withMeta)
         v["descriptor"] = std::string(prec->desc);
