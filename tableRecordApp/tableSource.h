@@ -15,6 +15,7 @@
 #include <pvxs/nt.h>
 
 #include "tableRecordHook.h"
+#include "tableRecordUtil.h"
 
 namespace table {
 
@@ -37,6 +38,11 @@ struct TableRecCtx {
     tableRecordPvt                     hdr;    /* offset 0: notify() */
     dbCommon                          *prec;
     pvxs::Value                        proto;  /* built once, cloned per update */
+    /* Column accessors, resolved once at init (names/types and the field
+       pointers are fixed for the life of the record). Used for both reading
+       (snapshot) and writing (put). */
+    std::vector<TableRecordWrapper::DataColumn> dcols;
+    std::vector<TableRecordWrapper::OptColumn>  ocols;
     std::mutex                         mu;     /* guards subs */
     std::set<std::shared_ptr<SubCtx>>  subs;
     class TableSource                 *src;
@@ -72,7 +78,9 @@ private:
     std::map<std::string, TableRecCtx*>          records_;
     std::shared_ptr<const std::set<std::string>> names_;
 
-    pvxs::Value makeProto(dbCommon* prec) const;
+    pvxs::Value makeProto(
+        const std::vector<TableRecordWrapper::DataColumn>& dcols,
+        const std::vector<TableRecordWrapper::OptColumn>& ocols) const;
 };
 
 } /* namespace table */
