@@ -41,6 +41,12 @@ recordtype(table) {
         interest(1)
         initial("1")
     }
+    field(RPVT, DBF_NOACCESS) {
+        prompt("Record Private")
+        special(SPC_NOMOD)
+        extra("void *rpvt")
+        interest(4)
+    }
     # ----------------------------------------------------------------
     # Column names — C00NAME .. C0FNAME
     # ----------------------------------------------------------------

@@ -232,15 +232,15 @@ static void snapshotTable(tableRecord *prec, pvxs::Value &v, bool partial)
 /* Build a snapshot Value from the current record state.
    withMeta=true: include static metadata (labels, descriptor) that only needs
    to be sent once per client — on the initial monitor post and every GET. */
-static pvxs::Value snapshot(const RecInfo &ri, const pvxs::Value &proto,
+static pvxs::Value snapshot(dbCommon *prec, const pvxs::Value &proto,
                              bool withMeta = false)
 {
     pvxs::Value v = withMeta ? proto.clone() : proto.cloneEmpty();
-    v["timeStamp.secondsPastEpoch"] = (int64_t)ri.prec->time.secPastEpoch;
-    v["timeStamp.nanoseconds"]      = (int32_t)ri.prec->time.nsec;
+    v["timeStamp.secondsPastEpoch"] = (int64_t)prec->time.secPastEpoch;
+    v["timeStamp.nanoseconds"]      = (int32_t)prec->time.nsec;
     if (withMeta)
-        v["descriptor"] = std::string(ri.prec->desc);
-    snapshotTable((tableRecord *)ri.prec, v, /*partial=*/ !withMeta);
+        v["descriptor"] = std::string(prec->desc);
+    snapshotTable((tableRecord *)prec, v, /*partial=*/ !withMeta);
     return v;
 }
 
@@ -287,31 +287,12 @@ static void putValueTable(tableRecord *prec, const pvxs::Value &val)
     }
 }
 
-/* EPICS event callback — fires on the event thread after a record processes */
-static void eventCallback(void *userArg, struct dbChannel * /*chan*/,
-                           int /*eventsRemaining*/, struct db_field_log * /*pfl*/)
-{
-    SubCtx *ctx = static_cast<SubCtx *>(userArg);
-    if (!ctx->ctrl) return;
-
-    try {
-        pvxs::Value v;
-        {
-            RecLock lk(ctx->ri.prec);
-            v = snapshot(ctx->ri, ctx->proto);
-        }
-        ctx->ctrl->post(v);
-    } catch (std::exception &e) {
-        log_exc_printf(tlog, "eventCallback: %s\n", e.what());
-    }
-}
-
 /* Build NTTable prototype from record metadata (must be called under lock) */
-pvxs::Value TableSource::makeProto(const RecInfo &ri) const
+pvxs::Value TableSource::makeProto(dbCommon *pcommon) const
 {
     pvxs::nt::NTTable builder;
     char fallback[32];
-    tableRecord *prec = (tableRecord *)ri.prec;
+    tableRecord *prec = (tableRecord *)pcommon;
     Col cols[16];
     getCols(prec, cols);
     for (epicsUInt32 i = 0; i < prec->numcols; i++) {
@@ -382,7 +363,6 @@ pvxs::Value TableSource::makeProto(const RecInfo &ri) const
 /* ------------------------------------------------------------------ */
 
 TableSource::TableSource()
-    : eventCtx_(nullptr)
 {
     auto names = std::make_shared<std::set<std::string>>();
     DBENTRY dbe;
@@ -392,25 +372,43 @@ TableSource::TableSource()
         for (long s = dbFirstRecord(&dbe); !s; s = dbNextRecord(&dbe)) {
             const char *rname = dbGetRecordName(&dbe);
             dbCommon *prec = (dbCommon *)dbe.precnode->precord;
-            records_[rname] = RecInfo{prec};
+
+            std::unique_ptr<TableRecCtx> ctx(new TableRecCtx());
+            ctx->prec       = prec;
+            ctx->src        = this;
+            ctx->hdr.notify = &TableSource::onProcess;
+            ctx->hdr.self   = ctx.get();
+
+            /* Build the NTTable prototype once — column metadata is fixed after
+               device-support init, which has already run by the time
+               addTableSource() constructs us. Publishing rpvt under the record
+               lock makes it safe against a concurrent process(). */
+            try {
+                RecLock lk(prec);
+                ctx->proto = makeProto(prec);
+                ((tableRecord *)prec)->rpvt = &ctx->hdr;
+            } catch (std::exception &e) {
+                log_err_printf(tlog, "makeProto failed for '%s': %s\n",
+                               rname, e.what());
+                continue;
+            }
+
+            records_[rname] = ctx.get();
             names->insert(rname);
+            ctxs_.push_back(std::move(ctx));
         }
     }
     dbFinishEntry(&dbe);
     names_ = std::move(names);
-
-    eventCtx_ = db_init_events();
-    if (!eventCtx_)
-        throw std::runtime_error("TableSource: db_init_events() failed");
-    if (db_start_events(eventCtx_, "tableSrc", nullptr, nullptr,
-                        epicsThreadPriorityCAServerLow - 1))
-        throw std::runtime_error("TableSource: db_start_events() failed");
 }
 
 TableSource::~TableSource()
 {
-    if (eventCtx_)
-        db_close_events(eventCtx_);
+    /* Stop process() from calling into us before our state is destroyed. */
+    for (auto &ctx : ctxs_) {
+        RecLock lk(ctx->prec);
+        ((tableRecord *)ctx->prec)->rpvt = nullptr;
+    }
 }
 
 void TableSource::onSearch(Search &op)
@@ -427,30 +425,20 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
     if (it == records_.end())
         return;
 
-    RecInfo ri = it->second;
-
-    pvxs::Value proto;
-    {
-        RecLock lk(ri.prec);
-        try {
-            proto = makeProto(ri);
-        } catch (std::exception &e) {
-            log_err_printf(tlog, "makeProto failed for '%s': %s\n",
-                           chan->name().c_str(), e.what());
-            return;
-        }
-    }
+    TableRecCtx *ctx  = it->second;
+    dbCommon    *prec = ctx->prec;
+    pvxs::Value  proto = ctx->proto;
 
     /* GET / PUT */
-    chan->onOp([ri, proto](std::unique_ptr<pvxs::server::ConnectOp> &&op) {
+    chan->onOp([prec, proto](std::unique_ptr<pvxs::server::ConnectOp> &&op) {
         op->connect(proto);
 
-        op->onGet([ri, proto](std::unique_ptr<pvxs::server::ExecOp> &&get) {
+        op->onGet([prec, proto](std::unique_ptr<pvxs::server::ExecOp> &&get) {
             try {
                 pvxs::Value v;
                 {
-                    RecLock lk(ri.prec);
-                    v = snapshot(ri, proto, true);
+                    RecLock lk(prec);
+                    v = snapshot(prec, proto, true);
                 }
                 get->reply(v);
             } catch (std::exception &e) {
@@ -458,13 +446,13 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
             }
         });
 
-        op->onPut([ri](std::unique_ptr<pvxs::server::ExecOp> &&put,
+        op->onPut([prec](std::unique_ptr<pvxs::server::ExecOp> &&put,
                        pvxs::Value &&val) {
             try {
                 {
-                    RecLock lk(ri.prec);
-                    putValueTable((tableRecord *)ri.prec, val);
-                    dbProcess(ri.prec);
+                    RecLock lk(prec);
+                    putValueTable((tableRecord *)prec, val);
+                    dbProcess(prec);   /* process() drives the update via rpvt */
                 }
                 put->reply();
             } catch (std::exception &e) {
@@ -473,68 +461,71 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
         });
     });
 
-    /* MONITOR */
-    dbEventCtx evtCtx = eventCtx_;
-    chan->onSubscribe([ri, proto, evtCtx](
+    /* MONITOR — register the subscription in the record context; updates are
+       posted from process() via onProcess(). No dbEvent involved. */
+    chan->onSubscribe([ctx, proto](
                           std::unique_ptr<pvxs::server::MonitorSetupOp> &&sub) {
         try {
-            auto ctx      = std::make_shared<SubCtx>();
-            ctx->ri       = ri;
-            ctx->proto    = proto;
-            ctx->evtCtx   = evtCtx;
-            ctx->ctrl     = sub->connect(proto);
+            auto sc   = std::make_shared<SubCtx>();
+            sc->owner = ctx;
+            sc->ctrl  = sub->connect(proto);
 
-            /* Open a dbChannel on C00VAL to subscribe for value-change events. */
-            std::string chname = std::string(ri.prec->name) + ".C00VAL";
-            dbChannel *pChan = dbChannelCreate(chname.c_str());
-            if (!pChan)
-                pChan = dbChannelCreate(ri.prec->name);
-            if (!pChan || dbChannelOpen(pChan)) {
-                if (pChan) dbChannelDelete(pChan);
-                sub->error("TableSource: cannot open dbChannel");
-                return;
-            }
-
-            ctx->ctrl->onStart([ctx, pChan](bool start) mutable {
+            sc->ctrl->onStart([ctx, sc](bool start) {
                 if (start) {
-                    ctx->evtSub = db_add_event(
-                        ctx->evtCtx, pChan,
-                        eventCallback, ctx.get(),
-                        DBE_VALUE);
-                    db_event_enable(ctx->evtSub);
-                    /* Initial snapshot includes labels so the client's
-                       cache_sync prototype is seeded; subsequent posts
-                       via eventCallback omit them. */
+                    /* Register and send the initial full snapshot while holding
+                       both locks: the record lock keeps a concurrent process()
+                       notify from interleaving, and ctx->mu makes the sub
+                       visible to later notifies only once it has its baseline.
+                       Lock order is record-lock -> ctx->mu, matching onProcess. */
                     try {
-                        pvxs::Value v;
-                        {
-                            RecLock lk(ctx->ri.prec);
-                            v = snapshot(ctx->ri, ctx->proto, true);
-                        }
-                        ctx->ctrl->post(v);
+                        RecLock lk(ctx->prec);
+                        std::lock_guard<std::mutex> g(ctx->mu);
+                        ctx->subs.insert(sc);
+                        sc->ctrl->post(snapshot(ctx->prec, ctx->proto, true));
                     } catch (std::exception &e) {
                         log_exc_printf(tlog, "initial snapshot: %s\n", e.what());
                     }
                 } else {
-                    if (ctx->evtSub) {
-                        db_cancel_event(ctx->evtSub);
-                        ctx->evtSub = nullptr;
-                    }
-                    dbChannelDelete(pChan);
+                    std::lock_guard<std::mutex> g(ctx->mu);
+                    ctx->subs.erase(sc);
                 }
             });
 
-            sub->onClose([ctx](const std::string &) {
-                if (ctx->evtSub) {
-                    db_cancel_event(ctx->evtSub);
-                    ctx->evtSub = nullptr;
-                }
-                ctx->ctrl.reset();
+            sub->onClose([ctx, sc](const std::string &) {
+                std::lock_guard<std::mutex> g(ctx->mu);
+                ctx->subs.erase(sc);
+                sc->ctrl.reset();
             });
         } catch (std::exception &e) {
             sub->error(e.what());
         }
     });
+}
+
+/* Synchronous update hook — installed in each record's rpvt->notify and called
+   from tableRecord's process() with the record lock held and this cycle's CHGD
+   flags valid. Builds one partial snapshot and posts it to every subscriber. */
+void TableSource::onProcess(struct tableRecord *prect)
+{
+    dbCommon *prec = (dbCommon *)prect;
+    if (!prect->rpvt)
+        return;
+    tableRecordPvt *hdr = static_cast<tableRecordPvt *>(prect->rpvt);
+    TableRecCtx    *ctx = static_cast<TableRecCtx *>(hdr->self);
+    if (!ctx)
+        return;
+
+    std::lock_guard<std::mutex> g(ctx->mu);
+    if (ctx->subs.empty())
+        return;
+    try {
+        pvxs::Value v = snapshot(prec, ctx->proto, /*withMeta=*/false);
+        for (auto &sc : ctx->subs)
+            if (sc->ctrl)
+                sc->ctrl->post(v);
+    } catch (std::exception &e) {
+        log_exc_printf(tlog, "onProcess: %s\n", e.what());
+    }
 }
 
 TableSource::List TableSource::onList()

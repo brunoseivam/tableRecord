@@ -19,6 +19,7 @@
 #define GEN_SIZE_OFFSET
 #include "tableRecord.h"
 #undef GEN_SIZE_OFFSET
+#include "tableRecordHook.h"
 #include "epicsExport.h"
 
 #define report       NULL
@@ -227,6 +228,14 @@ static long process(struct dbCommon *pcommon)
 
     if (prec->c00val)
         db_post_events(prec, prec->c00val, DBE_VALUE | DBE_LOG);
+
+    /* Notify a registered publisher synchronously, while the lock is still held
+     * and this cycle's CHGD flags are valid. */
+    if (prec->rpvt) {
+        tableRecordPvt *hook = (tableRecordPvt *)prec->rpvt;
+        if (hook->notify)
+            hook->notify((struct tableRecord *)prec);
+    }
 
     recGblFwdLink(prec);
     prec->pact = FALSE;
