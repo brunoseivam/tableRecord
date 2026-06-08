@@ -44,6 +44,7 @@ static long soft_init_record(struct dbCommon *prec)
 
             if (!dbLoadLinkArray(c.inp, c.config.type, *c.val, &n_req)) {
                 *c.numrows = (epicsUInt32)n_req;
+                *c.chgd = 1;
                 prec->udf = FALSE;
             }
         }
@@ -55,6 +56,7 @@ static long soft_init_record(struct dbCommon *prec)
 
             if (!dbLoadLinkArray(c.inp, c.config.type, *c.val, &n_req)) {
                 *c.numrows = (epicsUInt32)n_req;
+                *c.chgd = 1;
                 prec->udf = FALSE;
             }
         }
@@ -74,8 +76,10 @@ static long soft_read_table(tableRecord *prec)
 
         long n_req = rec.max_data_rows();
 
-        if (dbGetLink(c.inp, c.config.type, *c.val, 0, &n_req) == 0)
+        if (dbGetLink(c.inp, c.config.type, *c.val, 0, &n_req) == 0) {
             *c.numrows = (epicsUInt32)n_req;
+            *c.chgd = 1;
+        }
     }
 
     for (auto & c : *pvt->opt_cols) {
@@ -84,8 +88,10 @@ static long soft_read_table(tableRecord *prec)
 
         long n_req = rec.max_opt_rows();
 
-        if (dbGetLink(c.inp, c.config.type, *c.val, 0, &n_req) == 0)
+        if (dbGetLink(c.inp, c.config.type, *c.val, 0, &n_req) == 0) {
             *c.numrows = (epicsUInt32)n_req;
+            *c.chgd = 1;
+        }
     }
     return 0;
 }

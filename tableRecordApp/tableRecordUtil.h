@@ -26,9 +26,11 @@ struct TableRecordWrapper {
         DBLINK *inp;
         void **val;
         epicsUInt32 *numrows;
+        epicsUInt8  *chgd;
 
         DataColumn(const std::string & name, const std::string & label,
-            epicsEnum16 type, DBLINK *inp, void **val, epicsUInt32 *numrows);
+            epicsEnum16 type, DBLINK *inp, void **val, epicsUInt32 *numrows,
+            epicsUInt8 *chgd);
     };
 
     struct OptColumn {
@@ -36,9 +38,10 @@ struct TableRecordWrapper {
         DBLINK *inp;
         void **val;
         epicsUInt32 *numrows;
+        epicsUInt8  *chgd;
 
         OptColumn(const std::string & name, epicsEnum16 type, DBLINK *inp, void **val,
-            epicsUInt32 *numrows);
+            epicsUInt32 *numrows, epicsUInt8 *chgd);
     };
 
     tableRecord & rec;

@@ -31,21 +31,20 @@ record(waveform, "TBL:SFT:COL02") {
     field(NELM, "4")
 }
 
-
 record(table, "TBL:SFT") {
     field(MAXROWS, "4")
 
-    field(COL00INP, "TBL:SFT:COL00")
-    field(COL01INP, "TBL:SFT:COL01")
-    field(COL02INP, "TBL:SFT:COL02 CP")
+    field(C00INP, "TBL:SFT:COL00")
+    field(C01INP, "TBL:SFT:COL01")
+    field(C02INP, "TBL:SFT:COL02 CP")
 
-    field(COL00NAME, "x") field(COL00LABEL, "X") field(COL00TYPE, "INT64")
-    field(COL01NAME, "y") field(COL01LABEL, "Y") field(COL01TYPE, "DOUBLE")
-    field(COL02NAME, "z") field(COL02LABEL, "Z") field(COL02TYPE, "STRING")
+    field(C00NAME, "x") field(C00LABEL, "X") field(C00TYPE, "INT64")
+    field(C01NAME, "y") field(C01LABEL, "Y") field(C01TYPE, "DOUBLE")
+    field(C02NAME, "z") field(C02LABEL, "Z") field(C02TYPE, "STRING")
 
-    field(COLOPT00NAME, "units")
-    field(COLOPT00TYPE, "STRING")
-    field(COLOPT00INP, {const: ["um", "um", "umstr"]})
+    field(CO00NAME, "units")
+    field(CO00TYPE, "STRING")
+    field(CO00INP, {const: ["um", "um", "umstr"]})
 
     field(TPRO, "1")
     field(PINI, "YES")

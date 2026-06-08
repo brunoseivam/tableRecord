@@ -213,6 +213,11 @@ static long process(struct dbCommon *pcommon)
         return S_dev_missingSup;
     }
 
+    for (size_t i = 0; i < prec->numcols; ++i)
+        *(&prec->c00chgd + i) = 0;
+    for (size_t i = 0; i < prec->numoptcols; ++i)
+        *(&prec->co00chgd + i) = 0;
+
     status = pdset->read_table(prec);
     if (status == 0)
         prec->udf = FALSE;

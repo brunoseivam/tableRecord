@@ -77,12 +77,6 @@ static long sim_read_table(tableRecord *prec) {
     TableRecordWrapper rec(*prec);
     TableSimPrivate *pvt = rec.get_private<TableSimPrivate>();
 
-    // Set all changed fields
-    // TODO: do we need chgd?
-    for (size_t col = 0; col < rec.num_data_cols(); ++col) {
-        *(&prec->c00chgd + col) = 1;
-    }
-
     // Generate random data for each column
     for (auto & col : pvt->data_cols) {
         if (!*col.val)
@@ -90,6 +84,7 @@ static long sim_read_table(tableRecord *prec) {
 
         fill_random_values(*col.val, col.config.type, rec.max_data_rows());
         *col.numrows = (epicsUInt32)rec.max_data_rows();
+        *col.chgd = 1;
     }
 
     return 0;

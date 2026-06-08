@@ -14,14 +14,14 @@ TableRecordWrapper::OptColumnConfig::OptColumnConfig(
 
 TableRecordWrapper::DataColumn::DataColumn(
     const std::string & name, const std::string & label, epicsEnum16 type,
-    DBLINK *inp, void **val, epicsUInt32 *numrows
-) : config(name, label, type), inp(inp), val(val), numrows(numrows)
+    DBLINK *inp, void **val, epicsUInt32 *numrows, epicsUInt8 *chgd
+) : config(name, label, type), inp(inp), val(val), numrows(numrows), chgd(chgd)
 {}
 
 TableRecordWrapper::OptColumn::OptColumn(
     const std::string & name, epicsEnum16 type, DBLINK *inp, void **val,
-    epicsUInt32 *numrows
-) : config(name, type), inp(inp), val(val), numrows(numrows)
+    epicsUInt32 *numrows, epicsUInt8 *chgd
+) : config(name, type), inp(inp), val(val), numrows(numrows), chgd(chgd)
 {}
 
 TableRecordWrapper::TableRecordWrapper(tableRecord & rec)
@@ -140,8 +140,9 @@ void TableRecordWrapper::data_cols(std::vector<TableRecordWrapper::DataColumn> &
         DBLINK *inp = &rec.c00inp + i;
         void **val = &rec.c00val + i;
         epicsUInt32 *numrows = &rec.c00nrows + i;
+        epicsUInt8  *chgd    = &rec.c00chgd  + i;
 
-        cols.emplace_back(name, label, type, inp, val, numrows);
+        cols.emplace_back(name, label, type, inp, val, numrows, chgd);
     }
 }
 
@@ -157,7 +158,8 @@ void TableRecordWrapper::opt_cols(std::vector<TableRecordWrapper::OptColumn> & c
         DBLINK *inp = &rec.co00inp + i;
         void **val = &rec.co00val + i;
         epicsUInt32 *numrows = &rec.co00nrows + i;
+        epicsUInt8  *chgd    = &rec.co00chgd  + i;
 
-        cols.emplace_back(name, type, inp, val, numrows);
+        cols.emplace_back(name, type, inp, val, numrows, chgd);
     }
 }

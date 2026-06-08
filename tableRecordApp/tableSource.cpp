@@ -49,14 +49,22 @@ static pvxs::TypeCode ftypeToTC(epicsEnum16 type)
     }
 }
 
-/* Copy one column buffer into a pvxs Value column field (called under lock) */
-static void fillCol(pvxs::Value col, epicsEnum16 type, const void *buf, epicsUInt32 nrow)
+/* Copy one column buffer into a pvxs Value column field (called under lock).
+   numrows valid elements are copied from buf; the remaining rows up to nrow are
+   padded (empty strings for DBF_STRING, zeros for numeric) so all columns in the
+   published NTTable share a uniform length. */
+static void fillCol(pvxs::Value col, epicsEnum16 type, const void *buf,
+                    epicsUInt32 numrows, epicsUInt32 nrow)
 {
-    if (!col.valid() || !buf || nrow == 0) return;
+    if (!col.valid()) return;
+    if (!buf) numrows = 0;
+    if (numrows > nrow) numrows = nrow;
 
     if (type == DBF_STRING) {
+        /* shared_array<std::string>(nrow) default-constructs empty strings, so
+           rows [numrows, nrow) are already "" — only fill the valid rows. */
         pvxs::shared_array<std::string> arr(nrow);
-        for (epicsUInt32 r = 0; r < nrow; r++)
+        for (epicsUInt32 r = 0; r < numrows; r++)
             arr[r] = (const char *)buf + r * MAX_STRING_SIZE;
         col.from(arr.freeze());
         return;
@@ -66,7 +74,9 @@ static void fillCol(pvxs::Value col, epicsEnum16 type, const void *buf, epicsUIn
 #define COPY(TC_VAL, CTYPE) \
     case pvxs::TypeCode::TC_VAL: { \
         pvxs::shared_array<CTYPE> arr(nrow); \
-        memcpy(arr.data(), buf, nrow * sizeof(CTYPE)); \
+        if (numrows) memcpy(arr.data(), buf, numrows * sizeof(CTYPE)); \
+        if (nrow > numrows) \
+            memset(arr.data() + numrows, 0, (nrow - numrows) * sizeof(CTYPE)); \
         col.from(arr.freeze()); break; }
     COPY(Int8,    epicsInt8)
     COPY(UInt8,   epicsUInt8)
@@ -131,26 +141,27 @@ struct Col {
     epicsEnum16   type;
     void         *val;
     epicsUInt32   numrows;
+    epicsUInt8    chgd;
 };
 
 static void getCols(tableRecord *prec, Col cols[16])
 {
-    cols[ 0] = {prec->c00name, prec->c00label, prec->c00type, prec->c00val, prec->c00nrows};
-    cols[ 1] = {prec->c01name, prec->c01label, prec->c01type, prec->c01val, prec->c01nrows};
-    cols[ 2] = {prec->c02name, prec->c02label, prec->c02type, prec->c02val, prec->c02nrows};
-    cols[ 3] = {prec->c03name, prec->c03label, prec->c03type, prec->c03val, prec->c03nrows};
-    cols[ 4] = {prec->c04name, prec->c04label, prec->c04type, prec->c04val, prec->c04nrows};
-    cols[ 5] = {prec->c05name, prec->c05label, prec->c05type, prec->c05val, prec->c05nrows};
-    cols[ 6] = {prec->c06name, prec->c06label, prec->c06type, prec->c06val, prec->c06nrows};
-    cols[ 7] = {prec->c07name, prec->c07label, prec->c07type, prec->c07val, prec->c07nrows};
-    cols[ 8] = {prec->c08name, prec->c08label, prec->c08type, prec->c08val, prec->c08nrows};
-    cols[ 9] = {prec->c09name, prec->c09label, prec->c09type, prec->c09val, prec->c09nrows};
-    cols[10] = {prec->c0aname, prec->c0alabel, prec->c0atype, prec->c0aval, prec->c0anrows};
-    cols[11] = {prec->c0bname, prec->c0blabel, prec->c0btype, prec->c0bval, prec->c0bnrows};
-    cols[12] = {prec->c0cname, prec->c0clabel, prec->c0ctype, prec->c0cval, prec->c0cnrows};
-    cols[13] = {prec->c0dname, prec->c0dlabel, prec->c0dtype, prec->c0dval, prec->c0dnrows};
-    cols[14] = {prec->c0ename, prec->c0elabel, prec->c0etype, prec->c0eval, prec->c0enrows};
-    cols[15] = {prec->c0fname, prec->c0flabel, prec->c0ftype, prec->c0fval, prec->c0fnrows};
+    cols[ 0] = {prec->c00name, prec->c00label, prec->c00type, prec->c00val, prec->c00nrows, prec->c00chgd};
+    cols[ 1] = {prec->c01name, prec->c01label, prec->c01type, prec->c01val, prec->c01nrows, prec->c01chgd};
+    cols[ 2] = {prec->c02name, prec->c02label, prec->c02type, prec->c02val, prec->c02nrows, prec->c02chgd};
+    cols[ 3] = {prec->c03name, prec->c03label, prec->c03type, prec->c03val, prec->c03nrows, prec->c03chgd};
+    cols[ 4] = {prec->c04name, prec->c04label, prec->c04type, prec->c04val, prec->c04nrows, prec->c04chgd};
+    cols[ 5] = {prec->c05name, prec->c05label, prec->c05type, prec->c05val, prec->c05nrows, prec->c05chgd};
+    cols[ 6] = {prec->c06name, prec->c06label, prec->c06type, prec->c06val, prec->c06nrows, prec->c06chgd};
+    cols[ 7] = {prec->c07name, prec->c07label, prec->c07type, prec->c07val, prec->c07nrows, prec->c07chgd};
+    cols[ 8] = {prec->c08name, prec->c08label, prec->c08type, prec->c08val, prec->c08nrows, prec->c08chgd};
+    cols[ 9] = {prec->c09name, prec->c09label, prec->c09type, prec->c09val, prec->c09nrows, prec->c09chgd};
+    cols[10] = {prec->c0aname, prec->c0alabel, prec->c0atype, prec->c0aval, prec->c0anrows, prec->c0achgd};
+    cols[11] = {prec->c0bname, prec->c0blabel, prec->c0btype, prec->c0bval, prec->c0bnrows, prec->c0bchgd};
+    cols[12] = {prec->c0cname, prec->c0clabel, prec->c0ctype, prec->c0cval, prec->c0cnrows, prec->c0cchgd};
+    cols[13] = {prec->c0dname, prec->c0dlabel, prec->c0dtype, prec->c0dval, prec->c0dnrows, prec->c0dchgd};
+    cols[14] = {prec->c0ename, prec->c0elabel, prec->c0etype, prec->c0eval, prec->c0enrows, prec->c0echgd};
+    cols[15] = {prec->c0fname, prec->c0flabel, prec->c0ftype, prec->c0fval, prec->c0fnrows, prec->c0fchgd};
 }
 
 struct OptCol {
@@ -158,35 +169,43 @@ struct OptCol {
     epicsEnum16   type;
     void         *val;
     epicsUInt32   numrows;
+    epicsUInt8    chgd;
 };
 
 static void getOptCols(tableRecord *prec, OptCol cols[16])
 {
-    cols[ 0] = {prec->co00name, prec->co00type, prec->co00val, prec->co00nrows};
-    cols[ 1] = {prec->co01name, prec->co01type, prec->co01val, prec->co01nrows};
-    cols[ 2] = {prec->co02name, prec->co02type, prec->co02val, prec->co02nrows};
-    cols[ 3] = {prec->co03name, prec->co03type, prec->co03val, prec->co03nrows};
-    cols[ 4] = {prec->co04name, prec->co04type, prec->co04val, prec->co04nrows};
-    cols[ 5] = {prec->co05name, prec->co05type, prec->co05val, prec->co05nrows};
-    cols[ 6] = {prec->co06name, prec->co06type, prec->co06val, prec->co06nrows};
-    cols[ 7] = {prec->co07name, prec->co07type, prec->co07val, prec->co07nrows};
-    cols[ 8] = {prec->co08name, prec->co08type, prec->co08val, prec->co08nrows};
-    cols[ 9] = {prec->co09name, prec->co09type, prec->co09val, prec->co09nrows};
-    cols[10] = {prec->co0aname, prec->co0atype, prec->co0aval, prec->co0anrows};
-    cols[11] = {prec->co0bname, prec->co0btype, prec->co0bval, prec->co0bnrows};
-    cols[12] = {prec->co0cname, prec->co0ctype, prec->co0cval, prec->co0cnrows};
-    cols[13] = {prec->co0dname, prec->co0dtype, prec->co0dval, prec->co0dnrows};
-    cols[14] = {prec->co0ename, prec->co0etype, prec->co0eval, prec->co0enrows};
-    cols[15] = {prec->co0fname, prec->co0ftype, prec->co0fval, prec->co0fnrows};
+    cols[ 0] = {prec->co00name, prec->co00type, prec->co00val, prec->co00nrows, prec->co00chgd};
+    cols[ 1] = {prec->co01name, prec->co01type, prec->co01val, prec->co01nrows, prec->co01chgd};
+    cols[ 2] = {prec->co02name, prec->co02type, prec->co02val, prec->co02nrows, prec->co02chgd};
+    cols[ 3] = {prec->co03name, prec->co03type, prec->co03val, prec->co03nrows, prec->co03chgd};
+    cols[ 4] = {prec->co04name, prec->co04type, prec->co04val, prec->co04nrows, prec->co04chgd};
+    cols[ 5] = {prec->co05name, prec->co05type, prec->co05val, prec->co05nrows, prec->co05chgd};
+    cols[ 6] = {prec->co06name, prec->co06type, prec->co06val, prec->co06nrows, prec->co06chgd};
+    cols[ 7] = {prec->co07name, prec->co07type, prec->co07val, prec->co07nrows, prec->co07chgd};
+    cols[ 8] = {prec->co08name, prec->co08type, prec->co08val, prec->co08nrows, prec->co08chgd};
+    cols[ 9] = {prec->co09name, prec->co09type, prec->co09val, prec->co09nrows, prec->co09chgd};
+    cols[10] = {prec->co0aname, prec->co0atype, prec->co0aval, prec->co0anrows, prec->co0achgd};
+    cols[11] = {prec->co0bname, prec->co0btype, prec->co0bval, prec->co0bnrows, prec->co0bchgd};
+    cols[12] = {prec->co0cname, prec->co0ctype, prec->co0cval, prec->co0cnrows, prec->co0cchgd};
+    cols[13] = {prec->co0dname, prec->co0dtype, prec->co0dval, prec->co0dnrows, prec->co0dchgd};
+    cols[14] = {prec->co0ename, prec->co0etype, prec->co0eval, prec->co0enrows, prec->co0echgd};
+    cols[15] = {prec->co0fname, prec->co0ftype, prec->co0fval, prec->co0fnrows, prec->co0fchgd};
 }
 
-/* Snapshot a table record into a Value clone (caller holds lock) */
-static void snapshotTable(tableRecord *prec, pvxs::Value &v)
+/* Snapshot a table record into a Value clone (caller holds lock).
+   partial=true: only serialize (mark) columns whose chgd flag is set, so a
+   monitor update carries only the columns that changed this process cycle.
+   partial=false: serialize all active columns (GET, initial monitor snapshot).
+   Each serialized column is padded to the table-wide max row count so the
+   NTTable stays internally consistent. */
+static void snapshotTable(tableRecord *prec, pvxs::Value &v, bool partial)
 {
     Col cols[16];
     getCols(prec, cols);
 
-    /* NTTable requires uniform column length: use the maximum across all data columns */
+    /* NTTable requires uniform column length: use the maximum across all data
+       columns (not just the changed ones) so a partial update's columns stay
+       consistent with the unchanged columns the client already holds. */
     epicsUInt32 nrow = 0;
     for (epicsUInt32 i = 0; i < prec->numcols; i++) {
         if (cols[i].numrows > nrow)
@@ -194,17 +213,19 @@ static void snapshotTable(tableRecord *prec, pvxs::Value &v)
     }
 
     for (epicsUInt32 i = 0; i < prec->numcols; i++) {
+        if (partial && !cols[i].chgd) continue;
         auto col = v["value"][cols[i].name];
-        fillCol(col, cols[i].type, cols[i].val, nrow);
+        fillCol(col, cols[i].type, cols[i].val, cols[i].numrows, nrow);
     }
 
     OptCol optcols[16];
     getOptCols(prec, optcols);
     for (epicsUInt32 i = 0; i < prec->numoptcols; i++) {
         if (!optcols[i].name || !optcols[i].name[0]) continue;
+        if (partial && !optcols[i].chgd) continue;
         /* pvxs uses '.' as path separator, so "meta.field" accesses v["meta"]["field"] */
         auto col = v[optcols[i].name];
-        fillCol(col, optcols[i].type, optcols[i].val, nrow);
+        fillCol(col, optcols[i].type, optcols[i].val, optcols[i].numrows, nrow);
     }
 }
 
@@ -219,7 +240,7 @@ static pvxs::Value snapshot(const RecInfo &ri, const pvxs::Value &proto,
     v["timeStamp.nanoseconds"]      = (int32_t)ri.prec->time.nsec;
     if (withMeta)
         v["descriptor"] = std::string(ri.prec->desc);
-    snapshotTable((tableRecord *)ri.prec, v);
+    snapshotTable((tableRecord *)ri.prec, v, /*partial=*/ !withMeta);
     return v;
 }
 
@@ -463,8 +484,8 @@ void TableSource::onCreate(std::unique_ptr<pvxs::server::ChannelControl> &&chan)
             ctx->evtCtx   = evtCtx;
             ctx->ctrl     = sub->connect(proto);
 
-            /* Open a dbChannel on COL00VAL to subscribe for value-change events. */
-            std::string chname = std::string(ri.prec->name) + ".COL00VAL";
+            /* Open a dbChannel on C00VAL to subscribe for value-change events. */
+            std::string chname = std::string(ri.prec->name) + ".C00VAL";
             dbChannel *pChan = dbChannelCreate(chname.c_str());
             if (!pChan)
                 pChan = dbChannelCreate(ri.prec->name);
