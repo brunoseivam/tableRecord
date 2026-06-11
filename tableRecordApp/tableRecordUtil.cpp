@@ -1,6 +1,7 @@
 #include "tableRecordUtil.h"
 
 #include <string.h>
+#include <errlog.h>
 
 TableRecordWrapper::DataColumnConfig::DataColumnConfig(
     const std::string & name, const std::string & label, epicsEnum16 type
@@ -126,6 +127,36 @@ size_t TableRecordWrapper::configure_opt_columns(
     return num_opt_cols;
 }
 
+/* Returns true if name satisfies pvxs identifier rules: [a-zA-Z_][a-zA-Z0-9_]* */
+static bool valid_pvxs_simple_name(const char *name)
+{
+    if (!name || name[0] == '\0') return false;
+    for (size_t i = 0; name[i]; i++) {
+        char c = name[i];
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') continue;
+        if (c >= '0' && c <= '9' && i > 0) continue;
+        return false;
+    }
+    return true;
+}
+
+/* For optional column names: allows one dot separator (prefix.fieldname),
+   validating each component with valid_pvxs_simple_name. */
+static bool valid_pvxs_col_name(const char *name)
+{
+    if (!name) return false;
+    const char *dot = strchr(name, '.');
+    if (!dot)
+        return valid_pvxs_simple_name(name);
+    /* Validate prefix */
+    size_t prefix_len = (size_t)(dot - name);
+    char prefix[MAX_STRING_SIZE];
+    if (prefix_len == 0 || prefix_len >= sizeof(prefix)) return false;
+    memcpy(prefix, name, prefix_len);
+    prefix[prefix_len] = '\0';
+    return valid_pvxs_simple_name(prefix) && valid_pvxs_simple_name(dot + 1);
+}
+
 void TableRecordWrapper::data_cols(std::vector<TableRecordWrapper::DataColumn> & cols) {
     cols.clear();
 
@@ -134,6 +165,13 @@ void TableRecordWrapper::data_cols(std::vector<TableRecordWrapper::DataColumn> &
 
         if (strlen(name) == 0)
             break;
+
+        if (!valid_pvxs_simple_name(name)) {
+            errlogPrintf("tableRecord '%s': data column %zu has invalid pvxs name \"%s\""
+                         " (must match [a-zA-Z_][a-zA-Z0-9_]*), skipping\n",
+                         rec.name, i, name);
+            continue;
+        }
 
         char *label = rec.c00label + i*sizeof(rec.c00label);
         epicsEnum16 type = *(&rec.c00type + i);
@@ -153,6 +191,13 @@ void TableRecordWrapper::opt_cols(std::vector<TableRecordWrapper::OptColumn> & c
 
         if (strlen(name) == 0)
             break;
+
+        if (!valid_pvxs_col_name(name)) {
+            errlogPrintf("tableRecord '%s': optional column %zu has invalid pvxs name \"%s\""
+                         " (must match [a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)?), skipping\n",
+                         rec.name, i, name);
+            continue;
+        }
 
         epicsEnum16 type = *(&rec.co00type + i);
         DBLINK *inp = &rec.co00inp + i;
