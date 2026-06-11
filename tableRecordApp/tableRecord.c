@@ -15,6 +15,7 @@
 #include "recSup.h"
 #include "recGbl.h"
 #include "cantProceed.h"
+#include "tableVStr.h"
 
 #define GEN_SIZE_OFFSET
 #include "tableRecord.h"
@@ -26,7 +27,7 @@
 #define initialize   NULL
 static long init_record(struct dbCommon *, int);
 static long process(struct dbCommon *);
-#define special      NULL
+static long special(DBADDR *, int);
 #define get_value    NULL
 static long cvt_dbaddr(DBADDR *);
 static long get_array_info(DBADDR *, long *, long *);
@@ -264,7 +265,8 @@ static long cvt_dbaddr(DBADDR *paddr)
         paddr->field_type     = type;
         paddr->field_size     = dbValueSize(type);
         paddr->dbr_field_type = type;
-        paddr->no_elements    = prec->maxrows;
+        /* opt buffers are allocated with prec->numcols rows (one per data column) */
+        paddr->no_elements    = prec->numcols;
     }
     return 0;
 }
@@ -295,9 +297,62 @@ static long put_array_info(DBADDR *paddr, long nNew)
         *(&prec->c00nrows + (fi - tableRecordC00VAL)) = n;
     } else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL) {
         epicsUInt32 n = (epicsUInt32)nNew;
-        if (n > prec->maxrows) n = prec->maxrows;
+        /* opt buffers are allocated with numcols rows, not maxrows */
+        if (n > prec->numcols) n = prec->numcols;
         *(&prec->co00nrows + (fi - tableRecordCO00VAL)) = n;
     }
+    return 0;
+}
+
+/* special() — called by dbPutSpecial() before (after=0) and after (after=1) a
+ * dbPutField to a CxxVAL/COxxVAL.  Verified: with special==NULL, puts to these
+ * fields fail with S_db_noSupport (dbAccess.c:139); this function enables them.
+ *
+ * For STRING-typed columns at after=0 we free all overflow heap pointers and
+ * zero the cells BEFORE the strncpy copy lands, preventing leaked heap blocks.
+ * base's putStringString always produces valid type-1/2 cells (strncpy + [39]=0),
+ * so the sanitized column is in a consistent state after the put.
+ *
+ * Note: CxxVAL fields have pp(TRUE), so a put to a passive record triggers
+ * process(), which calls read_table and may overwrite the put (e.g. CSV/sim
+ * dsets).  That is by design: the device support owns the column contents. */
+static long special(DBADDR *paddr, int after)
+{
+    tableRecord *prec = (tableRecord *)paddr->precord;
+    int fi = dbGetFieldIndex(paddr);
+
+    if (fi >= tableRecordC00VAL && fi <= tableRecordC0FVAL) {
+        size_t i = (size_t)(fi - tableRecordC00VAL);
+        void **vp = tablerec_col_val_addr(prec, i);
+
+        if (i >= prec->numcols || !vp || !*vp)
+            return S_db_noMod;
+
+        if (!after) {
+            if (tablerec_col_type(prec, i) == DBF_STRING)
+                tablerec_vstr_clear(*vp, prec->maxrows);
+        } else {
+            *(&prec->c00chgd + i) = 1;
+        }
+        return 0;
+    }
+
+    if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL) {
+        size_t i = (size_t)(fi - tableRecordCO00VAL);
+        void **vp = tablerec_col_opt_val_addr(prec, i);
+
+        if (i >= prec->numoptcols || !vp || !*vp)
+            return S_db_noMod;
+
+        if (!after) {
+            if (tablerec_col_opt_type(prec, i) == DBF_STRING)
+                tablerec_vstr_clear(*vp, prec->numcols);
+        } else {
+            *(&prec->co00chgd + i) = 1;
+        }
+        return 0;
+    }
+
     return 0;
 }
 

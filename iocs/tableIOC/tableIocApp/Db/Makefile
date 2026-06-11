@@ -6,6 +6,7 @@ TOP=../..
 include $(TOP)/configure/CONFIG
 
 DB += table.db
+DB += tableCsv.db
 
 include $(TOP)/configure/RULES
 

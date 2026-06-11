@@ -1,7 +1,9 @@
 #pragma once
 
 #include "tableRecord.h"
+#include "tableVStr.h"
 
+#include <string>
 #include <vector>
 
 struct TableRecordWrapper {
@@ -103,4 +105,26 @@ struct TableRecordWrapper {
 
     // Returns a list of active optional columns
     void opt_cols(std::vector<OptColumn> & cols);
+
+    // ---- vstring cell codec (STRING columns only) ----
+
+    // Write a single std::string into row `row` of the given column buffer.
+    static void vstr_write_cell(void *colbuf, size_t row, const std::string &s);
+
+    // Read a single string from row `row` of the given column buffer.
+    static std::string vstr_read_cell(const void *colbuf, size_t row);
+
+    // Write vals into a STRING data column: writes min(vals.size(), max_data_rows())
+    // cells, sets *col.numrows and *col.chgd=1. No-op if !*col.val. Returns rows written.
+    size_t write_string_column(DataColumn &col, const std::vector<std::string> &vals);
+
+    // Write vals into a STRING optional column: writes min(vals.size(), max_opt_rows())
+    // cells, sets *col.numrows and *col.chgd=1. No-op if !*col.val. Returns rows written.
+    size_t write_string_column(OptColumn &col, const std::vector<std::string> &vals);
+
+    // Read *col.numrows cells into out (out is cleared first).
+    void read_string_column(const DataColumn &col, std::vector<std::string> &out);
+
+    // Read *col.numrows cells into out (out is cleared first).
+    void read_string_column(const OptColumn &col, std::vector<std::string> &out);
 };

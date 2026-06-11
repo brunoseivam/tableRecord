@@ -163,3 +163,72 @@ void TableRecordWrapper::opt_cols(std::vector<TableRecordWrapper::OptColumn> & c
         cols.emplace_back(name, type, inp, val, numrows, chgd);
     }
 }
+
+/* ------------------------------------------------------------------ */
+/* vstring cell codec — C++ wrappers                                    */
+/* ------------------------------------------------------------------ */
+
+void TableRecordWrapper::vstr_write_cell(void *colbuf, size_t row,
+                                         const std::string &s)
+{
+    tablerec_vstr_write(colbuf, (epicsUInt32)row, s.data(), (epicsUInt32)s.size());
+}
+
+std::string TableRecordWrapper::vstr_read_cell(const void *colbuf, size_t row)
+{
+    epicsUInt32 len = 0;
+    const char *p = tablerec_vstr_read(colbuf, (epicsUInt32)row, &len);
+    return std::string(p, len);
+}
+
+static size_t writeStringColumnImpl(void *buf, size_t maxrows,
+                                    epicsUInt32 *numrows, epicsUInt8 *chgd,
+                                    const std::vector<std::string> &vals)
+{
+    if (!buf)
+        return 0;
+    size_t n = vals.size() < maxrows ? vals.size() : maxrows;
+    for (size_t r = 0; r < n; r++)
+        tablerec_vstr_write(buf, (epicsUInt32)r, vals[r].data(),
+                            (epicsUInt32)vals[r].size());
+    *numrows = (epicsUInt32)n;
+    *chgd    = 1;
+    return n;
+}
+
+size_t TableRecordWrapper::write_string_column(DataColumn &col,
+                                               const std::vector<std::string> &vals)
+{
+    return writeStringColumnImpl(*col.val, max_data_rows(),
+                                 col.numrows, col.chgd, vals);
+}
+
+size_t TableRecordWrapper::write_string_column(OptColumn &col,
+                                               const std::vector<std::string> &vals)
+{
+    return writeStringColumnImpl(*col.val, max_opt_rows(),
+                                 col.numrows, col.chgd, vals);
+}
+
+static void readStringColumnImpl(const void *buf, epicsUInt32 nrows,
+                                 std::vector<std::string> &out)
+{
+    out.clear();
+    if (!buf)
+        return;
+    out.reserve(nrows);
+    for (epicsUInt32 r = 0; r < nrows; r++)
+        out.push_back(TableRecordWrapper::vstr_read_cell(buf, r));
+}
+
+void TableRecordWrapper::read_string_column(const DataColumn &col,
+                                            std::vector<std::string> &out)
+{
+    readStringColumnImpl(*col.val, *col.numrows, out);
+}
+
+void TableRecordWrapper::read_string_column(const OptColumn &col,
+                                            std::vector<std::string> &out)
+{
+    readStringColumnImpl(*col.val, *col.numrows, out);
+}

@@ -66,7 +66,7 @@ static void fillCol(pvxs::Value col, epicsEnum16 type, const void *buf,
            rows [numrows, nrow) are already "" — only fill the valid rows. */
         pvxs::shared_array<std::string> arr(nrow);
         for (epicsUInt32 r = 0; r < numrows; r++)
-            arr[r] = (const char *)buf + r * MAX_STRING_SIZE;
+            arr[r] = TableRecordWrapper::vstr_read_cell(buf, r);
         col.from(arr.freeze());
         return;
     }
@@ -104,11 +104,12 @@ static void drainCol(pvxs::Value col, epicsEnum16 type, void *buf,
         auto arr = col.as<pvxs::shared_array<const std::string>>();
         epicsUInt32 n = (epicsUInt32)arr.size();
         if (n > maxelm) n = maxelm;
-        for (epicsUInt32 r = 0; r < n; r++) {
-            char *dst = (char *)buf + r * MAX_STRING_SIZE;
-            strncpy(dst, arr[r].c_str(), MAX_STRING_SIZE - 1);
-            dst[MAX_STRING_SIZE - 1] = '\0';
-        }
+        /* vstr_write_cell frees any existing overflow pointer before overwriting,
+           so long→short→long round-trips don't leak.  Cells in [n, maxelm) keep
+           their old contents but are invisible (numrows = n) and will be freed on
+           the next write or tablerec_vstr_clear call. */
+        for (epicsUInt32 r = 0; r < n; r++)
+            TableRecordWrapper::vstr_write_cell(buf, r, arr[r]);
         nout = n;
         return;
     }

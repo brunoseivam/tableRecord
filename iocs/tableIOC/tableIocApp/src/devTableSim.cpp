@@ -11,6 +11,7 @@
 
 #include "tableRecord.h"
 #include "tableRecordUtil.h"
+#include "tableVStr.h"
 
 /*
  * Random Sim device support for the table record.
@@ -18,19 +19,19 @@
  * sim_init_record sets NUMCOLS based on the first contiguous run of non-empty
  * names set in the .db file. sim_read_table fills every active column
  * with MAXROWS random elements typed by COLxxTYPE and sets NUMROWS.
+ *
+ * STRING columns use the vstring codec; roughly every 3rd row generates a
+ * string > 39 bytes to exercise the overflow cell path.
  */
 
 struct TableSimPrivate {
     std::vector<TableRecordWrapper::DataColumn> data_cols;
-
-    TableSimPrivate(const std::vector<TableRecordWrapper::DataColumn> & data_cols)
-    : data_cols(data_cols)
-    {}
 };
 
 static long sim_init_record(struct dbCommon *prec) {
     TableRecordWrapper rec(prec);
-    TableSimPrivate *pvt = new TableSimPrivate(rec.data_cols());
+    TableSimPrivate *pvt = new TableSimPrivate();
+    rec.data_cols(pvt->data_cols);
     rec.set_private(pvt);
     return 0;
 }
@@ -50,8 +51,14 @@ static void fill_random_flt_values(void *val, size_t num_rows) {
 static void fill_random_str_values(void *val, size_t num_rows) {
     for (size_t row = 0; row < num_rows; ++row) {
         long rnd_val = random();
-        char *s = (char *)val + row * MAX_STRING_SIZE;
-        epicsSnprintf(s, MAX_STRING_SIZE, "val: %ld", rnd_val);
+        char tmp[128];
+        int len = epicsSnprintf(tmp, sizeof(tmp), "val: %ld", rnd_val);
+        /* ~every 3rd row: append filler to exceed 39 bytes and exercise
+         * the vstring overflow cell path */
+        if (rnd_val % 3 == 0)
+            len += epicsSnprintf(tmp + len, (int)sizeof(tmp) - len,
+                                 " -- long filler %ld%ld", rnd_val, rnd_val);
+        tablerec_vstr_write(val, (epicsUInt32)row, tmp, (epicsUInt32)len);
     }
 }
 
@@ -77,7 +84,6 @@ static long sim_read_table(tableRecord *prec) {
     TableRecordWrapper rec(*prec);
     TableSimPrivate *pvt = rec.get_private<TableSimPrivate>();
 
-    // Generate random data for each column
     for (auto & col : pvt->data_cols) {
         if (!*col.val)
             continue;

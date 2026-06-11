@@ -11,6 +11,7 @@ DBD += tableSupport.dbd
 LIBRARY_IOC += tableRecord
 
 tableRecord_SRCS += tableRecord.c
+tableRecord_SRCS += tableVStr.c
 tableRecord_SRCS += tableRecordUtil.cpp
 tableRecord_SRCS += devTableSoft.cpp
 tableRecord_SRCS += tableSource.cpp
@@ -19,6 +20,7 @@ tableRecord_SRCS += tableSourceRegistrar.cpp
 tableRecord_LIBS += pvxsIoc pvxs $(EPICS_BASE_IOC_LIBS)
 
 INC += tableRecordUtil.h
+INC += tableVStr.h
 
 
 include $(TOP)/configure/RULES
