@@ -1,0 +1,12 @@
+record(table, "TBL:CSV") {
+    field(DTYP, "CSV Loader")
+    field(INP,  "@testfile.csv")
+    field(MAXROWS, "8")
+
+    field(C00NAME,  "idx")         field(C00LABEL, "Index")       field(C00TYPE, "LONG")
+    field(C01NAME,  "name")        field(C01LABEL, "Name")        field(C01TYPE, "STRING")
+    field(C02NAME,  "value")       field(C02LABEL, "Value")       field(C02TYPE, "DOUBLE")
+    field(C03NAME,  "notes")       field(C03LABEL, "Notes")       field(C03TYPE, "STRING")
+
+    field(PINI, "YES")
+}

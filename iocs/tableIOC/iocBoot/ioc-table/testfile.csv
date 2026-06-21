@@ -1,0 +1,11 @@
+idx,name,value,extra,notes
+1,alpha,1.5,ignored,short note
+2,"beta, with comma",2.5,ignored,"quoted, with comma"
+3,"say ""hi""",3.5,ignored,a deliberately very long note exceeding thirty-nine bytes to force an overflow cell
+4,gamma-a-37-byte-medium-string-here,4.5,ignored,"multi
+line note"
+5,utf8-test,5.5,ignored,日本語のテキストがここから始まる長いノートで閾値を超えるはずです
+6,edge-39-bytes-exactly-XXXXXXXXXX,6.5,ignored,exactly 32 byte note: XXXXXXXX!!
+7,short,7.0,ignored,x
+8,last,8.0,ignored,this row exceeds MAXROWS=8 so it should be clamped and not loaded
+9,overflow,9.0,ignored,also beyond maxrows
