@@ -10,7 +10,7 @@ DBD += tableSupport.dbd
 
 LIBRARY_IOC += tableRecord
 
-tableRecord_SRCS += tableRecord.c
+tableRecord_SRCS += tableRecord.cpp
 tableRecord_SRCS += tableVStr.c
 tableRecord_SRCS += tableRecordUtil.cpp
 tableRecord_SRCS += devTableSoft.cpp

@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <ctype.h>
+
+#include <regex>
+#include <unordered_set>
 
 #include "dbDefs.h"
 #include "dbAccess.h"
@@ -51,50 +53,23 @@ rset tableRSET = {
 };
 epicsExportAddress(rset, tableRSET);
 
-/* Returns true if name satisfies pvxs identifier rules: [a-zA-Z_][a-zA-Z0-9_]* */
-static int valid_pvxs_simple_name(const char *name)
+static const std::string RE_VALID_CXXNAME_STR("[a-zA-Z_][a-zA-Z0-9_]*");
+static const std::string RE_VALID_COXXNAME_STR("[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)?");
+
+static const std::regex RE_VALID_CXXNAME(RE_VALID_CXXNAME_STR);
+static const std::regex RE_VALID_COXXNAME(RE_VALID_COXXNAME_STR);
+
+/* Returns true if name satisfies pvxs identifier rules */
+static bool valid_pvxs_col_name(const char *name)
 {
-    if (!name || name[0] == '\0')
-        return 0;
-
-    for (size_t i = 0; name[i]; i++) {
-        char c = name[i];
-
-        if (isalpha(c) || c == '_')
-            continue;
-
-        if (isdigit(c) && i > 0)
-            continue;
-
-        return 0;
-    }
-    return 1;
+    return name ? std::regex_match(name, RE_VALID_CXXNAME) : false;
 }
 
-/* For optional column names: allows one dot separator (prefix.fieldname),
-   validating each component with valid_pvxs_simple_name. */
-static int valid_pvxs_col_name(const char *name)
+/* For optional column names: allows one dot separator (prefix.fieldname) */
+static bool valid_pvxs_opt_col_name(const char *name)
 {
-    if (!name || name[0] == '\0')
-        return 0;
-
-    const char *dot = strchr(name, '.');
-
-    if (!dot)
-        return valid_pvxs_simple_name(name);
-
-    /* Validate prefix */
-    size_t prefix_len = (size_t)(dot - name);
-    char prefix[MAX_STRING_SIZE];
-    if (prefix_len == 0 || prefix_len >= sizeof(prefix))
-        return 0;
-
-    memcpy(prefix, name, prefix_len);
-    prefix[prefix_len] = '\0';
-
-    return valid_pvxs_simple_name(prefix) && valid_pvxs_simple_name(dot + 1);
+    return name ? std::regex_match(name, RE_VALID_COXXNAME) : false;
 }
-
 
 /* Pointer-arithmetic helpers — valid because column fields are
    declared in consecutive groups in the DBD, so the struct members are laid
@@ -177,23 +152,32 @@ static long init_record(struct dbCommon *pcommon, int pass)
         /* validate column names and calculate NUMCOLS after devsup
          * had a chance to fill column names */
         prec->numcols = 0;
+        std::unordered_set<std::string> colnames;
         for (size_t i = 0; i < TABLEREC_MAX_DATA_COLS; ++i) {
             char *name = tablerec_col_name(prec, i);
 
             if (strlen(name) == 0)
                 break;
 
-            if (!valid_pvxs_simple_name(name)) {
-                errlogPrintf("tableRecord '%s': C%02lXNAME has invalid pvxs name '%s'"
-                    " (must match [a-zA-Z_][a-zA-Z0-9_]*)\n",
-                    prec->name, i, name);
+            if (!valid_pvxs_col_name(name)) {
+                errlogPrintf("tableRecord '%s': C%02lXNAME has invalid value '%s'"
+                    " (must match '%s')\n",
+                    prec->name, i, name, RE_VALID_CXXNAME_STR.c_str());
 
                 recGblRecordError(S_db_errArg, prec, "table: init_record");
                 return S_db_errArg;
             }
 
-            ++prec->numcols;
+            if (colnames.count(name) > 0) {
+                errlogPrintf("tableRecord '%s': C%02lXNAME has duplicate value '%s'\n",
+                    prec->name, i, name);
+                recGblRecordError(S_db_errArg, prec, "table: init_record");
+                return S_db_errArg;
+            }
+
+            colnames.insert(name);
         }
+        prec->numcols = colnames.size();
 
         /* ensure that all remaining data columns have empty names (no gaps) */
         for (size_t i = prec->numcols; i < TABLEREC_MAX_DATA_COLS; ++i) {
@@ -210,23 +194,32 @@ static long init_record(struct dbCommon *pcommon, int pass)
         /* validate column names and calculate NUMOPTCOLS after devsup
          * had a chance to fill column names */
         prec->numoptcols = 0;
+        std::unordered_set<std::string> optcolnames;
         for (size_t i = 0; i < TABLEREC_MAX_OPT_COLS; ++i) {
             char *name = tablerec_col_opt_name(prec, i);
 
             if (strlen(name) == 0)
                 break;
 
-            if (!valid_pvxs_col_name(name)) {
-                errlogPrintf("tableRecord '%s': CO%02lXNAME has invalid pvxs name '%s'"
-                    " (must match [a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)?)\n",
-                    prec->name, i, name);
+            if (!valid_pvxs_opt_col_name(name)) {
+                errlogPrintf("tableRecord '%s': CO%02lXNAME has invalid value '%s'"
+                    " (must match '%s')\n",
+                    prec->name, i, name, RE_VALID_COXXNAME_STR.c_str());
 
                 recGblRecordError(S_db_errArg, prec, "table: init_record");
                 return S_db_errArg;
             }
 
-            ++prec->numoptcols;
+            if (optcolnames.count(name) > 0) {
+                errlogPrintf("tableRecord '%s': CO%02lXNAME has duplicate value '%s'\n",
+                    prec->name, i, name);
+                recGblRecordError(S_db_errArg, prec, "table: init_record");
+                return S_db_errArg;
+            }
+
+            optcolnames.insert(name);
         }
+        prec->numoptcols = optcolnames.size();
 
         /* ensure that all remaining optional columns have empty names (no gaps) */
         for (size_t i = prec->numoptcols; i < TABLEREC_MAX_OPT_COLS; ++i) {
