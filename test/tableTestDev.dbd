@@ -1,0 +1,6 @@
+# Stub device supports defined in tableInitTest.cpp, used to exercise the
+# read_table validation in tableRecord's init_record routine.
+#   devTableNoRead  - read_table pointer is NULL
+#   devTableBadVer  - dset version (common.number) < 5
+device(table, CONSTANT, devTableNoRead, "bad-noread")
+device(table, CONSTANT, devTableBadVer, "bad-version")

@@ -1,0 +1,4 @@
+# No device support is registered in tableNoDsetTest, so this record has a
+# NULL dset and init_record reports "no dset defined".
+record(table, "nodset:tbl") {
+}

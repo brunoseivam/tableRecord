@@ -13,6 +13,8 @@ DIRS += $(wildcard *Sup)
 DIRS += $(wildcard *App)
 DIRS += $(wildcard *Top)
 DIRS += $(wildcard iocBoot)
+DIRS += test
+test_DEPEND_DIRS += configure tableRecordApp
 
 # The build order is controlled by these dependency rules:
 

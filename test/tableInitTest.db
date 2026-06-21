@@ -1,0 +1,78 @@
+# Scenario records for tableInitTest.  All are initialised together in one
+# iocInit() cycle; iocInit ignores init_record's return value so the failing
+# records load without aborting initialisation.
+
+#---- read_table check (device support selected via DTYP) -------------------
+
+record(table, "bad:noread") {
+    field(DTYP, "bad-noread")
+}
+
+record(table, "bad:badver") {
+    field(DTYP, "bad-version")
+}
+
+#---- data column name checks (soft device support) -------------------------
+
+# invalid syntax: name starts with a digit
+record(table, "bad:cname") {
+    field(DTYP, "Soft Channel")
+    field(C00NAME, "1bad")
+}
+
+# duplicate name across two columns
+record(table, "bad:cdup") {
+    field(DTYP, "Soft Channel")
+    field(C00NAME, "x")
+    field(C01NAME, "x")
+}
+
+# gap: non-empty name after an empty one
+record(table, "bad:cgap") {
+    field(DTYP, "Soft Channel")
+    field(C00NAME, "a")
+    field(C02NAME, "b")
+}
+
+#---- optional column name checks -------------------------------------------
+
+# invalid syntax: hyphen not allowed
+record(table, "bad:oname") {
+    field(DTYP, "Soft Channel")
+    field(CO00NAME, "bad-name")
+}
+
+# duplicate optional name
+record(table, "bad:odup") {
+    field(DTYP, "Soft Channel")
+    field(CO00NAME, "y")
+    field(CO01NAME, "y")
+}
+
+# gap in optional names
+record(table, "bad:ogap") {
+    field(DTYP, "Soft Channel")
+    field(CO00NAME, "a")
+    field(CO02NAME, "b")
+}
+
+#---- successful init -------------------------------------------------------
+
+# maxrows defaults to 1, two data columns, dotted + plain optional columns
+record(table, "good:tbl") {
+    field(DTYP, "Soft Channel")
+    field(MAXROWS, "0")
+    field(C00NAME, "a")
+    field(C01NAME, "b")
+    field(CO00NAME, "pre.x")
+    field(CO01NAME, "y")
+}
+
+# constant array link loaded by the soft device support in pass-1 init
+record(table, "good:load") {
+    field(DTYP, "Soft Channel")
+    field(MAXROWS, "10")
+    field(C00NAME, "v")
+    field(C00TYPE, "LONG")
+    field(C00INP, "[1, 2, 3, 4]")
+}
