@@ -116,6 +116,30 @@ static void testSuccess(void)
     testdbGetFieldEqual("good:tbl.NUMOPTCOLS", DBF_ULONG, 2);
 }
 
+static void testNamesImmutable(void)
+{
+    testDiag("CxxNAME / COxxNAME are read-only after init (SPC_NOMOD)");
+
+    /* good:tbl was configured with C00NAME=a, C01NAME=b, CO00NAME=pre.x,
+     * CO01NAME=y.  Runtime puts must be rejected with S_db_noMod and leave
+     * the field values untouched. */
+    testdbPutFieldFail(S_db_noMod, "good:tbl.C00NAME", DBF_STRING, "zzz");
+    testdbGetFieldEqual("good:tbl.C00NAME", DBF_STRING, "a");
+
+    testdbPutFieldFail(S_db_noMod, "good:tbl.C01NAME", DBF_STRING, "zzz");
+    testdbGetFieldEqual("good:tbl.C01NAME", DBF_STRING, "b");
+
+    testdbPutFieldFail(S_db_noMod, "good:tbl.CO00NAME", DBF_STRING, "zzz");
+    testdbGetFieldEqual("good:tbl.CO00NAME", DBF_STRING, "pre.x");
+
+    testdbPutFieldFail(S_db_noMod, "good:tbl.CO01NAME", DBF_STRING, "zzz");
+    testdbGetFieldEqual("good:tbl.CO01NAME", DBF_STRING, "y");
+
+    /* an unused column name field is equally protected */
+    testdbPutFieldFail(S_db_noMod, "good:tbl.C05NAME", DBF_STRING, "zzz");
+    testdbGetFieldEqual("good:tbl.C05NAME", DBF_STRING, "");
+}
+
 static void testLoad(void)
 {
     testDiag("successful init: buffer allocation + pass-1 constant link load");
@@ -129,7 +153,7 @@ static void testLoad(void)
 
 MAIN(tableInitTest)
 {
-    testPlan(14);
+    testPlan(24);
 
     startIoc();
 
@@ -137,6 +161,7 @@ MAIN(tableInitTest)
     testDataColNames();
     testOptColNames();
     testSuccess();
+    testNamesImmutable();
     testLoad();
 
     stopIoc();

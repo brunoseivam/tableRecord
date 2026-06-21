@@ -52,96 +52,112 @@ recordtype(table) {
     # ----------------------------------------------------------------
 
     field(C00NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 00 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C01NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 01 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C02NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 02 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C03NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 03 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C04NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 04 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C05NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 05 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C06NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 06 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C07NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 07 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C08NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 08 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C09NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 09 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C0ANAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 0A name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C0BNAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 0B name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C0CNAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 0C name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C0DNAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 0D name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C0ENAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 0E name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(C0FNAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Column 0F name")
         promptgroup("41 - Input")
         interest(1)
@@ -743,96 +759,112 @@ recordtype(table) {
     # ----------------------------------------------------------------
 
     field(CO00NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 00 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO01NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 01 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO02NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 02 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO03NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 03 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO04NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 04 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO05NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 05 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO06NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 06 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO07NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 07 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO08NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 08 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO09NAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 09 name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO0ANAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 0A name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO0BNAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 0B name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO0CNAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 0C name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO0DNAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 0D name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO0ENAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 0E name")
         promptgroup("41 - Input")
         interest(1)
         size(40)
     }
     field(CO0FNAME, DBF_STRING) {
+        special(SPC_NOMOD)
         prompt("Optional column 0F name")
         promptgroup("41 - Input")
         interest(1)
