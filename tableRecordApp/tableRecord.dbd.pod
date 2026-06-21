@@ -1,15 +1,280 @@
 =title Table Record (table)
 
-The table record stores a multi-column table using per-column field bundles
-(analogous to the aSub record's A..U input fields). Each column has its own
-NAME, LABEL, TYPE, INP, VAL, and CHGD fields. qsrv publishes this record as
-an NTTable.
+The C<table> record holds a column-oriented table: a set of named columns, each
+an array of up to C<MAXROWS> elements of a per-column data type. It is intended
+to be served over PV Access as a pvData C<NTTable>; the bundled C<<< QSRV2 >>>
+(pvxs) integration publishes the record's columns, labels and timestamp as the
+structured fields of an C<NTTable>.
+
+Rather than a single value field, the record exposes each column as a I<bundle>
+of fixed-name fields, in the same spirit as the aSub record's A..U inputs. A
+column C<I<nn>> (hex C<00>..C<0F>) is described by C<CI<nn>NAME>, C<CI<nn>LABEL>,
+C<CI<nn>TYPE> and C<CI<nn>INP>, with its data held in C<CI<nn>VAL> and its
+runtime status in C<CI<nn>CHGD> and C<CI<nn>NROWS>. Up to 16 such I<data>
+columns may be configured.
+
+A second family of up to 16 I<optional> columns (C<COI<nn>...>) is provided for
+per-column metadata: each optional column carries exactly one value per data
+column (so it is sized to C<NUMCOLS> rows, not C<MAXROWS>) and is published
+alongside the table, typically as a column attribute.
+
+Columns are configured statically in the database (or filled in by device
+support) and validated once, when the record initializes; thereafter the column
+layout is fixed and only the column I<data> changes as the record processes.
 
 =recordtype table
 
 =cut
 
 recordtype(table) {
+
+=head2 Parameter Fields
+
+The record-specific fields are described below, grouped by function. The 16 data
+columns share an identical set of per-column fields, named with the column index
+C<00>..C<0F> embedded in the field name (for example C<C00NAME>, C<C01NAME>, ...,
+C<C0FNAME>); only the column C<00> fields are tabulated here, the rest follow the
+same pattern. The 16 optional columns are named C<CO00...>..C<CO0F...> in the
+same way.
+
+=head3 Scan Parameters
+
+The table record has the standard fields for specifying under what circumstances
+it will be processed. These fields are listed in
+L<Scan Fields|dbCommonRecord/Scan Fields>.
+
+=head3 Table Configuration
+
+C<INP> is an optional input link for the record as a whole. Device support may
+use it (for example, the simulation and CSV device supports read their table
+description or contents through C<INP>); the C<<< Soft Channel >>> support
+ignores it and instead reads each column's own C<CI<nn>INP> link.
+
+C<MAXROWS> is the row capacity allocated for every data column. It must be set
+before initialization (it is read-only afterwards); if left at zero,
+C<init_record> forces it to 1. Each data column's value buffer is allocated to
+hold C<MAXROWS> elements.
+
+C<NUMCOLS> and C<NUMOPTCOLS> report how many data and optional columns are
+active. They are B<not> set by the user: C<init_record> computes them by counting
+the configured (non-empty) column names, and they are read-only
+(C<<< SPC_NOMOD >>>).
+
+=fields INP, MAXROWS, NUMCOLS, NUMOPTCOLS
+
+=head3 Data Columns (C00 .. C0F)
+
+Each data column is configured by four fields and exposes three more at runtime:
+
+=over
+
+=item *
+
+C<CI<nn>NAME> — the column name. A column is "present" if its name is non-empty.
+Names must match C<< [A-Za-z_][A-Za-z0-9_]* >>, must be unique across data
+columns, and must be contiguous (no gaps): column C<I<nn>> may only be named if
+all lower-numbered columns are also named. These rules are checked by
+C<init_record>, which rejects the record (logging an error) if any is violated.
+The name is fixed after initialization (C<<< SPC_NOMOD >>>) and becomes the
+field label of the corresponding C<NTTable> column.
+
+=item *
+
+C<CI<nn>LABEL> — an optional human-readable column label carried alongside the
+name. If empty, consumers typically fall back to the name.
+
+=item *
+
+C<CI<nn>TYPE> — the column's element type, chosen from the C<menuFtype> menu
+(C<STRING>, C<CHAR>, C<SHORT>, C<LONG>, C<DOUBLE>, ...). Defaults to C<DOUBLE>.
+It is read-only after initialization, since the value buffer is allocated for
+this type. C<STRING> columns are stored using a variable-length string encoding
+(see C<tableVStr.h>) so cells may exceed the usual 40-byte limit.
+
+=item *
+
+C<CI<nn>INP> — an optional per-column input link. The C<<< Soft Channel >>>
+device support reads the column's data from this link (a constant array, a
+database link, or a channel-access link).
+
+=item *
+
+C<CI<nn>VAL> — the column data buffer, an array of C<MAXROWS> elements of type
+C<CI<nn>TYPE>. It is process-passive (C<pp(TRUE)>): a C<dbPutField> to it triggers
+processing. Reading or writing it through Channel Access / dbAccess uses the
+column's element type and reports C<CI<nn>NROWS> elements as the current length.
+
+=item *
+
+C<CI<nn>NROWS> — the number of valid rows currently in the column (0..MAXROWS),
+maintained by device support / array puts. Read-only.
+
+=item *
+
+C<CI<nn>CHGD> — a "changed this cycle" flag. It is cleared at the start of
+C<process> and set when the column's data is updated, so a publisher can send
+only the columns that actually changed.
+
+=back
+
+=fields C00NAME, C00LABEL, C00TYPE, C00INP, C00VAL, C00NROWS, C00CHGD
+
+=head3 Optional Columns (CO00 .. CO0F)
+
+Optional columns hold one value per data column rather than C<MAXROWS> rows; an
+optional column's buffer is therefore sized to C<NUMCOLS> elements. They are
+intended for per-column metadata (for example a units or description attribute
+for each data column) that is published together with the table.
+
+They follow the same bundle pattern and the same validation rules as data
+columns, with one addition: an optional column name may contain a single dotted
+component, C<< prefix.field >> (matching
+C<< [A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)? >>), which lets a consumer
+map the optional column onto a nested attribute. C<COI<nn>NAME> and
+C<COI<nn>TYPE> are fixed after initialization; C<COI<nn>VAL>, C<COI<nn>NROWS> and
+C<COI<nn>CHGD> behave as for data columns.
+
+=fields CO00NAME, CO00TYPE, CO00INP, CO00VAL, CO00NROWS, CO00CHGD
+
+=head2 Record Support
+
+=head3 Record Support Routines
+
+=head4 init_record
+
+Called twice (pass 0 then pass 1). On pass 0 it:
+
+=over
+
+=item 1.
+
+Verifies that device support is attached: the DSET must be present, and must
+declare at least 5 routines with a non-NULL C<read_table>. If not, an error is
+logged and initialization fails.
+
+=item 2.
+
+Forces C<MAXROWS> to 1 if it was left at 0.
+
+=item 3.
+
+Calls the device support's C<init_record> (if any) so it can allocate memory and
+fill in column names/types. If that routine returns C<<< TABLEREC_DEVINIT_PASS1 >>>
+the record arranges to call it again in pass 1.
+
+=item 4.
+
+Validates the data column names (format, uniqueness, no gaps as described above)
+and sets C<NUMCOLS> to the number found. The optional column names are validated
+the same way and C<NUMOPTCOLS> is set.
+
+=item 5.
+
+Allocates any column value buffers not already provided by device support:
+C<MAXROWS> elements for each data column, C<NUMCOLS> elements for each optional
+column.
+
+=back
+
+On pass 1, if device support requested it, the device C<init_record> is called
+once more (now able to read links and other records).
+
+=head4 process
+
+See L</Record Processing> below.
+
+=head4 special
+
+C<CI<nn>VAL> and C<COI<nn>VAL> accept array puts via C<special>. Before the data
+lands (C<after=0>), a C<STRING> column's previous variable-length cells are
+released; after the put (C<after=1>), the column's C<CHGD> flag is set. Puts to
+inactive columns are rejected. The column C<NAME> and C<TYPE> fields are
+read-only at run time (C<<< SPC_NOMOD >>>) and cannot be changed once the record
+has initialized.
+
+=head4 cvt_dbaddr, get_array_info, put_array_info
+
+These present each C<CI<nn>VAL>/C<COI<nn>VAL> field as an array whose element type
+is the column's C<TYPE>, whose capacity is C<MAXROWS> (data) or C<NUMCOLS>
+(optional columns), and whose current length is the column's C<NROWS>.
+
+=head3 Record Processing
+
+Routine C<process> implements the following algorithm:
+
+=over
+
+=item 1.
+
+If device support or its C<read_table> routine is missing, set C<PACT> TRUE, log
+an error and return, so processing is not retried (avoiding error storms).
+
+=item 2.
+
+Clear the C<CHGD> flag of every active data and optional column.
+
+=item 3.
+
+Call the device support C<<< read_table >>> routine to refresh the column data.
+If it succeeds, clear C<UDF>.
+
+=item 4.
+
+Update the time stamp and reset alarms.
+
+=item 5.
+
+Post monitor events for the column data.
+
+=item 6.
+
+If a publisher has registered a notify hook in C<RPVT> (as the C<<< QSRV2 >>>
+NTTable source does), call it synchronously while the record lock is held and
+this cycle's C<CHGD> flags are still valid.
+
+=item 7.
+
+Scan the forward link, set C<PACT> FALSE and return.
+
+=back
+
+=head2 Device Support
+
+=head3 Fields Of Interest To Device Support
+
+Device support obtains a fresh table whenever C<read_table> is called, and is
+chiefly interested in the column buffers and counts.
+
+=fields PACT, DPVT, UDF, NUMCOLS, NUMOPTCOLS, MAXROWS
+
+=head3 Device Support Interface
+
+A table device support entry table (C<tabledset>) extends the standard DSET with
+one routine:
+
+  typedef struct {
+      dset common;                              /* standard 5-entry DSET   */
+      long (*read_table)(struct tableRecord *prec);
+  } tabledset;
+
+C<read_table> must refresh the active column buffers (and their C<NROWS>) and
+return 0 on success. Device support that needs to allocate buffers or populate
+column names/types does so from C<<< common.init_record >>>. Because reading
+links is only safe after all records exist, support that must read links at init
+returns C<<< TABLEREC_DEVINIT_PASS1 >>> from its pass-0 C<init_record> to ask the
+record to call it again in pass 1.
+
+=head3 Device Support For Soft Records
+
+The C<<< Soft Channel >>> support (C<devTableSoft>) implements a table whose
+columns are driven by their individual C<CI<nn>INP> / C<COI<nn>INP> links. At
+initialization it loads any constant links into the column buffers; on each
+C<read_table> it re-reads the non-constant links. C<STRING> columns are staged
+through a temporary buffer and re-encoded into variable-length cells so that
+numeric-to-string conversions cannot leave stale bytes in a cell.
+
+=cut
+
     include "dbCommon.dbd"
 
     %

@@ -22,5 +22,9 @@ tableRecord_LIBS += pvxsIoc pvxs $(EPICS_BASE_IOC_LIBS)
 INC += tableRecordUtil.h
 INC += tableVStr.h
 
+# Reference documentation, generated from tableRecord.dbd.pod
+HTMLS_DIR = .
+DOCS  += tableRecord.md
+HTMLS += tableRecord.html
 
 include $(TOP)/configure/RULES

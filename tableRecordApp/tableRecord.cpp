@@ -56,18 +56,17 @@ epicsExportAddress(rset, tableRSET);
 static const std::string RE_VALID_CXXNAME_STR("[a-zA-Z_][a-zA-Z0-9_]*");
 static const std::string RE_VALID_COXXNAME_STR("[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)?");
 
-static const std::regex RE_VALID_CXXNAME(RE_VALID_CXXNAME_STR);
-static const std::regex RE_VALID_COXXNAME(RE_VALID_COXXNAME_STR);
-
 /* Returns true if name satisfies pvxs identifier rules */
 static bool valid_pvxs_col_name(const char *name)
 {
+    static const std::regex RE_VALID_CXXNAME(RE_VALID_CXXNAME_STR);
     return name ? std::regex_match(name, RE_VALID_CXXNAME) : false;
 }
 
 /* For optional column names: allows one dot separator (prefix.fieldname) */
 static bool valid_pvxs_opt_col_name(const char *name)
 {
+    static const std::regex RE_VALID_COXXNAME(RE_VALID_COXXNAME_STR);
     return name ? std::regex_match(name, RE_VALID_COXXNAME) : false;
 }
 
