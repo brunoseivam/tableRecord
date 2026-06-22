@@ -29,10 +29,11 @@ struct TableRecordWrapper {
         void **val;
         epicsUInt32 *numrows;
         epicsUInt8  *chgd;
+        char        *label;   /* live pointer to the CxxLABEL field (40 bytes) */
 
         DataColumn(const std::string & name, const std::string & label,
             epicsEnum16 type, DBLINK *inp, void **val, epicsUInt32 *numrows,
-            epicsUInt8 *chgd);
+            epicsUInt8 *chgd, char *labelfld);
     };
 
     struct OptColumn {

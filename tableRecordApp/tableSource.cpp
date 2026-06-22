@@ -143,7 +143,7 @@ static void drainCol(pvxs::Value col, epicsEnum16 type, void *buf,
    partial=false: serialize all active columns (GET, initial monitor snapshot).
    Each serialized column is padded to the table-wide max row count so the
    NTTable stays internally consistent. */
-static void snapshotTable(const TableRecCtx &ctx, pvxs::Value &v, bool partial)
+static void snapshotTable(TableRecCtx &ctx, pvxs::Value &v, bool partial)
 {
     /* NTTable requires uniform column length: use the maximum across all data
        columns (not just the changed ones) so a partial update's columns stay
@@ -169,12 +169,28 @@ static void snapshotTable(const TableRecCtx &ctx, pvxs::Value &v, bool partial)
         auto col = v[c.config.name];
         fillCol(col, c.config.type, *c.val, *c.numrows, ncols);
     }
+
+    /* Column labels (NTTable "labels", one per data column) may be updated at
+       run time by device support. Read the live label fields and republish the
+       array on a full snapshot, or on a monitor delta when they have changed. */
+    std::vector<std::string> labels;
+    labels.reserve(ctx.dcols.size());
+    for (const auto &c : ctx.dcols)
+        labels.emplace_back(c.label ? c.label : "");
+
+    if (!partial || labels != ctx.lastLabels) {
+        pvxs::shared_array<std::string> arr(labels.size());
+        for (size_t i = 0; i < labels.size(); ++i)
+            arr[i] = labels[i];
+        v["labels"] = arr.freeze();
+    }
+    ctx.lastLabels = std::move(labels);
 }
 
 /* Build a snapshot Value from the current record state.
    withMeta=true: include static metadata (labels, descriptor) that only needs
    to be sent once per client — on the initial monitor post and every GET. */
-static pvxs::Value snapshot(const TableRecCtx &ctx, bool withMeta = false)
+static pvxs::Value snapshot(TableRecCtx &ctx, bool withMeta = false)
 {
     pvxs::Value v = withMeta ? ctx.proto.clone() : ctx.proto.cloneEmpty();
     /* prec->time is in the EPICS epoch (1990); PVA timestamps are POSIX (1970). */

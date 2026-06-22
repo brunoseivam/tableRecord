@@ -43,6 +43,9 @@ struct TableRecCtx {
        (snapshot) and writing (put). */
     std::vector<TableRecordWrapper::DataColumn> dcols;
     std::vector<TableRecordWrapper::OptColumn>  ocols;
+    /* Labels included in the last published update, used to detect label
+       changes between monitor deltas. Accessed only under the record lock. */
+    std::vector<std::string>           lastLabels;
     std::mutex                         mu;     /* guards subs */
     std::set<std::shared_ptr<SubCtx>>  subs;
     class TableSource                 *src;

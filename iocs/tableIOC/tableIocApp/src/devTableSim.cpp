@@ -133,6 +133,13 @@ static long sim_read_table(tableRecord *prec) {
         fill_random_values(*col.val, col.config.type, rec.max_data_rows());
         *col.numrows = (epicsUInt32)rec.max_data_rows();
         *col.chgd = 1;
+
+        /* Refresh the column label as "<name> <short random suffix>" so the
+         * published NTTable labels change on every scan. */
+        if (col.label)
+            epicsSnprintf(col.label, MAX_STRING_SIZE, "%s %04lx",
+                          col.config.name.c_str(),
+                          (unsigned long)(random() & 0xffff));
     }
 
     return 0;
