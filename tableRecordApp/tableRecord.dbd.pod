@@ -70,7 +70,7 @@ Each data column is configured by four fields and exposes three more at runtime:
 
 =item *
 
-C<CI<nn>NAME> — the column name. A column is "present" if its name is non-empty.
+C<CI<nn>NAME> - the column name. A column is "present" if its name is non-empty.
 Names must match C<< [A-Za-z_][A-Za-z0-9_]* >>, must be unique across data
 columns, and must be contiguous (no gaps): column C<I<nn>> may only be named if
 all lower-numbered columns are also named. These rules are checked by
@@ -80,12 +80,12 @@ field label of the corresponding C<NTTable> column.
 
 =item *
 
-C<CI<nn>LABEL> — an optional human-readable column label carried alongside the
+C<CI<nn>LABEL> - an optional human-readable column label carried alongside the
 name. If empty, consumers typically fall back to the name.
 
 =item *
 
-C<CI<nn>TYPE> — the column's element type, chosen from the C<menuFtype> menu
+C<CI<nn>TYPE> - the column's element type, chosen from the C<menuFtype> menu
 (C<STRING>, C<CHAR>, C<SHORT>, C<LONG>, C<DOUBLE>, ...). Defaults to C<DOUBLE>.
 It is read-only after initialization, since the value buffer is allocated for
 this type. C<STRING> columns are stored using a variable-length string encoding
@@ -93,25 +93,25 @@ this type. C<STRING> columns are stored using a variable-length string encoding
 
 =item *
 
-C<CI<nn>INP> — an optional per-column input link. The C<<< Soft Channel >>>
+C<CI<nn>INP> - an optional per-column input link. The C<<< Soft Channel >>>
 device support reads the column's data from this link (a constant array, a
 database link, or a channel-access link).
 
 =item *
 
-C<CI<nn>VAL> — the column data buffer, an array of C<MAXROWS> elements of type
+C<CI<nn>VAL> - the column data buffer, an array of C<MAXROWS> elements of type
 C<CI<nn>TYPE>. It is process-passive (C<pp(TRUE)>): a C<dbPutField> to it triggers
 processing. Reading or writing it through Channel Access / dbAccess uses the
 column's element type and reports C<CI<nn>NROWS> elements as the current length.
 
 =item *
 
-C<CI<nn>NROWS> — the number of valid rows currently in the column (0..MAXROWS),
+C<CI<nn>NROWS> - the number of valid rows currently in the column (0..MAXROWS),
 maintained by device support / array puts. Read-only.
 
 =item *
 
-C<CI<nn>CHGD> — a "changed this cycle" flag. It is cleared at the start of
+C<CI<nn>CHGD> - a "changed this cycle" flag. It is cleared at the start of
 C<process> and set when the column's data is updated, so a publisher can send
 only the columns that actually changed.
 
@@ -313,7 +313,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         interest(4)
     }
     # ----------------------------------------------------------------
-    # Column names — C00NAME .. C0FNAME
+    # Column names - C00NAME .. C0FNAME
     # ----------------------------------------------------------------
 
     field(C00NAME, DBF_STRING) {
@@ -430,7 +430,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Column labels — C00LABEL .. C0FLABEL
+    # Column labels - C00LABEL .. C0FLABEL
     # ----------------------------------------------------------------
 
     field(C00LABEL, DBF_STRING) {
@@ -531,7 +531,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Column field types — C00TYPE .. C0FTYPE
+    # Column field types - C00TYPE .. C0FTYPE
     # ----------------------------------------------------------------
 
     field(C00TYPE, DBF_MENU) {
@@ -664,7 +664,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Column input links — C00INP .. C0FINP
+    # Column input links - C00INP .. C0FINP
     # ----------------------------------------------------------------
 
     field(C00INP, DBF_INLINK) {
@@ -749,7 +749,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Column data buffers — C00VAL .. C0FVAL
+    # Column data buffers - C00VAL .. C0FVAL
     # ----------------------------------------------------------------
 
     field(C00VAL, DBF_NOACCESS) {
@@ -866,7 +866,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Column changed flags — C00CHGD .. C0FCHGD
+    # Column changed flags - C00CHGD .. C0FCHGD
     # ----------------------------------------------------------------
 
     field(C00CHGD, DBF_UCHAR) {
@@ -935,7 +935,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Column valid row counts — C00NROWS .. C0FNROWS
+    # Column valid row counts - C00NROWS .. C0FNROWS
     # ----------------------------------------------------------------
 
     field(C00NROWS, DBF_ULONG) {
@@ -1020,7 +1020,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Optional column names — CO00NAME .. CO0FNAME
+    # Optional column names - CO00NAME .. CO0FNAME
     # ----------------------------------------------------------------
 
     field(CO00NAME, DBF_STRING) {
@@ -1137,7 +1137,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Optional column field types — CO00TYPE .. CO0FTYPE
+    # Optional column field types - CO00TYPE .. CO0FTYPE
     # ----------------------------------------------------------------
 
     field(CO00TYPE, DBF_MENU) {
@@ -1270,7 +1270,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Optional column input links — CO00INP .. CO0FINP
+    # Optional column input links - CO00INP .. CO0FINP
     # ----------------------------------------------------------------
 
     field(CO00INP, DBF_INLINK) {
@@ -1355,7 +1355,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Optional column data buffers — CO00VAL .. CO0FVAL
+    # Optional column data buffers - CO00VAL .. CO0FVAL
     # ----------------------------------------------------------------
 
     field(CO00VAL, DBF_NOACCESS) {
@@ -1478,7 +1478,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Optional column changed flags — CO00CHGD .. CO0FCHGD
+    # Optional column changed flags - CO00CHGD .. CO0FCHGD
     # ----------------------------------------------------------------
 
     field(CO00CHGD, DBF_UCHAR) {
@@ -1547,7 +1547,7 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
     }
 
     # ----------------------------------------------------------------
-    # Optional column valid row counts — CO00NROWS .. CO0FNROWS
+    # Optional column valid row counts - CO00NROWS .. CO0FNROWS
     # ----------------------------------------------------------------
 
     field(CO00NROWS, DBF_ULONG) {

@@ -5,6 +5,9 @@ include $(TOP)/configure/CONFIG
 #  ADD MACRO DEFINITIONS AFTER THIS LINE
 #=============================
 
+# Use the typed RSET/DSET definitions, matching the tableRecord library
+USR_CPPFLAGS += -DUSE_TYPED_RSET -DUSE_TYPED_DSET
+
 # Access to the record's public and private headers
 USR_CPPFLAGS += -I$(TOP)/include
 USR_CPPFLAGS += -I$(TOP)/tableRecordApp
