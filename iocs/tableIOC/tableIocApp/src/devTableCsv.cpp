@@ -241,15 +241,23 @@ static long csv_init_record(struct dbCommon *pcommon)
     tableRecord *prec = (tableRecord *)pcommon;
     struct link *plnk = &prec->inp;
 
-    /* INP must be an instrument-IO link: field(INP, "@testfile.csv") */
-    if (plnk->type != INST_IO || !plnk->value.instio.string
-                              || plnk->value.instio.string[0] == '\0') {
-        recGblRecordError(S_db_badField, pcommon,
-            "devTableCsv: INP must be an instrument-IO CSV file path, "
-            "e.g. field(INP, \"@testfile.csv\")");
-        return S_db_badField;
+    /* Pass 0: validate INP, then defer to pass 1. The active data columns
+       (NUMCOLS) are only known after the record validates the column names,
+       which happens after this pass-0 callback returns, so data_cols() must be
+       captured in pass 1. */
+    if (prec->pact != TABLEREC_DEVINIT_PASS1) {
+        /* INP must be an instrument-IO link: field(INP, "@testfile.csv") */
+        if (plnk->type != INST_IO || !plnk->value.instio.string
+                                  || plnk->value.instio.string[0] == '\0') {
+            recGblRecordError(S_db_badField, pcommon,
+                "devTableCsv: INP must be an instrument-IO CSV file path, "
+                "e.g. field(INP, \"@testfile.csv\")");
+            return S_db_badField;
+        }
+        return TABLEREC_DEVINIT_PASS1;
     }
 
+    /* Pass 1: column metadata is now valid */
     DevTableCsvPvt *pvt = new DevTableCsvPvt();
     pvt->path = plnk->value.instio.string;
 
