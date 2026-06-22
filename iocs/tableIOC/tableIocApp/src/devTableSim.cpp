@@ -5,8 +5,10 @@
 
 #include "dbAccess.h"
 #include "dbFldTypes.h"
+#include "dbLink.h"
 #include "devSup.h"
 #include "epicsStdio.h"
+#include "epicsTypes.h"
 #include "epicsExport.h"
 
 #include "tableRecord.h"
@@ -20,6 +22,9 @@
  * names set in the .db file. sim_read_table fills every active column
  * with MAXROWS random elements typed by COLxxTYPE and sets NUMROWS.
  *
+ * Optional columns hold constant per-column metadata (e.g. meta.units); their
+ * constant links are loaded once at initialization.
+ *
  * STRING columns use the vstring codec; roughly every 3rd row generates a
  * string > 39 bytes to exercise the overflow cell path.
  */
@@ -28,11 +33,48 @@ struct TableSimPrivate {
     std::vector<TableRecordWrapper::DataColumn> data_cols;
 };
 
+/* Load an optional column's constant link into its value buffer once, at init. */
+static void load_const_opt_column(TableRecordWrapper &rec,
+                                  TableRecordWrapper::OptColumn &c) {
+    if (!*c.val)
+        return;
+
+    long n = (long)rec.max_opt_rows();
+
+    if (c.config.type == DBF_STRING) {
+        std::vector<char> stage((size_t)n * MAX_STRING_SIZE, 0);
+        if (dbLoadLinkArray(c.inp, DBF_STRING, stage.data(), &n) != 0)
+            return;
+        std::vector<std::string> vals;
+        vals.reserve((size_t)n);
+        for (long r = 0; r < n; ++r)
+            vals.emplace_back(stage.data() + (size_t)r * MAX_STRING_SIZE);
+        rec.write_string_column(c, vals);   /* sets *numrows and *chgd */
+    } else {
+        if (dbLoadLinkArray(c.inp, c.config.type, *c.val, &n) != 0)
+            return;
+        *c.numrows = (epicsUInt32)n;
+        *c.chgd = 1;
+    }
+}
+
 static long sim_init_record(struct dbCommon *prec) {
+    /* Defer to pass 1: the record allocates the column value buffers after this
+     * callback returns in pass 0, so the optional-column buffers we load the
+     * constant links into only exist once pass 1 runs. */
+    if (prec->pact != TABLEREC_DEVINIT_PASS1)
+        return TABLEREC_DEVINIT_PASS1;
+
     TableRecordWrapper rec(prec);
     TableSimPrivate *pvt = new TableSimPrivate();
     rec.data_cols(pvt->data_cols);
     rec.set_private(pvt);
+
+    std::vector<TableRecordWrapper::OptColumn> opt_cols;
+    rec.opt_cols(opt_cols);
+    for (auto & c : opt_cols)
+        load_const_opt_column(rec, c);
+
     return 0;
 }
 

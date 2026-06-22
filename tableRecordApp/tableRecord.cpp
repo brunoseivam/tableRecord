@@ -352,7 +352,7 @@ static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
     if (fi >= tableRecordC00VAL && fi <= tableRecordC0FVAL)
         *no_elements = *(&prec->c00nrows + (fi - tableRecordC00VAL));
     else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL)
-        *no_elements = *(&prec->co00nrows + (fi - tableRecordCO00VAL));
+        *no_elements = prec->numcols;
     else
         *no_elements = 0;
     return 0;

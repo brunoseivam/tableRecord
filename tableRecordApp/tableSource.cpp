@@ -159,11 +159,15 @@ static void snapshotTable(const TableRecCtx &ctx, pvxs::Value &v, bool partial)
         fillCol(col, c.config.type, *c.val, *c.numrows, nrow);
     }
 
+    /* Optional columns carry one value per data column, so their length is the
+       number of active data columns (NUMCOLS), not the data row count (nrow). */
+    epicsUInt32 ncols = (epicsUInt32)ctx.dcols.size();
+
     /* pvxs uses '.' as path separator, so "meta.field" accesses v["meta"]["field"] */
     for (const auto &c : ctx.ocols) {
         if (partial && !*c.chgd) continue;
         auto col = v[c.config.name];
-        fillCol(col, c.config.type, *c.val, *c.numrows, nrow);
+        fillCol(col, c.config.type, *c.val, *c.numrows, ncols);
     }
 }
 

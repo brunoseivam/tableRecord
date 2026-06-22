@@ -5,8 +5,9 @@
 TOP=../..
 include $(TOP)/configure/CONFIG
 
-DB += table.db
-DB += tableCsv.db
+DB += table-csv.db
+DB += table-sim.db
+DB += table-soft.db
 
 include $(TOP)/configure/RULES
 
