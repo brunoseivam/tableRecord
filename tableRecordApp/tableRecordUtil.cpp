@@ -46,9 +46,7 @@ size_t TableRecordWrapper::max_data_cols() {
 }
 
 size_t TableRecordWrapper::num_opt_cols() {
-    assert(false);
-    // TODO
-    return 0;
+    return rec.numoptcols;
 }
 
 size_t TableRecordWrapper::max_opt_cols() {
@@ -131,11 +129,12 @@ size_t TableRecordWrapper::configure_opt_columns(
 void TableRecordWrapper::data_cols(std::vector<TableRecordWrapper::DataColumn> & cols) {
     cols.clear();
 
-    for (size_t i = 0; i < max_data_cols(); ++i) {
+    /* Iterate only the validated, active columns (NUMCOLS), not every named
+       field: a record that failed init_record validation may still hold
+       duplicate or syntactically-invalid names in its CxxNAME fields, which
+       must not be surfaced to consumers (e.g. NTTable construction). */
+    for (size_t i = 0; i < num_data_cols(); ++i) {
         char *name = rec.c00name + i*sizeof(rec.c00name);
-
-        if (strlen(name) == 0)
-            break;
 
         char *label = rec.c00label + i*sizeof(rec.c00label);
         epicsEnum16 type = *(&rec.c00type + i);
@@ -150,11 +149,9 @@ void TableRecordWrapper::data_cols(std::vector<TableRecordWrapper::DataColumn> &
 
 void TableRecordWrapper::opt_cols(std::vector<TableRecordWrapper::OptColumn> & cols) {
     cols.clear();
-    for (size_t i = 0; i < max_opt_cols(); ++i) {
+    /* Only the validated, active optional columns (NUMOPTCOLS) — see data_cols(). */
+    for (size_t i = 0; i < num_opt_cols(); ++i) {
         char *name = rec.co00name + i*sizeof(rec.co00name);
-
-        if (strlen(name) == 0)
-            break;
 
         epicsEnum16 type = *(&rec.co00type + i);
         DBLINK *inp = &rec.co00inp + i;

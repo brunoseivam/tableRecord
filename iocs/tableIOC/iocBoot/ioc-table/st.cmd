@@ -10,6 +10,3 @@ dbLoadRecords("$(TOP)/db/table-sim.db")
 dbLoadRecords("$(TOP)/db/table-soft.db")
 
 iocInit()
-
-addTableSource()
-

@@ -1,7 +1,7 @@
 #include <memory>
 #include <stdexcept>
 
-#include <iocsh.h>
+#include <initHooks.h>
 #include <epicsExport.h>
 
 #include <pvxs/iochooks.h>
@@ -23,14 +23,19 @@ static void addTableSource(void)
     }
 }
 
-static const iocshFuncDef addTableSourceFuncDef = {
-    "addTableSource", 0, nullptr, "Register table record NTTable source\n"
-};
-static void addTableSourceCallFunc(const iocshArgBuf *) { addTableSource(); }
+/* Register the table NTTable source automatically during iocInit. By
+   initHookAfterIocBuilt the database is fully initialized (record and device
+   support init done) and the QSRV server exists but is not yet serving, which
+   is the pvxs-documented point to add a custom source (see pvxs/iochooks.h). */
+static void tableSourceInitHook(initHookState state)
+{
+    if (state == initHookAfterIocBuilt)
+        addTableSource();
+}
 
 static void registerTableSourceCmds(void)
 {
-    iocshRegister(&addTableSourceFuncDef, addTableSourceCallFunc);
+    initHookRegister(&tableSourceInitHook);
 }
 
 extern "C" {
