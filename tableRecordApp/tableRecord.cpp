@@ -320,7 +320,7 @@ static long cvt_dbaddr(DBADDR *paddr)
     tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
-    if (fi >= tableRecordC00VAL && fi <= tableRecordC0FVAL) {
+    if (fi >= tableRecordC00VAL && fi <= tableRecordC3FVAL) {
         int i = fi - tableRecordC00VAL;
         epicsEnum16 type = tablerec_col_type(prec, i);
         void **vp = tablerec_col_val_addr(prec, i);
@@ -329,7 +329,7 @@ static long cvt_dbaddr(DBADDR *paddr)
         paddr->field_size     = dbValueSize(type);
         paddr->dbr_field_type = type;
         paddr->no_elements    = prec->maxrows;
-    } else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL) {
+    } else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO3FVAL) {
         int i = fi - tableRecordCO00VAL;
         epicsEnum16 type = tablerec_col_opt_type(prec, i);
         void **vp = tablerec_col_opt_val_addr(prec, i);
@@ -349,9 +349,9 @@ static long get_array_info(DBADDR *paddr, long *no_elements, long *offset)
     int fi = dbGetFieldIndex(paddr);
 
     *offset = 0;
-    if (fi >= tableRecordC00VAL && fi <= tableRecordC0FVAL)
+    if (fi >= tableRecordC00VAL && fi <= tableRecordC3FVAL)
         *no_elements = *(&prec->c00nrows + (fi - tableRecordC00VAL));
-    else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL)
+    else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO3FVAL)
         *no_elements = prec->numcols;
     else
         *no_elements = 0;
@@ -363,11 +363,11 @@ static long put_array_info(DBADDR *paddr, long nNew)
     tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
-    if (fi >= tableRecordC00VAL && fi <= tableRecordC0FVAL) {
+    if (fi >= tableRecordC00VAL && fi <= tableRecordC3FVAL) {
         epicsUInt32 n = (epicsUInt32)nNew;
         if (n > prec->maxrows) n = prec->maxrows;
         *(&prec->c00nrows + (fi - tableRecordC00VAL)) = n;
-    } else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL) {
+    } else if (fi >= tableRecordCO00VAL && fi <= tableRecordCO3FVAL) {
         epicsUInt32 n = (epicsUInt32)nNew;
         /* opt buffers are allocated with numcols rows, not maxrows */
         if (n > prec->numcols) n = prec->numcols;
@@ -393,7 +393,7 @@ static long special(DBADDR *paddr, int after)
     tableRecord *prec = (tableRecord *)paddr->precord;
     int fi = dbGetFieldIndex(paddr);
 
-    if (fi >= tableRecordC00VAL && fi <= tableRecordC0FVAL) {
+    if (fi >= tableRecordC00VAL && fi <= tableRecordC3FVAL) {
         size_t i = (size_t)(fi - tableRecordC00VAL);
         void **vp = tablerec_col_val_addr(prec, i);
 
@@ -409,7 +409,7 @@ static long special(DBADDR *paddr, int after)
         return 0;
     }
 
-    if (fi >= tableRecordCO00VAL && fi <= tableRecordCO0FVAL) {
+    if (fi >= tableRecordCO00VAL && fi <= tableRecordCO3FVAL) {
         size_t i = (size_t)(fi - tableRecordCO00VAL);
         void **vp = tablerec_col_opt_val_addr(prec, i);
 
