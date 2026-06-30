@@ -1,0 +1,3 @@
+# Controllable device support defined in tablePartialTest.cpp, used to make a
+# single column/label/opt-column change per process cycle.
+device(table, CONSTANT, devTablePartial, "partial-test")

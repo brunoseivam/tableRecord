@@ -47,6 +47,24 @@ TESTFILES += $(COMMON_DIR)/tableNoDsetTest.dbd ../tableNoDsetTest.db
 TESTS += tableNoDsetTest
 
 #==================================================
+# tablePartialTest: serves a table over PVA, subscribes a monitor, and asserts
+# that unchanged columns / labels / optional-columns are NOT encoded/transported
+# in the monitor delta.  Uses a controllable device support defined in the test.
+
+TARGETS += $(COMMON_DIR)/tablePartialTest.dbd
+tablePartialTest_DBD += base.dbd
+tablePartialTest_DBD += tableSupport.dbd
+tablePartialTest_DBD += tablePartialTestDev.dbd
+
+TESTPROD_HOST += tablePartialTest
+tablePartialTest_SRCS += tablePartialTest.cpp
+tablePartialTest_SRCS += tablePartialTest_registerRecordDeviceDriver.cpp
+tablePartialTest_LIBS += tableRecord pvxsIoc pvxs $(EPICS_BASE_IOC_LIBS)
+testHarness_SRCS += tablePartialTest.cpp
+TESTFILES += $(COMMON_DIR)/tablePartialTest.dbd ../tablePartialTest.db
+TESTS += tablePartialTest
+
+#==================================================
 
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 

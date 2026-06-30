@@ -1,0 +1,13 @@
+# One served table for the partial-update test.  3 LONG data columns (a/b/c)
+# with labels, plus one LONG optional column (opt0).  devTablePartial seeds the
+# columns at init and changes a selected column/label per process cycle.
+record(table, "tbl:partial") {
+    field(DTYP, "partial-test")
+    field(MAXROWS, "8")
+
+    field(C00NAME, "a")  field(C00TYPE, "LONG")  field(C00LABEL, "La")
+    field(C01NAME, "b")  field(C01TYPE, "LONG")  field(C01LABEL, "Lb")
+    field(C02NAME, "c")  field(C02TYPE, "LONG")  field(C02LABEL, "Lc")
+
+    field(CO00NAME, "opt0")  field(CO00TYPE, "LONG")
+}
