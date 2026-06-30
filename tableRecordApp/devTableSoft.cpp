@@ -17,7 +17,7 @@
  * Soft Channel device support for the table record.
  *
  * STRING columns are staged through a temporary buffer before being re-encoded
- * into vstring cells.  This is required because numeric→string link conversions
+ * into vstring cells. This is required because numeric->string link conversions
  * (e.g. getDoubleString) do not zero-pad the 40-byte cells, which would leave
  * stale bytes in positions 32..39 that the vstring discriminator would misread
  * as overflow pointers.
@@ -36,8 +36,8 @@ struct DevTableSoftPvt {
 };
 
 /* Load a STRING column through the staging buffer and re-encode each row as
- * a vstring cell.  Uses dbLoadLinkArray when constant=true, dbGetLink otherwise. */
-static long loadStringColumn(struct link *plnk, void *val, long maxrows,
+ * a vstring cell. Uses dbLoadLinkArray when constant=true, dbGetLink otherwise. */
+static long load_string_column(struct link *plnk, void *val, long maxrows,
                               char *stage, epicsUInt32 *numrows, epicsUInt8 *chgd,
                               bool constant)
 {
@@ -46,18 +46,18 @@ static long loadStringColumn(struct link *plnk, void *val, long maxrows,
 
     long status = constant
         ? dbLoadLinkArray(plnk, DBF_STRING, stage, &n_req)
-        : dbGetLink      (plnk, DBF_STRING, stage, 0, &n_req);
+        : dbGetLink(plnk, DBF_STRING, stage, 0, &n_req);
 
     if (status != 0)
         return status;
 
     for (long r = 0; r < n_req; r++) {
         const char *cell = stage + r * MAX_STRING_SIZE;
-        epicsUInt32 len  = (epicsUInt32)epicsStrnLen(cell, MAX_STRING_SIZE - 1);
+        epicsUInt32 len = (epicsUInt32)epicsStrnLen(cell, MAX_STRING_SIZE - 1);
         tablerec_vstr_write(val, (epicsUInt32)r, cell, len);
     }
     *numrows = (epicsUInt32)n_req;
-    *chgd    = 1;
+    *chgd = 1;
     return 0;
 }
 
@@ -77,6 +77,7 @@ static long soft_init_record(struct dbCommon *prec)
     pvt->stage_rows = std::max(rec.max_data_rows(), rec.max_opt_rows());
     if (pvt->stage_rows == 0)
         pvt->stage_rows = 1;
+
     pvt->stage = (char *)callocMustSucceed(
         pvt->stage_rows, MAX_STRING_SIZE, "devTableSoft: stage");
 
@@ -88,15 +89,17 @@ static long soft_init_record(struct dbCommon *prec)
             continue;
 
         if (c.config.type == DBF_STRING) {
-            if (loadStringColumn(c.inp, *c.val, (long)rec.max_data_rows(),
-                                 pvt->stage, c.numrows, c.chgd, true) == 0)
+            long status = load_string_column(c.inp, *c.val, (long)rec.max_data_rows(),
+                pvt->stage, c.numrows, c.chgd, true);
+
+            if (status == 0)
                 prec->udf = FALSE;
         } else {
             long n_req = (long)rec.max_data_rows();
             if (dbLoadLinkArray(c.inp, c.config.type, *c.val, &n_req) == 0) {
                 *c.numrows = (epicsUInt32)n_req;
-                *c.chgd    = 1;
-                prec->udf  = FALSE;
+                *c.chgd = 1;
+                prec->udf = FALSE;
             }
         }
     }
@@ -106,15 +109,17 @@ static long soft_init_record(struct dbCommon *prec)
             continue;
 
         if (c.config.type == DBF_STRING) {
-            if (loadStringColumn(c.inp, *c.val, (long)rec.max_opt_rows(),
-                                 pvt->stage, c.numrows, c.chgd, true) == 0)
+            long status = load_string_column(c.inp, *c.val, (long)rec.max_opt_rows(),
+                pvt->stage, c.numrows, c.chgd, true);
+
+            if (status == 0)
                 prec->udf = FALSE;
         } else {
             long n_req = (long)rec.max_opt_rows();
             if (dbLoadLinkArray(c.inp, c.config.type, *c.val, &n_req) == 0) {
                 *c.numrows = (epicsUInt32)n_req;
-                *c.chgd    = 1;
-                prec->udf  = FALSE;
+                *c.chgd = 1;
+                prec->udf = FALSE;
             }
         }
     }
@@ -132,13 +137,13 @@ static long soft_read_table(tableRecord *prec)
             continue;
 
         if (c.config.type == DBF_STRING) {
-            loadStringColumn(c.inp, *c.val, (long)rec.max_data_rows(),
-                             pvt->stage, c.numrows, c.chgd, false);
+            load_string_column(c.inp, *c.val, (long)rec.max_data_rows(),
+                pvt->stage, c.numrows, c.chgd, false);
         } else {
             long n_req = (long)rec.max_data_rows();
             if (dbGetLink(c.inp, c.config.type, *c.val, 0, &n_req) == 0) {
                 *c.numrows = (epicsUInt32)n_req;
-                *c.chgd    = 1;
+                *c.chgd = 1;
             }
         }
     }
@@ -148,13 +153,13 @@ static long soft_read_table(tableRecord *prec)
             continue;
 
         if (c.config.type == DBF_STRING) {
-            loadStringColumn(c.inp, *c.val, (long)rec.max_opt_rows(),
-                             pvt->stage, c.numrows, c.chgd, false);
+            load_string_column(c.inp, *c.val, (long)rec.max_opt_rows(),
+                pvt->stage, c.numrows, c.chgd, false);
         } else {
             long n_req = (long)rec.max_opt_rows();
             if (dbGetLink(c.inp, c.config.type, *c.val, 0, &n_req) == 0) {
                 *c.numrows = (epicsUInt32)n_req;
-                *c.chgd    = 1;
+                *c.chgd = 1;
             }
         }
     }
