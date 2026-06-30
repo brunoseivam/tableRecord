@@ -1,0 +1,27 @@
+# Source table: 32 rows of random numeric data, regenerated every second.
+record(table, "TBL:SRC") {
+    field(DTYP, "Random Sim")
+    field(DESC, "Stat demo source table")
+    field(SCAN, "1 second")
+    field(MAXROWS, "32")
+
+    field(C00NAME, "x") field(C00LABEL, "X") field(C00TYPE, "INT64")
+    field(C01NAME, "y") field(C01LABEL, "Y") field(C01TYPE, "DOUBLE")
+    field(C02NAME, "z") field(C02LABEL, "Z") field(C02TYPE, "DOUBLE")
+}
+
+# Compressed statistics table: reduces TBL:SRC in groups of N=8 rows.
+# 32 source rows / 8 = 4 output rows (capped by MAXROWS).
+record(table, "TBL:STAT") {
+    field(DTYP, "Table Stat")
+    field(DESC, "Per-column statistics of TBL:SRC")
+    field(INP,  "@N=8 STATS=avg,rms,min,max,sum")
+    field(SCAN, "1 second")
+    field(MAXROWS, "4")
+
+    field(C00NAME, "x_avg") field(C00LABEL, "avg(x)") field(C00TYPE, "DOUBLE") field(C00INP, "TBL:SRC.C00VAL")
+    field(C01NAME, "y_rms") field(C01LABEL, "rms(y)") field(C01TYPE, "DOUBLE") field(C01INP, "TBL:SRC.C01VAL")
+    field(C02NAME, "y_min") field(C02LABEL, "min(y)") field(C02TYPE, "DOUBLE") field(C02INP, "TBL:SRC.C01VAL")
+    field(C03NAME, "z_max") field(C03LABEL, "max(z)") field(C03TYPE, "DOUBLE") field(C03INP, "TBL:SRC.C02VAL")
+    field(C04NAME, "z_sum") field(C04LABEL, "sum(z)") field(C04TYPE, "DOUBLE") field(C04INP, "TBL:SRC.C02VAL")
+}

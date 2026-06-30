@@ -16,9 +16,11 @@ $(PROD_IOC)_DBD += base.dbd
 $(PROD_IOC)_DBD += tableSupport.dbd
 $(PROD_IOC)_DBD += devTableSim.dbd
 $(PROD_IOC)_DBD += devTableCsv.dbd
+$(PROD_IOC)_DBD += devTableStat.dbd
 
 $(PROD_IOC)_SRCS += devTableSim.cpp
 $(PROD_IOC)_SRCS += devTableCsv.cpp
+$(PROD_IOC)_SRCS += devTableStat.cpp
 $(PROD_IOC)_SRCS += $(PROD_IOC)_registerRecordDeviceDriver.cpp
 $(PROD_IOC)_SRCS += $(PROD_IOC)Main.cpp
 
