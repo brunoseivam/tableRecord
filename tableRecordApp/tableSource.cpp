@@ -32,7 +32,7 @@ struct RecLock {
 };
 
 /* Map EPICS menuFtype → pvxs scalar TypeCode */
-static pvxs::TypeCode ftypeToTC(epicsEnum16 type)
+static pvxs::TypeCode ftype_to_typecode(epicsEnum16 type)
 {
     switch (type) {
     case DBF_STRING: return pvxs::TypeCode::String;
@@ -54,8 +54,8 @@ static pvxs::TypeCode ftypeToTC(epicsEnum16 type)
    numrows valid elements are copied from buf; the remaining rows up to nrow are
    padded (empty strings for DBF_STRING, zeros for numeric) so all columns in the
    published NTTable share a uniform length. */
-static void fillCol(pvxs::Value col, epicsEnum16 type, const void *buf,
-                    epicsUInt32 numrows, epicsUInt32 nrow)
+static void fill_col(pvxs::Value col, epicsEnum16 type, const void *buf,
+    epicsUInt32 numrows, epicsUInt32 nrow)
 {
     if (!col.valid()) return;
     if (!buf) numrows = 0;
@@ -71,7 +71,7 @@ static void fillCol(pvxs::Value col, epicsEnum16 type, const void *buf,
         return;
     }
 
-    switch (ftypeToTC(type).code) {
+    switch (ftype_to_typecode(type).code) {
 #define COPY(TC_VAL, CTYPE) \
     case pvxs::TypeCode::TC_VAL: { \
         pvxs::shared_array<CTYPE> arr(nrow); \
@@ -95,7 +95,7 @@ static void fillCol(pvxs::Value col, epicsEnum16 type, const void *buf,
 }
 
 /* Extract data from a pvxs Value column and write into a record buffer (under lock) */
-static void drainCol(pvxs::Value col, epicsEnum16 type, void *buf,
+static void drain_col(pvxs::Value col, epicsEnum16 type, void *buf,
                      epicsUInt32 maxelm, epicsUInt32 &nout)
 {
     if (!col.valid() || !buf) return;
@@ -114,7 +114,7 @@ static void drainCol(pvxs::Value col, epicsEnum16 type, void *buf,
         return;
     }
 
-    switch (ftypeToTC(type).code) {
+    switch (ftype_to_typecode(type).code) {
 #define PUT(TC_VAL, CTYPE) \
     case pvxs::TypeCode::TC_VAL: { \
         auto arr = col.as<pvxs::shared_array<const CTYPE>>(); \
@@ -143,7 +143,7 @@ static void drainCol(pvxs::Value col, epicsEnum16 type, void *buf,
    partial=false: serialize all active columns (GET, initial monitor snapshot).
    Each serialized column is padded to the table-wide max row count so the
    NTTable stays internally consistent. */
-static void snapshotTable(TableRecCtx &ctx, pvxs::Value &v, bool partial)
+static void snapshot_table(TableRecCtx &ctx, pvxs::Value &v, bool partial)
 {
     /* NTTable requires uniform column length: use the maximum across all data
        columns (not just the changed ones) so a partial update's columns stay
@@ -156,7 +156,7 @@ static void snapshotTable(TableRecCtx &ctx, pvxs::Value &v, bool partial)
     for (const auto &c : ctx.dcols) {
         if (partial && !*c.chgd) continue;
         auto col = v["value"][c.config.name];
-        fillCol(col, c.config.type, *c.val, *c.numrows, nrow);
+        fill_col(col, c.config.type, *c.val, *c.numrows, nrow);
     }
 
     /* Optional columns carry one value per data column, so their length is the
@@ -167,7 +167,7 @@ static void snapshotTable(TableRecCtx &ctx, pvxs::Value &v, bool partial)
     for (const auto &c : ctx.ocols) {
         if (partial && !*c.chgd) continue;
         auto col = v[c.config.name];
-        fillCol(col, c.config.type, *c.val, *c.numrows, ncols);
+        fill_col(col, c.config.type, *c.val, *c.numrows, ncols);
     }
 
     /* Column labels (NTTable "labels", one per data column) may be updated at
@@ -199,7 +199,7 @@ static pvxs::Value snapshot(TableRecCtx &ctx, bool withMeta = false)
     v["timeStamp.nanoseconds"]      = (int32_t)ctx.prec->time.nsec;
     if (withMeta)
         v["descriptor"] = std::string(ctx.prec->desc);
-    snapshotTable(ctx, v, /*partial=*/ !withMeta);
+    snapshot_table(ctx, v, /*partial=*/ !withMeta);
     return v;
 }
 
@@ -210,7 +210,7 @@ static void putValueTable(const TableRecCtx &ctx, const pvxs::Value &val)
         auto col = val["value"][c.config.name];
         if (!col.valid() || !col.isMarked(true, true)) continue;
         epicsUInt32 nout = 0;
-        drainCol(col, c.config.type, *c.val,
+        drain_col(col, c.config.type, *c.val,
                  ((tableRecord *)ctx.prec)->maxrows, nout);
         *c.numrows = nout;
         *c.chgd = 1;
@@ -226,7 +226,7 @@ pvxs::Value TableSource::makeProto(
     for (const auto &c : dcols) {
         const char *label = c.config.label.empty()
                           ? c.config.name.c_str() : c.config.label.c_str();
-        builder.add_column(ftypeToTC(c.config.type), c.config.name.c_str(), label);
+        builder.add_column(ftype_to_typecode(c.config.type), c.config.name.c_str(), label);
     }
 
     /* Extend the NTTable TypeDef with optional top-level fields.
@@ -254,7 +254,7 @@ pvxs::Value TableSource::makeProto(
             groupOrder.push_back(prefix);
             groups[prefix] = {};
         }
-        pvxs::TypeCode arrCode = ftypeToTC(c.config.type).arrayOf();
+        pvxs::TypeCode arrCode = ftype_to_typecode(c.config.type).arrayOf();
         groups[prefix].emplace_back(arrCode, fieldname);
     }
 

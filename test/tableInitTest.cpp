@@ -21,8 +21,12 @@
 #include "epicsStdio.h"
 #include "epicsExport.h"
 #include "tableRecord.h"
+#include "tableRecordUtil.h"
 
 #include "testMain.h"
+
+#include <string>
+#include <vector>
 
 extern "C" int tableInitTest_registerRecordDeviceDriver(struct dbBase *);
 
@@ -151,9 +155,47 @@ static void testLoad(void)
     testdbGetFieldEqual("good:load.UDF", DBF_UCHAR, 0);
 }
 
+static void testStringTruncation(void)
+{
+    testDiag("STRING column link load truncates each element to MAX_STRING_SIZE-1");
+
+    /* good:longstr.C00INP is a constant array of strings, two of which exceed
+     * 39 chars.  Loaded as DBF_STRING by the soft device support in pass-1, the
+     * over-length rows come back clamped to 39 chars -- the vstring type-3
+     * overflow path is unreachable through link loads (see devTableSoft.cpp). */
+    dbCommon *prec = testdbRecordPtr("good:longstr.NUMCOLS");
+
+    testdbGetFieldEqual("good:longstr.C00NROWS", DBF_ULONG, 3);
+    testdbGetFieldEqual("good:longstr.UDF", DBF_UCHAR, 0);
+
+    TableRecordWrapper rec(prec);
+    std::vector<TableRecordWrapper::DataColumn> cols;
+    rec.data_cols(cols);
+
+    std::vector<std::string> out;
+    dbScanLock(prec);
+    rec.read_string_column(cols[0], out);
+    dbScanUnlock(prec);
+
+    const std::string in0 =
+        "this string is definitely longer than forty characters AAAA";
+    const std::string in2 =
+        "another over-length value bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+    const size_t cap = MAX_STRING_SIZE - 1;   /* 39 */
+
+    testOk(out.size() == 3, "good:longstr loaded 3 rows (got %zu)", out.size());
+    testOk(out[0].size() == cap,
+           "row0 truncated to %zu chars (got %zu)", cap, out[0].size());
+    testOk(out[0] == in0.substr(0, cap), "row0 == first %zu chars of input", cap);
+    testOk(out[1] == "short one", "row1 (short) preserved verbatim");
+    testOk(out[2].size() == cap,
+           "row2 truncated to %zu chars (got %zu)", cap, out[2].size());
+    testOk(out[2] == in2.substr(0, cap), "row2 == first %zu chars of input", cap);
+}
+
 MAIN(tableInitTest)
 {
-    testPlan(24);
+    testPlan(32);
 
     startIoc();
 
@@ -163,6 +205,7 @@ MAIN(tableInitTest)
     testSuccess();
     testNamesImmutable();
     testLoad();
+    testStringTruncation();
 
     stopIoc();
 

@@ -16,11 +16,34 @@
 /*
  * Soft Channel device support for the table record.
  *
- * STRING columns are staged through a temporary buffer before being re-encoded
- * into vstring cells. This is required because numeric->string link conversions
- * (e.g. getDoubleString) do not zero-pad the 40-byte cells, which would leave
- * stale bytes in positions 32..39 that the vstring discriminator would misread
- * as overflow pointers.
+ * STRING columns are staged through a temporary buffer and then re-encoded into
+ * vstring cells via tablerec_vstr_write(), rather than letting the link write
+ * the 40-byte cells directly. Two reasons:
+ *
+ *   1. Numeric->string conversions do not zero-pad the cell. getLongString /
+ *      getDoubleString (and their fast-link equivalents) write only "text\0"
+ *      and leave the remaining bytes untouched. A STRING column fed by a
+ *      numeric link would thus retain stale bytes in positions 32..39 that the
+ *      vstring discriminator would misread as an overflow pointer.
+ *      (Plain STRING->STRING conversions are already cell-clean: getStringString
+ *      and cvt_st_st use strncpy, which zero-fills the whole cell, so a string
+ *      source on its own would not need staging.)
+ *
+ *   2. Invariant safety. A direct dbGetLink/dbLoadLinkArray write bypasses the
+ *      vstring codec, so it cannot free a pre-existing type-3 overflow heap
+ *      block before clobbering bytes 32..39 (leak + dangling pointer). Routing
+ *      every load through tablerec_vstr_write() keeps the codec's invariants
+ *      (free-old-overflow, zero-cell) intact regardless of source type.
+ *
+ * Long-string limitation: STRING columns are read from links as DBF_STRING,
+ * the fixed 40-byte epicsOldString type. Every link plugin truncates to
+ * MAX_STRING_SIZE-1 (39) chars for that request -- pva (pvxs pvalink_lset.cpp),
+ * const (dbConvertJSON.c), and ca/db (dbFastLinkConv.c) alike. EPICS has no DBR
+ * type for an array of long strings, so a link load can never deliver more than
+ * 39 chars per cell. Consequently the vstring type-3 (overflow) encoding is
+ * never produced here; it is reachable only via direct tablerec_vstr_write /
+ * write_string_column callers (e.g. a caput to a STRING column). See
+ * test/tableInitTest.cpp:testStringTruncation for an executable record of this.
  */
 
 struct DevTableSoftPvt {
@@ -36,7 +59,10 @@ struct DevTableSoftPvt {
 };
 
 /* Load a STRING column through the staging buffer and re-encode each row as
- * a vstring cell. Uses dbLoadLinkArray when constant=true, dbGetLink otherwise. */
+ * a vstring cell. Uses dbLoadLinkArray when constant=true, dbGetLink otherwise.
+ * Note: the DBF_STRING request truncates each element to MAX_STRING_SIZE-1 (39)
+ * chars before it reaches the staging buffer, so loaded cells are always
+ * type-1/2 (no overflow); see the file header for why this is unavoidable. */
 static long load_string_column(struct link *plnk, void *val, long maxrows,
                               char *stage, epicsUInt32 *numrows, epicsUInt8 *chgd,
                               bool constant)

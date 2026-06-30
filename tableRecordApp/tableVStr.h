@@ -45,6 +45,12 @@ extern "C" {
  * so external caput/dbpf writes are always safe.  The special() sanitizer in
  * tableRecord.c frees overflow pointers before an external put can clobber them.
  *
+ * DB/CA/PVA/const *link* loads (devTableSoft.cpp) likewise only ever produce
+ * type-1/2 cells: they read DBF_STRING, which every link plugin truncates to 39
+ * chars, and EPICS has no DBR type for an array of long strings.  Type-3
+ * (overflow, >39 chars) is therefore reachable only via the direct
+ * tablerec_vstr_write / write_string_column callers below.
+ *
  * All access must be under the record lock (dbScanLock / process / dbPutField).
  */
 

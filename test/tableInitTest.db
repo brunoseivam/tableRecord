@@ -76,3 +76,18 @@ record(table, "good:load") {
     field(C00TYPE, "LONG")
     field(C00INP, "[1, 2, 3, 4]")
 }
+
+# STRING column fed a constant array whose elements exceed MAX_STRING_SIZE-1.
+# Link loads read DBF_STRING, which truncates every element to 39 chars, so the
+# over-length rows below come back clamped.  See testStringTruncation.
+record(table, "good:longstr") {
+    field(DTYP, "Soft Channel")
+    field(MAXROWS, "4")
+    field(C00NAME, "s")
+    field(C00TYPE, "STRING")
+    field(C00INP, {const:[
+        "this string is definitely longer than forty characters AAAA",
+        "short one",
+        "another over-length value bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    ]})
+}
