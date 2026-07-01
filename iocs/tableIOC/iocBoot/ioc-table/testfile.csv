@@ -7,5 +7,5 @@ line note"
 5,utf8-test,5.5,ignored,日本語のテキストがここから始まる長いノートで閾値を超えるはずです
 6,edge-39-bytes-exactly-XXXXXXXXXX,6.5,ignored,exactly 32 byte note: XXXXXXXX!!
 7,short,7.0,ignored,x
-8,last,8.0,ignored,this row exceeds MAXROWS=8 so it should be clamped and not loaded
+8,last,8.0,ignored,last visible row
 9,overflow,9.0,ignored,also beyond maxrows
