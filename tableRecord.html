@@ -1,0 +1,248 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN'
+     'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+
+<html>
+<head>
+<title>Table Record (table)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel='stylesheet' href='style.css' type='text/css'>
+</head>
+<body>
+
+
+<div class="pod">
+
+<p><a href="ComponentReference.html">EPICS Component Reference Manual</a></p>
+
+<hr>
+
+<h1 id="EPICS-Reference:-Table-Record-table">EPICS Reference: Table Record (table)  <a class='sect' href="#EPICS-Reference:-Table-Record-table">&sect;</a></h1>
+
+<p>The <code>table</code> record holds a column-oriented table: a set of named columns, each an array of up to <code>MAXROWS</code> elements of a per-column data type. It is intended to be served over PV Access as a pvData <code>NTTable</code>; the bundled <code>QSRV2</code> (pvxs) integration publishes the record&#39;s columns, labels and timestamp as the structured fields of an <code>NTTable</code>.</p>
+
+<p>Rather than a single value field, the record exposes each column as a <i>bundle</i> of fixed-name fields, in the same spirit as the aSub record&#39;s A..U inputs. A column <code><i>nn</i></code> (hex <code>00</code>..<code>3F</code>) is described by <code>C<i>nn</i>NAME</code>, <code>C<i>nn</i>LABEL</code>, <code>C<i>nn</i>TYPE</code> and <code>C<i>nn</i>INP</code>, with its data held in <code>C<i>nn</i>VAL</code> and its runtime status in <code>C<i>nn</i>CHGD</code> and <code>C<i>nn</i>NROWS</code>. Up to 64 such <i>data</i> columns may be configured.</p>
+
+<p>A second family of up to 64 <i>optional</i> columns (<code>CO<i>nn</i>...</code>) is provided for per-column metadata: each optional column carries exactly one value per data column (so it is sized to <code>NUMCOLS</code> rows, not <code>MAXROWS</code>) and is published alongside the table, typically as a column attribute.</p>
+
+<p>Columns are configured statically in the database (or filled in by device support) and validated once, when the record initializes; thereafter the column layout is fixed and only the column <i>data</i> changes as the record processes.</p>
+
+<h2 id="Parameter-Fields">Parameter Fields  <a class='sect' href="#Parameter-Fields">&sect;</a></h2>
+
+<p>The record-specific fields are described below, grouped by function. The 64 data columns share an identical set of per-column fields, named with the column index <code>00</code>..<code>3F</code> embedded in the field name (for example <code>C00NAME</code>, <code>C01NAME</code>, ..., <code>C3FNAME</code>); only the column <code>00</code> fields are tabulated here, the rest follow the same pattern. The 64 optional columns are named <code>CO00...</code>..<code>CO3F...</code> in the same way.</p>
+
+<h3 id="Scan-Parameters">Scan Parameters  <a class='sect' href="#Scan-Parameters">&sect;</a></h3>
+
+<p>The table record has the standard fields for specifying under what circumstances it will be processed. These fields are listed in <a href="dbCommonRecord.html#Scan-Fields">Scan Fields</a>.</p>
+
+<h3 id="Table-Configuration">Table Configuration  <a class='sect' href="#Table-Configuration">&sect;</a></h3>
+
+<p><code>INP</code> is an optional input link for the record as a whole. Device support may use it (for example, the simulation and CSV device supports read their table description or contents through <code>INP</code>); the <code>Soft Channel</code> support ignores it and instead reads each column&#39;s own <code>C<i>nn</i>INP</code> link.</p>
+
+<p><code>MAXROWS</code> is the row capacity allocated for every data column. It must be set before initialization (it is read-only afterwards); if left at zero, <code>init_record</code> forces it to 1. Each data column&#39;s value buffer is allocated to hold <code>MAXROWS</code> elements.</p>
+
+<p><code>NUMCOLS</code> and <code>NUMOPTCOLS</code> report how many data and optional columns are active. They are <b>not</b> set by the user: <code>init_record</code> computes them by counting the configured (non-empty) column names, and they are read-only (<code>SPC_NOMOD</code>).</p>
+
+<blockquote><table border="1"><tr>
+<th>Field</th><th>Summary</th><th>Type</th><th>DCT</th>
+<th>Default</th><th>Read</th><th>Write</th><th>CA PP</th>
+</tr>
+<tr><td class="cell">INP</td><td class="cell">Input Specification</td><td class="cell">INLINK</td><td class="cell">Yes</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">Yes</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">MAXROWS</td><td class="cell">Max number of rows per column</td><td class="cell">ULONG</td><td class="cell">No</td><td class="cell">1</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">NUMCOLS</td><td class="cell">Number of active columns (set by device support)</td><td class="cell">ULONG</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">NUMOPTCOLS</td><td class="cell">Number of active optional columns (set by device support)</td><td class="cell">ULONG</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+</table></blockquote>
+
+<h3 id="Data-Columns-C00-..-C3F">Data Columns (C00 .. C3F)  <a class='sect' href="#Data-Columns-C00-..-C3F">&sect;</a></h3>
+
+<p>Each data column is configured by four fields and exposes three more at runtime:</p>
+
+<ul>
+
+<li><p><code>C<i>nn</i>NAME</code> - the column name. A column is &quot;present&quot; if its name is non-empty. Names must match <code>[A-Za-z_][A-Za-z0-9_]*</code>, must be unique across data columns, and must be contiguous (no gaps): column <code><i>nn</i></code> may only be named if all lower-numbered columns are also named. These rules are checked by <code>init_record</code>, which rejects the record (logging an error) if any is violated. The name is fixed after initialization (<code>SPC_NOMOD</code>) and becomes the field label of the corresponding <code>NTTable</code> column.</p>
+
+</li>
+<li><p><code>C<i>nn</i>LABEL</code> - an optional human-readable column label carried alongside the name. If empty, consumers typically fall back to the name.</p>
+
+</li>
+<li><p><code>C<i>nn</i>TYPE</code> - the column&#39;s element type, chosen from the <code>menuFtype</code> menu (<code>STRING</code>, <code>CHAR</code>, <code>SHORT</code>, <code>LONG</code>, <code>DOUBLE</code>, ...). Defaults to <code>DOUBLE</code>. It is read-only after initialization, since the value buffer is allocated for this type. <code>STRING</code> columns are stored using a variable-length string encoding (see <code>tableVStr.h</code>) so cells may exceed the usual 40-byte limit.</p>
+
+</li>
+<li><p><code>C<i>nn</i>INP</code> - an optional per-column input link. The <code>Soft Channel</code> device support reads the column&#39;s data from this link (a constant array, a database link, or a channel-access link).</p>
+
+</li>
+<li><p><code>C<i>nn</i>VAL</code> - the column data buffer, an array of <code>MAXROWS</code> elements of type <code>C<i>nn</i>TYPE</code>. It is process-passive (<code>pp(TRUE)</code>): a <code>dbPutField</code> to it triggers processing. Reading or writing it through Channel Access / dbAccess uses the column&#39;s element type and reports <code>C<i>nn</i>NROWS</code> elements as the current length.</p>
+
+</li>
+<li><p><code>C<i>nn</i>NROWS</code> - the number of valid rows currently in the column (0..MAXROWS), maintained by device support / array puts. Read-only.</p>
+
+</li>
+<li><p><code>C<i>nn</i>CHGD</code> - a &quot;changed this cycle&quot; flag. It is cleared at the start of <code>process</code> and set when the column&#39;s data is updated, so a publisher can send only the columns that actually changed.</p>
+
+</li>
+</ul>
+
+<blockquote><table border="1"><tr>
+<th>Field</th><th>Summary</th><th>Type</th><th>DCT</th>
+<th>Default</th><th>Read</th><th>Write</th><th>CA PP</th>
+</tr>
+<tr><td class="cell">C00NAME</td><td class="cell">Column 00 name</td><td class="cell">STRING [40]</td><td class="cell">Yes</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">C00LABEL</td><td class="cell">Column 00 label</td><td class="cell">STRING [40]</td><td class="cell">Yes</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">Yes</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">C00TYPE</td><td class="cell">Column 00 field type</td><td class="cell">MENU (<a href='menuFtype.html'>menuFtype</a>)</td><td class="cell">Yes</td><td class="cell">DOUBLE</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">C00INP</td><td class="cell">Column 00 input link</td><td class="cell">INLINK</td><td class="cell">Yes</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">Yes</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">C00VAL</td><td class="cell">Column 00 data</td><td class="cell">NOACCESS</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Probably</td><td class="cell">Maybe</td><td class="cell">Yes</td></tr>
+
+<tr><td class="cell">C00NROWS</td><td class="cell">Column 00 number of valid rows</td><td class="cell">ULONG</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">C00CHGD</td><td class="cell">Column 00 changed flag</td><td class="cell">UCHAR</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">Yes</td><td class="cell">No</td></tr>
+
+</table></blockquote>
+
+<h3 id="Optional-Columns-CO00-..-CO3F">Optional Columns (CO00 .. CO3F)  <a class='sect' href="#Optional-Columns-CO00-..-CO3F">&sect;</a></h3>
+
+<p>Optional columns hold one value per data column rather than <code>MAXROWS</code> rows; an optional column&#39;s buffer is therefore sized to <code>NUMCOLS</code> elements. They are intended for per-column metadata (for example a units or description attribute for each data column) that is published together with the table.</p>
+
+<p>They follow the same bundle pattern and the same validation rules as data columns, with one addition: an optional column name may contain a single dotted component, <code>prefix.field</code> (matching <code>[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)?</code>), which lets a consumer map the optional column onto a nested attribute. <code>CO<i>nn</i>NAME</code> and <code>CO<i>nn</i>TYPE</code> are fixed after initialization; <code>CO<i>nn</i>VAL</code>, <code>CO<i>nn</i>NROWS</code> and <code>CO<i>nn</i>CHGD</code> behave as for data columns.</p>
+
+<blockquote><table border="1"><tr>
+<th>Field</th><th>Summary</th><th>Type</th><th>DCT</th>
+<th>Default</th><th>Read</th><th>Write</th><th>CA PP</th>
+</tr>
+<tr><td class="cell">CO00NAME</td><td class="cell">Optional column 00 name</td><td class="cell">STRING [40]</td><td class="cell">Yes</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">CO00TYPE</td><td class="cell">Optional column 00 field type</td><td class="cell">MENU (<a href='menuFtype.html'>menuFtype</a>)</td><td class="cell">Yes</td><td class="cell">DOUBLE</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">CO00INP</td><td class="cell">Optional column 00 input link</td><td class="cell">INLINK</td><td class="cell">Yes</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">Yes</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">CO00VAL</td><td class="cell">Optional column 00 data</td><td class="cell">NOACCESS</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Probably</td><td class="cell">Maybe</td><td class="cell">Yes</td></tr>
+
+<tr><td class="cell">CO00NROWS</td><td class="cell">Optional column 00 number of valid rows</td><td class="cell">ULONG</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">CO00CHGD</td><td class="cell">Optional column 00 changed flag</td><td class="cell">UCHAR</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">Yes</td><td class="cell">No</td></tr>
+
+</table></blockquote>
+
+<h2 id="Record-Support">Record Support  <a class='sect' href="#Record-Support">&sect;</a></h2>
+
+<h3 id="Record-Support-Routines">Record Support Routines  <a class='sect' href="#Record-Support-Routines">&sect;</a></h3>
+
+<h4 id="init_record">init_record  <a class='sect' href="#init_record">&sect;</a></h4>
+
+<p>Called twice (pass 0 then pass 1). On pass 0 it:</p>
+
+<ol>
+
+<li><p>Verifies that device support is attached: the DSET must be present, and must declare at least 5 routines with a non-NULL <code>read_table</code>. If not, an error is logged and initialization fails.</p>
+
+</li>
+<li><p>Forces <code>MAXROWS</code> to 1 if it was left at 0.</p>
+
+</li>
+<li><p>Calls the device support&#39;s <code>init_record</code> (if any) so it can allocate memory and fill in column names/types. If that routine returns <code>TABLEREC_DEVINIT_PASS1</code> the record arranges to call it again in pass 1.</p>
+
+</li>
+<li><p>Validates the data column names (format, uniqueness, no gaps as described above) and sets <code>NUMCOLS</code> to the number found. The optional column names are validated the same way and <code>NUMOPTCOLS</code> is set.</p>
+
+</li>
+<li><p>Allocates any column value buffers not already provided by device support: <code>MAXROWS</code> elements for each data column, <code>NUMCOLS</code> elements for each optional column.</p>
+
+</li>
+</ol>
+
+<p>On pass 1, if device support requested it, the device <code>init_record</code> is called once more (now able to read links and other records).</p>
+
+<h4 id="process">process  <a class='sect' href="#process">&sect;</a></h4>
+
+<p>See <a href="#Record-Processing">&quot;Record Processing&quot;</a> below.</p>
+
+<h4 id="special">special  <a class='sect' href="#special">&sect;</a></h4>
+
+<p><code>C<i>nn</i>VAL</code> and <code>CO<i>nn</i>VAL</code> accept array puts via <code>special</code>. Before the data lands (<code>after=0</code>), a <code>STRING</code> column&#39;s previous variable-length cells are released; after the put (<code>after=1</code>), the column&#39;s <code>CHGD</code> flag is set. Puts to inactive columns are rejected. The column <code>NAME</code> and <code>TYPE</code> fields are read-only at run time (<code>SPC_NOMOD</code>) and cannot be changed once the record has initialized.</p>
+
+<h4 id="cvt_dbaddr-get_array_info-put_array_info">cvt_dbaddr, get_array_info, put_array_info  <a class='sect' href="#cvt_dbaddr-get_array_info-put_array_info">&sect;</a></h4>
+
+<p>These present each <code>C<i>nn</i>VAL</code>/<code>CO<i>nn</i>VAL</code> field as an array whose element type is the column&#39;s <code>TYPE</code>, whose capacity is <code>MAXROWS</code> (data) or <code>NUMCOLS</code> (optional columns), and whose current length is the column&#39;s <code>NROWS</code>.</p>
+
+<h3 id="Record-Processing">Record Processing  <a class='sect' href="#Record-Processing">&sect;</a></h3>
+
+<p>Routine <code>process</code> implements the following algorithm:</p>
+
+<ol>
+
+<li><p>If device support or its <code>read_table</code> routine is missing, set <code>PACT</code> TRUE, log an error and return, so processing is not retried (avoiding error storms).</p>
+
+</li>
+<li><p>Clear the <code>CHGD</code> flag of every active data and optional column.</p>
+
+</li>
+<li><p>Call the device support <code>read_table</code> routine to refresh the column data. If it succeeds, clear <code>UDF</code>.</p>
+
+</li>
+<li><p>Update the time stamp and reset alarms.</p>
+
+</li>
+<li><p>Post monitor events for the column data.</p>
+
+</li>
+<li><p>If a publisher has registered a notify hook in <code>RPVT</code> (as the <code>QSRV2</code> NTTable source does), call it synchronously while the record lock is held and this cycle&#39;s <code>CHGD</code> flags are still valid.</p>
+
+</li>
+<li><p>Scan the forward link, set <code>PACT</code> FALSE and return.</p>
+
+</li>
+</ol>
+
+<h2 id="Device-Support">Device Support  <a class='sect' href="#Device-Support">&sect;</a></h2>
+
+<h3 id="Fields-Of-Interest-To-Device-Support">Fields Of Interest To Device Support  <a class='sect' href="#Fields-Of-Interest-To-Device-Support">&sect;</a></h3>
+
+<p>Device support obtains a fresh table whenever <code>read_table</code> is called, and is chiefly interested in the column buffers and counts.</p>
+
+<blockquote><table border="1"><tr>
+<th>Field</th><th>Summary</th><th>Type</th><th>DCT</th>
+<th>Default</th><th>Read</th><th>Write</th><th>CA PP</th>
+</tr>
+<tr><td class="cell">PACT</td><td class="cell">Record active</td><td class="cell">UCHAR</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">DPVT</td><td class="cell">Device Private</td><td class="cell">NOACCESS</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">No</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">UDF</td><td class="cell">Undefined</td><td class="cell">UCHAR</td><td class="cell">Yes</td><td class="cell">1</td><td class="cell">Yes</td><td class="cell">Yes</td><td class="cell">Yes</td></tr>
+
+<tr><td class="cell">NUMCOLS</td><td class="cell">Number of active columns (set by device support)</td><td class="cell">ULONG</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">NUMOPTCOLS</td><td class="cell">Number of active optional columns (set by device support)</td><td class="cell">ULONG</td><td class="cell">No</td><td class="cell">&nbsp;</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+<tr><td class="cell">MAXROWS</td><td class="cell">Max number of rows per column</td><td class="cell">ULONG</td><td class="cell">No</td><td class="cell">1</td><td class="cell">Yes</td><td class="cell">No</td><td class="cell">No</td></tr>
+
+</table></blockquote>
+
+<h3 id="Device-Support-Interface">Device Support Interface  <a class='sect' href="#Device-Support-Interface">&sect;</a></h3>
+
+<p>A table device support entry table (<code>tabledset</code>) extends the standard DSET with one routine:</p>
+
+<pre><code>  typedef struct {
+      dset common;                              /* standard 5-entry DSET   */
+      long (*read_table)(struct tableRecord *prec);
+  } tabledset;</code></pre>
+
+<p><code>read_table</code> must refresh the active column buffers (and their <code>NROWS</code>) and return 0 on success. Device support that needs to allocate buffers or populate column names/types does so from <code>common.init_record</code>. Because reading links is only safe after all records exist, support that must read links at init returns <code>TABLEREC_DEVINIT_PASS1</code> from its pass-0 <code>init_record</code> to ask the record to call it again in pass 1.</p>
+
+<h3 id="Device-Support-For-Soft-Records">Device Support For Soft Records  <a class='sect' href="#Device-Support-For-Soft-Records">&sect;</a></h3>
+
+<p>The <code>Soft Channel</code> support (<code>devTableSoft</code>) implements a table whose columns are driven by their individual <code>C<i>nn</i>INP</code> / <code>CO<i>nn</i>INP</code> links. At initialization it loads any constant links into the column buffers; on each <code>read_table</code> it re-reads the non-constant links. <code>STRING</code> columns are staged through a temporary buffer and re-encoded into variable-length cells so that numeric-to-string conversions cannot leave stale bytes in a cell.</p>
+
+</div><hr>
+
+<p><a href="ComponentReference.html">EPICS Component Reference Manual</a></p>
+
+</body>
+</html>
+
