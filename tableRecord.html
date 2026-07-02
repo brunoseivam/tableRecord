@@ -247,13 +247,13 @@
 
 <ul>
 
-<li><p><b>Type 1 — inline short</b> (length ≤ 31, no embedded <code>NUL</code>): the string bytes are stored directly in the cell, NUL-terminated. Fully compatible with an ordinary <code>DBF_STRING</code>.</p>
+<li><p><b>Type 1 - inline short</b> (length ≤ 31, no embedded <code>NUL</code>): the string bytes are stored directly in the cell, NUL-terminated. Fully compatible with an ordinary <code>DBF_STRING</code>.</p>
 
 </li>
-<li><p><b>Type 2 — plain long</b> (32 ≤ length ≤ 39, no embedded <code>NUL</code>): the string bytes are stored directly in the cell, NUL-terminated. Also compatible with an ordinary <code>DBF_STRING</code>.</p>
+<li><p><b>Type 2 - plain long</b> (32 ≤ length ≤ 39, no embedded <code>NUL</code>): the string bytes are stored directly in the cell, NUL-terminated. Also compatible with an ordinary <code>DBF_STRING</code>.</p>
 
 </li>
-<li><p><b>Type 3 — overflow</b> (length &gt; 39, or embedded <code>NUL</code>): up to 31 bytes of a UTF-8-clean preview are stored in the cell inline; a pointer to a heap-allocated <code>tablerecVStr</code> block carrying the full string is stored in bytes 32–39 of the cell.</p>
+<li><p><b>Type 3 - overflow</b> (length &gt; 39, or embedded <code>NUL</code>): up to 31 bytes of a UTF-8-clean preview are stored in the cell inline; a pointer to a heap-allocated <code>tablerecVStr</code> block carrying the full string is stored in bytes 32..39 of the cell.</p>
 
 </li>
 </ul>
@@ -274,20 +274,6 @@
 </div><hr>
 
 <p><a href="ComponentReference.html">EPICS Component Reference Manual</a></p>
-
-<h1 id="POD-ERRORS">POD ERRORS  <a class='sect' href="#POD-ERRORS">&sect;</a></h1>
-
-<p>Hey! <b>The above document had some coding errors, which are explained below:</b></p>
-
-<dl>
-
-<dt>Around line 370:</dt>
-<dd>
-
-<p>Non-ASCII character seen before =encoding in &#39;—&#39;. Assuming UTF-8</p>
-
-</dd>
-</dl>
 
 </body>
 </html>
