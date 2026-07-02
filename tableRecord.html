@@ -69,7 +69,7 @@
 <li><p><code>C<i>nn</i>LABEL</code> - an optional human-readable column label carried alongside the name. If empty, consumers typically fall back to the name.</p>
 
 </li>
-<li><p><code>C<i>nn</i>TYPE</code> - the column&#39;s element type, chosen from the <code>menuFtype</code> menu (<code>STRING</code>, <code>CHAR</code>, <code>SHORT</code>, <code>LONG</code>, <code>DOUBLE</code>, ...). Defaults to <code>DOUBLE</code>. It is read-only after initialization, since the value buffer is allocated for this type. <code>STRING</code> columns are stored using a variable-length string encoding (see <code>tableVStr.h</code>) so cells may exceed the usual 40-byte limit.</p>
+<li><p><code>C<i>nn</i>TYPE</code> - the column&#39;s element type, chosen from the <code>menuFtype</code> menu (<code>STRING</code>, <code>CHAR</code>, <code>SHORT</code>, <code>LONG</code>, <code>DOUBLE</code>, ...). Defaults to <code>DOUBLE</code>. It is read-only after initialization, since the value buffer is allocated for this type. <code>STRING</code> columns use a <b>variable-length string encoding</b> (see <a href="#Variable-Strings">&quot;Variable Strings&quot;</a>) so cells may hold strings longer than the usual 39-character limit; PV Access clients receive the full string, while Channel Access clients see a truncated preview for strings exceeding 39 characters.</p>
 
 </li>
 <li><p><code>C<i>nn</i>INP</code> - an optional per-column input link. The <code>Soft Channel</code> device support reads the column&#39;s data from this link (a constant array, a database link, or a channel-access link).</p>
@@ -239,9 +239,55 @@
 
 <p>The <code>Soft Channel</code> support (<code>devTableSoft</code>) implements a table whose columns are driven by their individual <code>C<i>nn</i>INP</code> / <code>CO<i>nn</i>INP</code> links. At initialization it loads any constant links into the column buffers; on each <code>read_table</code> it re-reads the non-constant links. <code>STRING</code> columns are staged through a temporary buffer and re-encoded into variable-length cells so that numeric-to-string conversions cannot leave stale bytes in a cell.</p>
 
+<h2 id="Variable-Strings">Variable Strings  <a class='sect' href="#Variable-Strings">&sect;</a></h2>
+
+<p>EPICS strings are normally limited to <code>MAX_STRING_SIZE</code> bytes (40), leaving at most 39 usable characters. <code>STRING</code>-typed columns use a <b>variable-length string encoding</b> (defined in <code>tableVStr.h</code>) that lets device support store strings of arbitrary length, including strings with embedded <code>NUL</code> bytes.</p>
+
+<p>Each 40-byte cell in a <code>STRING</code> column buffer is stored in one of three formats, discriminated by two sentinel bytes within the cell:</p>
+
+<ul>
+
+<li><p><b>Type 1 — inline short</b> (length ≤ 31, no embedded <code>NUL</code>): the string bytes are stored directly in the cell, NUL-terminated. Fully compatible with an ordinary <code>DBF_STRING</code>.</p>
+
+</li>
+<li><p><b>Type 2 — plain long</b> (32 ≤ length ≤ 39, no embedded <code>NUL</code>): the string bytes are stored directly in the cell, NUL-terminated. Also compatible with an ordinary <code>DBF_STRING</code>.</p>
+
+</li>
+<li><p><b>Type 3 — overflow</b> (length &gt; 39, or embedded <code>NUL</code>): up to 31 bytes of a UTF-8-clean preview are stored in the cell inline; a pointer to a heap-allocated <code>tablerecVStr</code> block carrying the full string is stored in bytes 32–39 of the cell.</p>
+
+</li>
+</ul>
+
+<p>PV Access clients (<code>NTTable</code>) always receive the full string regardless of encoding type. Channel Access and dbAccess clients see the ordinary <code>DBF_STRING</code> cell: the complete content for Types 1 and 2, and only the 31-byte UTF-8 preview for Type 3.</p>
+
+<h3 id="Writing-long-strings-from-device-support">Writing long strings from device support  <a class='sect' href="#Writing-long-strings-from-device-support">&sect;</a></h3>
+
+<p>Type 3 cells can only be produced by device support code. The C API in <code>tableVStr.h</code> provides:</p>
+
+<pre><code>  void tablerec_vstr_write(void *colbuf, epicsUInt32 row,
+                           const char *bytes, epicsUInt32 len);</code></pre>
+
+<p>The C++ wrapper in <code>tableRecordUtil.h</code> provides <code>write_string_column</code> and <code>vstr_write_cell</code> as higher-level helpers. External writes via <code>caput</code>, <code>dbpf</code>, or PV Access are accepted but the <code>DBF_STRING</code> type caps them at 39 characters, so they produce at most a Type 2 cell.</p>
+
+<p>Overflow heap blocks are freed automatically whenever a cell is overwritten or cleared. The <code>special()</code> handler also frees any overflow pointer before an external put can overwrite a cell, preventing leaks during normal IOC operation. All access to a <code>STRING</code> column buffer must be done while holding the record lock (<code>dbScanLock</code> / <code>process</code> / <code>dbPutField</code>).</p>
+
 </div><hr>
 
 <p><a href="ComponentReference.html">EPICS Component Reference Manual</a></p>
+
+<h1 id="POD-ERRORS">POD ERRORS  <a class='sect' href="#POD-ERRORS">&sect;</a></h1>
+
+<p>Hey! <b>The above document had some coding errors, which are explained below:</b></p>
+
+<dl>
+
+<dt>Around line 370:</dt>
+<dd>
+
+<p>Non-ASCII character seen before =encoding in &#39;—&#39;. Assuming UTF-8</p>
+
+</dd>
+</dl>
 
 </body>
 </html>
