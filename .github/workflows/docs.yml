@@ -1,0 +1,64 @@
+name: Deploy docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tableRecordApp/tableRecord.dbd.pod'
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout epics-base (sparse)
+        uses: actions/checkout@v4
+        with:
+          repository: epics-base/epics-base
+          ref: R7.0.10
+          sparse-checkout: |
+            modules/database/src/tools
+            modules/database/src/ioc/db/dbCommon.dbd.pod
+            modules/libcom/src/macLib/EPICS/macLib.pm
+            src/tools
+          path: epics-base
+
+      - name: Generate HTML
+        run: |
+          mkdir -p html
+          perl epics-base/src/tools/podRemove.pl \
+            -o html/dbCommon.dbd \
+            epics-base/modules/database/src/ioc/db/dbCommon.dbd.pod
+          perl \
+            -I epics-base/modules/database/src/tools \
+            -I epics-base/modules/libcom/src/macLib \
+            -I epics-base/src/tools \
+            epics-base/modules/database/src/tools/dbdToHtml.pl \
+            -I html \
+            -o html/tableRecord.html \
+            tableRecordApp/tableRecord.dbd.pod
+          rm html/dbCommon.dbd
+          cp epics-base/src/tools/style.css html/style.css
+          echo '<meta http-equiv="refresh" content="0; url=tableRecord.html">' > html/index.html
+
+      - name: Deploy to gh-pages
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git fetch origin gh-pages 2>/dev/null || true
+          git worktree add /tmp/gh-pages gh-pages 2>/dev/null || \
+            git worktree add --orphan -b gh-pages /tmp/gh-pages
+          rm -rf /tmp/gh-pages/*
+          cp html/* /tmp/gh-pages/
+          cd /tmp/gh-pages
+          git add -A
+          git diff --cached --quiet || \
+            git commit -m "Deploy docs from ${GITHUB_SHA::8}"
+          git push origin gh-pages

@@ -28,3 +28,9 @@ DOCS  += tableRecord.md
 HTMLS += tableRecord.html
 
 include $(TOP)/configure/RULES
+
+$(INSTALL_HTML)/style.css: $(EPICS_BASE)/html/style.css
+	$(ECHO) "Installing html $@"
+	@$(INSTALL) -d -m $(INSTALL_PERMISSIONS) $< $(@D)
+
+buildInstall: $(INSTALL_HTML)/style.css
