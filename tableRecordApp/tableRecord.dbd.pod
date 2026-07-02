@@ -88,8 +88,10 @@ name. If empty, consumers typically fall back to the name.
 C<CI<nn>TYPE> - the column's element type, chosen from the C<menuFtype> menu
 (C<STRING>, C<CHAR>, C<SHORT>, C<LONG>, C<DOUBLE>, ...). Defaults to C<DOUBLE>.
 It is read-only after initialization, since the value buffer is allocated for
-this type. C<STRING> columns are stored using a variable-length string encoding
-(see C<tableVStr.h>) so cells may exceed the usual 40-byte limit.
+this type. C<STRING> columns use a B<variable-length string encoding>
+(see L</Variable Strings>) so cells may hold strings longer than the usual
+39-character limit; PV Access clients receive the full string, while Channel
+Access clients see a truncated preview for strings exceeding 39 characters.
 
 =item *
 
@@ -272,6 +274,63 @@ initialization it loads any constant links into the column buffers; on each
 C<read_table> it re-reads the non-constant links. C<STRING> columns are staged
 through a temporary buffer and re-encoded into variable-length cells so that
 numeric-to-string conversions cannot leave stale bytes in a cell.
+
+=head2 Variable Strings
+
+EPICS strings are normally limited to C<MAX_STRING_SIZE> bytes (40), leaving
+at most 39 usable characters. C<STRING>-typed columns use a B<variable-length
+string encoding> (defined in C<tableVStr.h>) that lets device support store
+strings of arbitrary length, including strings with embedded C<NUL> bytes.
+
+Each 40-byte cell in a C<STRING> column buffer is stored in one of three
+formats, discriminated by two sentinel bytes within the cell:
+
+=over
+
+=item *
+
+B<Type 1 - inline short> (length E<le> 31, no embedded C<NUL>): the string
+bytes are stored directly in the cell, NUL-terminated. Fully compatible with
+an ordinary C<DBF_STRING>.
+
+=item *
+
+B<Type 2 - plain long> (32 E<le> length E<le> 39, no embedded C<NUL>): the
+string bytes are stored directly in the cell, NUL-terminated. Also compatible
+with an ordinary C<DBF_STRING>.
+
+=item *
+
+B<Type 3 - overflow> (length E<gt> 39, or embedded C<NUL>): up to 31 bytes of
+a UTF-8-clean preview are stored in the cell inline; a pointer to a
+heap-allocated C<tablerecVStr> block carrying the full string is stored in
+bytes 32..39 of the cell.
+
+=back
+
+PV Access clients (C<NTTable>) always receive the full string regardless of
+encoding type. Channel Access and dbAccess clients see the ordinary
+C<DBF_STRING> cell: the complete content for Types 1 and 2, and only the
+31-byte UTF-8 preview for Type 3.
+
+=head3 Writing long strings from device support
+
+Type 3 cells can only be produced by device support code. The C API in
+C<tableVStr.h> provides:
+
+  void tablerec_vstr_write(void *colbuf, epicsUInt32 row,
+                           const char *bytes, epicsUInt32 len);
+
+The C++ wrapper in C<tableRecordUtil.h> provides C<write_string_column> and
+C<vstr_write_cell> as higher-level helpers. External writes via C<caput>,
+C<dbpf>, or PV Access are accepted but the C<DBF_STRING> type caps them at 39
+characters, so they produce at most a Type 2 cell.
+
+Overflow heap blocks are freed automatically whenever a cell is overwritten or
+cleared. The C<special()> handler also frees any overflow pointer before an
+external put can overwrite a cell, preventing leaks during normal IOC operation.
+All access to a C<STRING> column buffer must be done while holding the record
+lock (C<dbScanLock> / C<process> / C<dbPutField>).
 
 =cut
 
@@ -2258,6 +2317,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c00val")
+        #=type Set by C00TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2266,6 +2328,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c01val")
+        #=type Set by C01TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2274,6 +2339,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c02val")
+        #=type Set by C02TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2282,6 +2350,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c03val")
+        #=type Set by C03TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2290,6 +2361,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c04val")
+        #=type Set by C04TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2298,6 +2372,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c05val")
+        #=type Set by C05TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2306,6 +2383,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c06val")
+        #=type Set by C06TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2314,6 +2394,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c07val")
+        #=type Set by C07TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2322,6 +2405,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c08val")
+        #=type Set by C08TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2330,6 +2416,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c09val")
+        #=type Set by C09TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2338,6 +2427,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c0aval")
+        #=type Set by C0ATYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2346,6 +2438,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c0bval")
+        #=type Set by C0BTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2354,6 +2449,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c0cval")
+        #=type Set by C0CTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2362,6 +2460,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c0dval")
+        #=type Set by C0DTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2370,6 +2471,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c0eval")
+        #=type Set by C0ETYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2378,6 +2482,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c0fval")
+        #=type Set by C0FTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2386,6 +2493,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c10val")
+        #=type Set by C10TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2394,6 +2504,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c11val")
+        #=type Set by C11TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2402,6 +2515,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c12val")
+        #=type Set by C12TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2410,6 +2526,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c13val")
+        #=type Set by C13TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2418,6 +2537,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c14val")
+        #=type Set by C14TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2426,6 +2548,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c15val")
+        #=type Set by C15TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2434,6 +2559,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c16val")
+        #=type Set by C16TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2442,6 +2570,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c17val")
+        #=type Set by C17TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2450,6 +2581,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c18val")
+        #=type Set by C18TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2458,6 +2592,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c19val")
+        #=type Set by C19TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2466,6 +2603,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c1aval")
+        #=type Set by C1ATYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2474,6 +2614,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c1bval")
+        #=type Set by C1BTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2482,6 +2625,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c1cval")
+        #=type Set by C1CTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2490,6 +2636,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c1dval")
+        #=type Set by C1DTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2498,6 +2647,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c1eval")
+        #=type Set by C1ETYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2506,6 +2658,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c1fval")
+        #=type Set by C1FTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2514,6 +2669,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c20val")
+        #=type Set by C20TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2522,6 +2680,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c21val")
+        #=type Set by C21TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2530,6 +2691,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c22val")
+        #=type Set by C22TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2538,6 +2702,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c23val")
+        #=type Set by C23TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2546,6 +2713,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c24val")
+        #=type Set by C24TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2554,6 +2724,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c25val")
+        #=type Set by C25TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2562,6 +2735,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c26val")
+        #=type Set by C26TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2570,6 +2746,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c27val")
+        #=type Set by C27TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2578,6 +2757,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c28val")
+        #=type Set by C28TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2586,6 +2768,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c29val")
+        #=type Set by C29TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2594,6 +2779,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c2aval")
+        #=type Set by C2ATYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2602,6 +2790,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c2bval")
+        #=type Set by C2BTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2610,6 +2801,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c2cval")
+        #=type Set by C2CTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2618,6 +2812,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c2dval")
+        #=type Set by C2DTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2626,6 +2823,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c2eval")
+        #=type Set by C2ETYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2634,6 +2834,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c2fval")
+        #=type Set by C2FTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2642,6 +2845,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c30val")
+        #=type Set by C30TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2650,6 +2856,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c31val")
+        #=type Set by C31TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2658,6 +2867,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c32val")
+        #=type Set by C32TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2666,6 +2878,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c33val")
+        #=type Set by C33TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2674,6 +2889,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c34val")
+        #=type Set by C34TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2682,6 +2900,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c35val")
+        #=type Set by C35TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2690,6 +2911,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c36val")
+        #=type Set by C36TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2698,6 +2922,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c37val")
+        #=type Set by C37TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2706,6 +2933,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c38val")
+        #=type Set by C38TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2714,6 +2944,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c39val")
+        #=type Set by C39TYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2722,6 +2955,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c3aval")
+        #=type Set by C3ATYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2730,6 +2966,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c3bval")
+        #=type Set by C3BTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2738,6 +2977,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c3cval")
+        #=type Set by C3CTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2746,6 +2988,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c3dval")
+        #=type Set by C3DTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2754,6 +2999,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c3eval")
+        #=type Set by C3ETYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -2762,6 +3010,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *c3fval")
+        #=type Set by C3FTYPE[MAXROWS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -4970,6 +5221,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co00val")
+        #=type Set by CO00TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -4978,6 +5232,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co01val")
+        #=type Set by CO01TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -4986,6 +5243,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co02val")
+        #=type Set by CO02TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -4994,6 +5254,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co03val")
+        #=type Set by CO03TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5002,6 +5265,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co04val")
+        #=type Set by CO04TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5010,6 +5276,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co05val")
+        #=type Set by CO05TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5018,6 +5287,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co06val")
+        #=type Set by CO06TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5026,6 +5298,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co07val")
+        #=type Set by CO07TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5034,6 +5309,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co08val")
+        #=type Set by CO08TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5042,6 +5320,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co09val")
+        #=type Set by CO09TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5050,6 +5331,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co0aval")
+        #=type Set by CO0ATYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5058,6 +5342,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co0bval")
+        #=type Set by CO0BTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5066,6 +5353,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co0cval")
+        #=type Set by CO0CTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5074,6 +5364,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co0dval")
+        #=type Set by CO0DTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5082,6 +5375,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co0eval")
+        #=type Set by CO0ETYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5090,6 +5386,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co0fval")
+        #=type Set by CO0FTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5098,6 +5397,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co10val")
+        #=type Set by CO10TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5106,6 +5408,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co11val")
+        #=type Set by CO11TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5114,6 +5419,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co12val")
+        #=type Set by CO12TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5122,6 +5430,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co13val")
+        #=type Set by CO13TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5130,6 +5441,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co14val")
+        #=type Set by CO14TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5138,6 +5452,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co15val")
+        #=type Set by CO15TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5146,6 +5463,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co16val")
+        #=type Set by CO16TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5154,6 +5474,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co17val")
+        #=type Set by CO17TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5162,6 +5485,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co18val")
+        #=type Set by CO18TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5170,6 +5496,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co19val")
+        #=type Set by CO19TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5178,6 +5507,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co1aval")
+        #=type Set by CO1ATYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5186,6 +5518,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co1bval")
+        #=type Set by CO1BTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5194,6 +5529,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co1cval")
+        #=type Set by CO1CTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5202,6 +5540,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co1dval")
+        #=type Set by CO1DTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5210,6 +5551,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co1eval")
+        #=type Set by CO1ETYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5218,6 +5562,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co1fval")
+        #=type Set by CO1FTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5226,6 +5573,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co20val")
+        #=type Set by CO20TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5234,6 +5584,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co21val")
+        #=type Set by CO21TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5242,6 +5595,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co22val")
+        #=type Set by CO22TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5250,6 +5606,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co23val")
+        #=type Set by CO23TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5258,6 +5617,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co24val")
+        #=type Set by CO24TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5266,6 +5628,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co25val")
+        #=type Set by CO25TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5274,6 +5639,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co26val")
+        #=type Set by CO26TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5282,6 +5650,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co27val")
+        #=type Set by CO27TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5290,6 +5661,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co28val")
+        #=type Set by CO28TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5298,6 +5672,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co29val")
+        #=type Set by CO29TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5306,6 +5683,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co2aval")
+        #=type Set by CO2ATYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5314,6 +5694,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co2bval")
+        #=type Set by CO2BTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5322,6 +5705,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co2cval")
+        #=type Set by CO2CTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5330,6 +5716,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co2dval")
+        #=type Set by CO2DTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5338,6 +5727,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co2eval")
+        #=type Set by CO2ETYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5346,6 +5738,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co2fval")
+        #=type Set by CO2FTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5354,6 +5749,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co30val")
+        #=type Set by CO30TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5362,6 +5760,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co31val")
+        #=type Set by CO31TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5370,6 +5771,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co32val")
+        #=type Set by CO32TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5378,6 +5782,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co33val")
+        #=type Set by CO33TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5386,6 +5793,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co34val")
+        #=type Set by CO34TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5394,6 +5804,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co35val")
+        #=type Set by CO35TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5402,6 +5815,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co36val")
+        #=type Set by CO36TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5410,6 +5826,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co37val")
+        #=type Set by CO37TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5418,6 +5837,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co38val")
+        #=type Set by CO38TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5426,6 +5848,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co39val")
+        #=type Set by CO39TYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5434,6 +5859,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co3aval")
+        #=type Set by CO3ATYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5442,6 +5870,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co3bval")
+        #=type Set by CO3BTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5450,6 +5881,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co3cval")
+        #=type Set by CO3CTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5458,6 +5892,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co3dval")
+        #=type Set by CO3DTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5466,6 +5903,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co3eval")
+        #=type Set by CO3ETYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
@@ -5474,6 +5914,9 @@ numeric-to-string conversions cannot leave stale bytes in a cell.
         special(SPC_DBADDR)
         pp(TRUE)
         extra("void *co3fval")
+        #=type Set by CO3FTYPE[NUMCOLS]
+        #=read Yes
+        #=write Yes
         interest(2)
     }
 
